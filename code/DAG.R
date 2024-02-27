@@ -46,8 +46,8 @@ plot(DAG_FROG)
 library(ggdag)
 
 coord_dag <- list(
-  "FROG" = c(d = 0, x = 1, y = 4),
-  "Year" = c(d = 0, x = 1, y = 0)
+  FROG = c(d = 0, x = 1, y = 4),
+  Year = c(d = 0, x = 1, y = 0)
 )
 
 FROG_ggdag <- dagify(
