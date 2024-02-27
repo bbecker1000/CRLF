@@ -40,3 +40,7 @@ summary(na.omit(water_temp))
 water_depth<-new_egg$WaterDepth
 length(na.omit(water_depth))
 summary(na.omit(water_depth))
+
+egg_masses<-new_egg$NumberofEggMasses
+sum(egg_masses != 0,na.rm = TRUE)
+
