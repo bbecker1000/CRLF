@@ -10,28 +10,28 @@ str(raw_data,na.rm = TRUE)
 
 new_egg <-raw_data[raw_data$OldMass=="FALSE",]
 new_egg
-egg_count_by_year <- new_egg|>
+survey_count_by_year <- new_egg|>
   select(BRDYEAR, OldMass)|>
   group_by(BRDYEAR)|>
   summarize(count=n())
-egg_count_by_year
+survey_count_by_year
 
 library(ggplot2)
-ggplot(data = egg_count_by_year,aes(x=BRDYEAR,y=count))+geom_point()+geom_smooth()
+ggplot(data = survey_count_by_year,aes(x=BRDYEAR,y=count))+geom_point()+geom_smooth()
 
-egg_count_by_site <-new_egg|>
+survey_count_by_site <-new_egg|>
   select(Watershed,BRDYEAR,OldMass)|>
   group_by(Watershed,BRDYEAR)|>
   summarize(count=n())
-site_graph <- ggplot(egg_count_by_site,aes(x=BRDYEAR,y=count,colour=Watershed,group=Watershed))+geom_point()
+site_graph <- ggplot(survey_count_by_site,aes(x=BRDYEAR,y=count,colour=Watershed,group=Watershed))+geom_point()
 site_graph
 site_graph+facet_wrap(~Watershed)
 
-egg_abundance <-new_egg|>
+survey_abundance <-new_egg|>
   count(Watershed,BRDYEAR)|>
   ggplot(mapping = aes(x=Watershed,y=BRDYEAR))+
   geom_tile(mapping = aes(fill=n))
-egg_abundance
+survey_abundance
 
 water_temp<-new_egg$WaterTemp
 length(na.omit(water_temp))
