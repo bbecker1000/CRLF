@@ -33,3 +33,10 @@ egg_abundance <-new_egg|>
   geom_tile(mapping = aes(fill=n))
 egg_abundance
 
+water_temp<-new_egg$WaterTemp
+length(na.omit(water_temp))
+summary(na.omit(water_temp))
+
+water_depth<-new_egg$WaterDepth
+length(na.omit(water_depth))
+summary(na.omit(water_depth))
