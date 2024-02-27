@@ -8,6 +8,7 @@ DAG_FROG <- dagitty("dag{
   Site -> FROG ;
   Rain -> Vegetation -> FROG ;
   Rain -> Depth -> FROG ;
+  Rain -> Site -> FROG;
   Bullfrog -> FROG ;
   Salinity -> FROG ; 
   
@@ -41,6 +42,37 @@ coordinates(DAG_FROG) <- list(x=c(Year=2,
                                    FROG=2))
 plot(DAG_FROG)
 
+# frog model using ggdag
+library(ggdag)
+
+coord_dag <- list(
+  FROG = c(d = 0, x = 1, y = 4),
+  Year = c(d = 0, x = 1, y = 0)
+)
+
+FROG_ggdag <- dagify(
+  FROG ~ Year,
+  FROG ~ Rain,
+  FROG ~ Site,
+  Rain ~ Vegetation,
+  Rain ~ Site,
+  Depth ~ Rain,
+  FROG ~ Depth,
+  FROG ~ Bullfrog,
+  FROG ~ Salinity,
+  exposure = "Year",
+  outcome = "FROG",
+  coords = coord_dag
+)
+ggdag(FROG_ggdag, 
+      text_col = "white",
+      stylized = TRUE)
+  theme_dag()
+ggdag_paths(FROG_ggdag, 
+            #adjust_for = c("Breach"),
+            text_col = "black")
+
+ggdag_adjustment_set(FROG_ggdag, text_col = "black")
 
 
 
