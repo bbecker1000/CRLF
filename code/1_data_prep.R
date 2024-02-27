@@ -25,3 +25,10 @@ egg_count_by_site <-new_egg|>
   summarize(count=n())
 site_graph <- ggplot(egg_count_by_site,aes(x=BRDYEAR,y=count))+geom_point()
 site_graph+facet_wrap(~Watershed)
+
+egg_abundance <-new_egg|>
+  count(Watershed,BRDYEAR)|>
+  ggplot(mapping = aes(x=Watershed,y=BRDYEAR))+
+  geom_tile(mapping = aes(fill=n))
+egg_abundance
+
