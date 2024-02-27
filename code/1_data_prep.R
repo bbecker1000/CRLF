@@ -17,7 +17,7 @@ egg_count_by_year <- new_egg|>
 egg_count_by_year
 
 library(ggplot2)
-ggplot(data = egg_count_by_year,aes(x=BRDYEAR,y=count))+geom_point()+geom_line()
+ggplot(data = egg_count_by_year,aes(x=BRDYEAR,y=count))+geom_point()+geom_smooth()
 
 egg_count_by_site <-new_egg|>
   select(Watershed,BRDYEAR,OldMass)|>
