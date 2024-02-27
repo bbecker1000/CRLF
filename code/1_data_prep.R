@@ -23,5 +23,5 @@ egg_count_by_site <-new_egg|>
   select(Watershed,BRDYEAR,OldMass)|>
   group_by(Watershed,BRDYEAR)|>
   summarize(count=n())
-egg_count_by_site|>ggplot(aes(x=Watershed,y=count))+geom_point()
-
+site_graph <- ggplot(egg_count_by_site,aes(x=BRDYEAR,y=count))+geom_point()
+site_graph+facet_wrap(~Watershed)
