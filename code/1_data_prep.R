@@ -72,5 +72,7 @@ newtest <-old_egg|>
   summarize(count= n())
 newtest
 
-ggplot(data = newtest, mapping = aes(x = NumberofEggMasses, y = count)) + 
-  geom_point(alpha = 1)
+ggplot(data = old_egg, mapping = aes(x = NumberofEggMasses)) + 
+  geom_freqpoly(mapping = aes(colour = BRDYEAR),bins = 10)+
+  scale_x_continuous(limits = c(0, 8))
+
