@@ -38,14 +38,26 @@ summary(total,na.rm = TRUE)
 old_egg <-raw_data[raw_data$OldMass=="FALSE",]
 old_total <- old_egg$NumberofEggMasses
 sum(old_total != 0, na.rm = TRUE)
+sum(old_total, na.rm = TRUE)
 summary(old_total,na.rm = TRUE)
+old_egg$BRDYEAR <- factor(old_egg$BRDYEAR)
 
 ggplot(data = old_egg)+ 
   stat_summary(mapping = aes(x = BRDYEAR, y = NumberofEggMasses),
                fun = "mean",geom = "point")
 
-old_egg$BRDYEAR <- factor(old_egg$BRDYEAR)
 ggplot(data = old_egg, mapping = aes(x = BRDYEAR, y = NumberofEggMasses)) + 
   geom_boxplot()
 
-    
+
+single <-old_egg|>
+  group_by(BRDYEAR,Watershed)|>
+  summarize(count = n(),
+            mean_num = mean(NumberofEggMasses, na.rm = TRUE)
+)
+single
+
+ggplot(data = single, mapping = aes(x = BRDYEAR, y = mean_num)) +
+  geom_point(aes(size = count), alpha = 1/3) +
+  geom_smooth(se = FALSE)+facet_wrap(~Watershed)
+
