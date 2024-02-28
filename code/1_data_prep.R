@@ -8,10 +8,7 @@ str(raw_data,na.rm = TRUE)
 
 #maybe we should have survey length, width, water depth, etc as 1 standardized value for each pond per breeding year? Not sure how we want to do that
 
-new_egg <-raw_data[raw_data$OldMass=="FALSE",]
-new_egg
-survey_count_by_year <- new_egg|>
-  select(BRDYEAR, OldMass)|>
+survey_count_by_year <- raw_data|>
   group_by(BRDYEAR)|>
   summarize(count=n())
 survey_count_by_year
@@ -19,28 +16,36 @@ survey_count_by_year
 library(ggplot2)
 ggplot(data = survey_count_by_year,aes(x=BRDYEAR,y=count))+geom_point()+geom_smooth()
 
-survey_count_by_site <-new_egg|>
-  select(Watershed,BRDYEAR,OldMass)|>
+survey_count_by_site <-raw_data|>
   group_by(Watershed,BRDYEAR)|>
   summarize(count=n())
+survey_count_by_site
 site_graph <- ggplot(survey_count_by_site,aes(x=BRDYEAR,y=count,colour=Watershed,group=Watershed))+geom_point()
 site_graph
 site_graph+facet_wrap(~Watershed)
 
-survey_abundance <-new_egg|>
+survey_abundance <-raw_data|>
   count(Watershed,BRDYEAR)|>
   ggplot(mapping = aes(x=Watershed,y=BRDYEAR))+
   geom_tile(mapping = aes(fill=n))
 survey_abundance
 
-water_temp<-new_egg$WaterTemp
-length(na.omit(water_temp))
-summary(na.omit(water_temp))
+total <- raw_data$NumberofEggMasses
+total
+sum(total != 0, na.rm = TRUE)
+summary(total,na.rm = TRUE)
 
-water_depth<-new_egg$WaterDepth
-length(na.omit(water_depth))
-summary(na.omit(water_depth))
+old_egg <-raw_data[raw_data$OldMass=="FALSE",]
+old_total <- old_egg$NumberofEggMasses
+sum(old_total != 0, na.rm = TRUE)
+summary(old_total,na.rm = TRUE)
 
-egg_masses<-new_egg$NumberofEggMasses
-sum(egg_masses != 0,na.rm = TRUE)
+ggplot(data = old_egg)+ 
+  stat_summary(mapping = aes(x = BRDYEAR, y = NumberofEggMasses),
+               fun = "mean",geom = "point")
 
+old_egg$BRDYEAR <- factor(old_egg$BRDYEAR)
+ggplot(data = old_egg, mapping = aes(x = BRDYEAR, y = NumberofEggMasses)) + 
+  geom_boxplot()
+
+    
