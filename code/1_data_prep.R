@@ -1,7 +1,9 @@
 library(tidyverse)
 raw_data <- read_csv("CRLF_EGG_RAWDATA.csv")
+
 raw_data
 #checking type of each column
+str(raw_data)
 str(raw_data,na.rm = TRUE)
 
 #many ints in Survey_MONTH are empty but the values in Date look to be full. need to get month from Date
