@@ -53,9 +53,10 @@ ggplot(data = old_egg, mapping = aes(x = BRDYEAR, y = NumberofEggMasses)) +
 single <-old_egg|>
   group_by(BRDYEAR,Watershed)|>
   summarize(count = n(),
-            mean_num = mean(NumberofEggMasses, na.rm = TRUE),
-            mutate(total = mean_num * count)
-  )
+            mean_num = mean(NumberofEggMasses, na.rm = TRUE))
+single
+single <- single %>%
+  mutate(total = count * mean_num)
 single
 
 ggplot(data = single, mapping = aes(x = BRDYEAR, y = mean_num)) +
