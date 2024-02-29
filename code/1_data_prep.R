@@ -65,11 +65,6 @@ ggplot(data = single, mapping = aes(x = BRDYEAR, y = mean_num)) +
   geom_point(aes(size = count), alpha = 1/3) +
   geom_smooth(se = FALSE)+facet_wrap(~Watershed)
 
-ggplot(data = single, mapping = aes(x = BRDYEAR, y = total)) +
-  geom_point(aes(size = count), alpha = 1/3) +
-  geom_smooth(se = FALSE)+facet_wrap(~Watershed)
-
-
 newtest <-old_egg|>
   group_by(NumberofEggMasses)|>
   summarize(count= n())
