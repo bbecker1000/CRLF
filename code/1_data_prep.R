@@ -77,3 +77,5 @@ ggplot(data = old_egg, mapping = aes(x = NumberofEggMasses)) +
   geom_freqpoly(mapping = aes(colour = BRDYEAR),bins = 4)+
   scale_x_continuous(limits = c(0, 3))
 
+aaa
+
