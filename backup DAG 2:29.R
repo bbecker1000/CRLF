@@ -25,21 +25,21 @@ plot(DAG_FROG)
 
 ## add coordinates
 coordinates(DAG_FROG) <- list(x=c(Year=2,
-                                   Rain=2.5,
-                                   Site=3,
-                                   Vegetation=2,
-                                   Depth=3,
-                                   Bullfrog=2,
-                                   Salinity=3,
+                                  Rain=2.5,
+                                  Site=3,
+                                  Vegetation=2,
+                                  Depth=3,
+                                  Bullfrog=2,
+                                  Salinity=3,
                                   FROG=2.5),
-                               y=c(Year=-1,
-                                   Rain=-4,
-                                   Site=-4,
-                                   Depth=3,
-                                   Vegetation=-4,
-                                   Bullfrog=-2,
-                                   Salinity=-2,
-                                   FROG=2))
+                              y=c(Year=-1,
+                                  Rain=-4,
+                                  Site=-4,
+                                  Depth=3,
+                                  Vegetation=-4,
+                                  Bullfrog=-2,
+                                  Salinity=-2,
+                                  FROG=2))
 plot(DAG_FROG)
 
 # frog model using ggdag
@@ -67,7 +67,7 @@ FROG_ggdag <- dagify(
 ggdag(FROG_ggdag, 
       text_col = "white",
       stylized = TRUE)
-  theme_dag()
+theme_dag()
 ggdag_paths(FROG_ggdag, 
             #adjust_for = c("Breach"),
             text_col = "black")
