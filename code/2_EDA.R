@@ -7,7 +7,7 @@
 source("1_data_prep.R")
 
 #table of how many surveys were done each year
-survey_count_by_year <- raw_data|>
+survey_count_by_year <- data|>
   group_by(BRDYEAR)|>
   summarize(count=n())
 survey_count_by_year
@@ -16,7 +16,7 @@ survey_count_by_year
 ggplot(data = survey_count_by_year,aes(x=BRDYEAR,y=count))+geom_point()+geom_smooth()
 
 #table of how many surveys were done at each watershed per year
-survey_count_by_shed <-raw_data|>
+survey_count_by_shed <-data|>
   group_by(Watershed,BRDYEAR)|>
   summarize(count=n())
 survey_count_by_shed
@@ -27,14 +27,14 @@ site_graph
 site_graph+facet_wrap(~Watershed) #separates graphs by watershed
 
 #heatmap of suvey count per year by watershed
-survey_abundance <-raw_data|>
+survey_abundance <-data|>
   count(Watershed,BRDYEAR)|>
   ggplot(mapping = aes(x=Watershed,y=BRDYEAR))+
   geom_tile(mapping = aes(fill=n))
 survey_abundance
 
 #I think this gets the total number of egg masses over all years? Not quite sure, this isn't my code lol --Robin
-new_egg <-raw_data[raw_data$OldMass=="FALSE",]
+new_egg <-data[data$OldMass=="FALSE",]
 new_total <- new_egg$NumberofEggMasses
 sum(new_total, na.rm = TRUE)
 summary(new_total,na.rm = TRUE)
@@ -79,16 +79,25 @@ ggplot(data = new_egg, mapping = aes(x = NumberofEggMasses)) +
   geom_freqpoly(mapping = aes(colour = BRDYEAR),bins = 4)+
   scale_x_continuous(limits = c(0, 3))
 
-raw_data|>
+data|>
   select(Watershed,LocationID)|>
   group_by(Watershed,LocationID)|>
   summarize(count=n())|>
   filter(Watershed=="Redwood Creek")
 
-number_of_sites_within_watershed <- raw_data|>
+number_of_sites_within_watershed <- data|>
   group_by(Watershed)|>
   summarize(distinct_count = n_distinct(LocationID))
 number_of_sites_within_watershed
 
 ggplot(number_of_sites_within_watershed,aes(x=Watershed,y=distinct_count))+
   geom_point()
+
+
+#histogram of response data for all years pooled
+ggplot(data = data, aes(x = NumberofEggMasses)) + geom_histogram()
+
+#vegetation --> frog
+#year --> frog
+#rain --> frog
+#site --> frog
