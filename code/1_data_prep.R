@@ -32,47 +32,47 @@ survey_abundance <-raw_data|>
   geom_tile(mapping = aes(fill=n))
 survey_abundance
 
-total <- raw_data$NumberofEggMasses
-total
+new_egg <-raw_data[raw_data$OldMass=="FALSE",]
+new_total <- new_egg$NumberofEggMasses
+sum(new_total, na.rm = TRUE)
+summary(new_total,na.rm = TRUE)
+new_egg$BRDYEAR <- factor(new_egg$BRDYEAR)
+
+total <- new_egg$NumberofEggMasses
+sum(total,na.rm = TRUE)
 sum(total != 0, na.rm = TRUE)
-summary(total,na.rm = TRUE)
 
-old_egg <-raw_data[raw_data$OldMass=="FALSE",]
-old_total <- old_egg$NumberofEggMasses
-sum(old_total != 0, na.rm = TRUE)
-sum(old_total, na.rm = TRUE)
-summary(old_total,na.rm = TRUE)
-old_egg$BRDYEAR <- factor(old_egg$BRDYEAR)
-
-ggplot(data = old_egg)+ 
+ggplot(data = new_egg)+ 
   stat_summary(mapping = aes(x = BRDYEAR, y = NumberofEggMasses),
-               fun = "mean",geom = "point")
+               fun = "mean",geom = "point",color = "blue", size= 2) 
+  
 
-ggplot(data = old_egg, mapping = aes(x = BRDYEAR, y = NumberofEggMasses)) + 
+ggplot(data = new_egg, mapping = aes(x = BRDYEAR, y = sqrt(NumberofEggMasses)))+
   geom_boxplot()
 
-
-single <-old_egg|>
+statistics <-new_egg|>
   group_by(BRDYEAR,Watershed)|>
   summarize(count = n(),
-            mean_num = mean(NumberofEggMasses, na.rm = TRUE))
-single
-single <- single %>%
-  mutate(total = count * mean_num)
-single
+            mean_num = mean(NumberofEggMasses, na.rm = TRUE),
+            total_num =sum(NumberofEggMasses, na.rm = TRUE)
+            )
+statistics
 
-ggplot(data = single, mapping = aes(x = BRDYEAR, y = mean_num)) +
-  geom_point(aes(size = count), alpha = 1/3) +
-  geom_smooth(se = FALSE)+facet_wrap(~Watershed)
+ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = total_num)) +
+  geom_point(aes(size = count), alpha = 1/2) + facet_wrap(~Watershed)
 
-newtest <-old_egg|>
+ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = mean_num)) +
+  geom_point(alpha = 1/3) + facet_wrap(~Watershed)
+
+
+newtest <-new_egg|>
   group_by(NumberofEggMasses)|>
   summarize(count= n())
 newtest
 
-ggplot(data = old_egg, mapping = aes(x = NumberofEggMasses)) + 
+ggplot(data = new_egg, mapping = aes(x = NumberofEggMasses)) + 
   geom_freqpoly(mapping = aes(colour = BRDYEAR),bins = 4)+
   scale_x_continuous(limits = c(0, 3))
 
-aaa
+
 
