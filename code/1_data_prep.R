@@ -77,10 +77,13 @@ ggplot(data = new_egg, mapping = aes(x = NumberofEggMasses)) +
 raw_data|>
   select(Watershed,LocationID)|>
   group_by(Watershed,LocationID)|>
-  summarize(count=n())
+  summarize(count=n())|>
+  filter(Watershed=="Redwood Creek")
 
 number_of_sites_within_watershed <- raw_data|>
   group_by(Watershed)|>
   summarize(distinct_count = n_distinct(LocationID))
 number_of_sites_within_watershed
 
+ggplot(number_of_sites_within_watershed,aes(x=Watershed,y=distinct_count))+
+  geom_point()
