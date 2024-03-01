@@ -74,5 +74,13 @@ ggplot(data = new_egg, mapping = aes(x = NumberofEggMasses)) +
   geom_freqpoly(mapping = aes(colour = BRDYEAR),bins = 4)+
   scale_x_continuous(limits = c(0, 3))
 
+raw_data|>
+  select(Watershed,LocationID)|>
+  group_by(Watershed,LocationID)|>
+  summarize(count=n())
 
+number_of_sites_within_watershed <- raw_data|>
+  group_by(Watershed)|>
+  summarize(distinct_count = n_distinct(LocationID))
+number_of_sites_within_watershed
 
