@@ -6,6 +6,27 @@
 
 source("1_data_prep.R")
 
+### ~~~ *** DATA MANIPULATION *** ~~~ ###
+
+# create table for number of egg masses by year by site
+totalEggsPerYear <- data %>%
+  group_by(Watershed, LocationID, BRDYEAR) %>%
+  summarize(totalEggs = sum(NumberofEggMasses))
+
+# create table to denote first and last egg mass detected per year
+eggTiming <- data %>%
+  filter(NumberofEggMasses > 0, OldMass == "FALSE") %>%
+  group_by(Watershed, LocationID, BRDYEAR) %>%
+  summarize(firstEgg = min(Date), lastEgg = max(Date))
+
+### ~~~ *** PLOTS AND TABLES *** ~~~ ###
+
+# plot total number of eggs per year by site
+ggplot(data = totalEggsPerYear, aes(x = BRDYEAR, y = totalEggs)) +geom_point() + facet_wrap(totalEggsPerYear$LocationID)
+
+# plot timing of egg laying by year and site (TODO)
+# and correlate this with rainfall! (TODO)
+
 #table of how many surveys were done each year
 survey_count_by_year <- data|>
   group_by(BRDYEAR)|>
@@ -96,8 +117,3 @@ ggplot(number_of_sites_within_watershed,aes(x=Watershed,y=distinct_count))+
 
 #histogram of response data for all years pooled
 ggplot(data = data, aes(x = NumberofEggMasses)) + geom_histogram()
-
-#vegetation --> frog
-#year --> frog
-#rain --> frog
-#site --> frog
