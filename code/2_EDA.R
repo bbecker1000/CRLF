@@ -6,26 +6,30 @@
 
 source("1_data_prep.R")
 
-### ~~~ *** DATA MANIPULATION *** ~~~ ###
+### ~~~ *** DATA MANIPULATION (tables that are helpful for creating many graphs) *** ~~~ ###
 
-# create table for number of egg masses by year by site
+# table for number of egg masses by year by site
 totalEggsPerYear <- data %>%
   group_by(Watershed, LocationID, BRDYEAR) %>%
   summarize(totalEggs = sum(NumberofEggMasses))
 
-# create table to denote first and last egg mass detected per year
+# table to denote first and last egg mass detected per year, as well as length of breeding season
 eggTiming <- data %>%
   filter(NumberofEggMasses > 0, OldMass == "FALSE") %>%
   group_by(Watershed, LocationID, BRDYEAR) %>%
-  summarize(firstEgg = min(Date), lastEgg = max(Date))
+  summarize(firstEgg = min(Date), lastEgg = max(Date), breedingLength = max(Date) - min(Date))
 
-### ~~~ *** PLOTS AND TABLES *** ~~~ ###
+### ~~~ *** PLOTS *** ~~~ ###
 
 # plot total number of eggs per year by site
 ggplot(data = totalEggsPerYear, aes(x = BRDYEAR, y = totalEggs)) +geom_point() + facet_wrap(totalEggsPerYear$LocationID)
 
-# plot timing of egg laying by year and site (TODO)
-# and correlate this with rainfall! (TODO)
+# plot timing of egg laying by year and watershed
+eggTimingNoZero <- eggTiming %>% filter(breedingLength > 0) %>% group_by(Watershed, BRDYEAR) %>% 
+  summarize(meanFirstEgg = mean(firstEgg), meanLastEgg = mean(lastEgg), meanLength = mean(lastEgg) - mean(firstEgg))
+ggplot(data = eggTimingNoZero, aes(x = BRDYEAR, y = meanLength, color = Watershed)) + geom_line()
+
+# correlate this^^ with rainfall! (TODO)·
 
 #table of how many surveys were done each year
 survey_count_by_year <- data|>

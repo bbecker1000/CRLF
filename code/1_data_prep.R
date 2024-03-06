@@ -1,6 +1,7 @@
 library(tidyverse)
 library(dplyr)
 library(here)
+library(lubridate)
 
 setwd(here::here("code"))
 raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA.csv"))
@@ -13,11 +14,13 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
   mutate(TotalVeg = PercentSubVeg + PercentEmergVeg + PercentOpenWater) %>%
   mutate(Date = strptime(Date, format = "%m/%d/%Y")) %>%
   mutate(Survey_MONTH = as.integer(format(Date, "%m"))) %>%
-  mutate(LocationID = as.factor(LocationID), Watershed = as.factor(Watershed), Obsv1 = as.factor(Obsv1), Obsv2 = as.factor(Obsv2), Obsv3 = as.factor(Obsv3), 
+  mutate(LocationID = as.factor(LocationID), Watershed = as.factor(Watershed), Date = as.Date(Date), Obsv1 = as.factor(Obsv1), Obsv2 = as.factor(Obsv2), Obsv3 = as.factor(Obsv3), 
          Weather = as.factor(Weather), Wind = as.integer(Wind), HabType= as.factor(HabType), SurveyMethodID = as.integer(SurveyMethodID), SalinityMethodID = as.integer(SalinityMethodID), 
          WaterFlowID = as.integer(WaterFlowID), MassID = as.integer(MassID), NumberofEggMasses = as.integer(NumberofEggMasses))
 
-data
+#add column for number of days after the beginning of the water year
+beginningWY <- floor_date(data$Date, unit = "year") - months(3) # gets the beginning of the water year for each date -- DOES NOT WORK YET
+data <- data %>% mutate(beginningWY = beginningWY, dayOfWY = as.numeric(Date - beginningWY))
 
 #checking type of each column
 str(data,na.rm = TRUE)
