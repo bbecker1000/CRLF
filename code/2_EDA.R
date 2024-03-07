@@ -29,7 +29,7 @@ eggTimingNoZero <- eggTiming %>% filter(breedingLength > 0) %>% group_by(Watersh
   summarize(meanFirstEgg = mean(firstEgg), meanLastEgg = mean(lastEgg), meanLength = mean(lastEgg) - mean(firstEgg))
 ggplot(data = eggTimingNoZero, aes(x = BRDYEAR, y = meanLength, color = Watershed)) + geom_line()
 
-# correlate this^^ with rainfall! (TODO)·
+# correlate this^^ with rainfall! (TODO -- need to do rainfall data first)·
 
 #table of how many surveys were done each year
 survey_count_by_year <- data|>
