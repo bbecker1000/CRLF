@@ -79,7 +79,7 @@ ggplot(data = new_egg, mapping = aes(x = BRDYEAR, y = sqrt(NumberofEggMasses)))+
 
 #stats for number of egg masses by watershed by year?
 statistics <-new_egg|>
-  group_by(BRDYEAR,Watershed)|>
+  group_by(BRDYEAR,Watershed,LocationID)|>
   summarize(count = n(),
             mean_num = mean(NumberofEggMasses, na.rm = TRUE),
             total_num =sum(NumberofEggMasses, na.rm = TRUE)
@@ -88,7 +88,7 @@ statistics
 
 #plot of total egg masses over time per watershed
 ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = total_num)) +
-  geom_point(aes(size = count), alpha = 1/2) + facet_wrap(~Watershed)
+  geom_point(aes(size = count), alpha = 1/2) + facet_wrap(~LocationID)
 
 #plot of mean egg masses over time by watershed
 ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = mean_num)) +
