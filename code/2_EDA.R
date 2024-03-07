@@ -34,39 +34,39 @@ ggplot(data = eggTimingNoZero, aes(x = BRDYEAR, y = meanLength, color = Watershe
 #table of how many surveys were done each year
 survey_count_by_year <- data|>
   group_by(BRDYEAR)|>
-  summarize(count=n())
+  summarize(survey_count=n())
 survey_count_by_year
 
 #plots survey count by year across all watersheds/sites
-ggplot(data = survey_count_by_year,aes(x=BRDYEAR,y=count))+geom_point()+geom_smooth()
+ggplot(data = survey_count_by_year,aes(x=BRDYEAR,y=survey_count))+geom_point()+geom_smooth()
 
 #table of how many surveys were done at each watershed per year
 survey_count_by_shed <-data|>
   group_by(Watershed,BRDYEAR)|>
-  summarize(count=n())
+  summarize(survey_count=n())
 survey_count_by_shed
 
 #plots survey count by watershed by year
-site_graph <- ggplot(survey_count_by_site,aes(x=BRDYEAR,y=count,colour=Watershed,group=Watershed))+geom_point()
+site_graph <- ggplot(survey_count_by_site,aes(x=BRDYEAR,y=survey_count,colour=Watershed,group=Watershed))+geom_point()
 site_graph
 site_graph+facet_wrap(~Watershed) #separates graphs by watershed
 
 #heatmap of suvey count per year by watershed
 survey_abundance <-data|>
-  count(Watershed,BRDYEAR)|>
+  survey_count(Watershed,BRDYEAR)|>
   ggplot(mapping = aes(x=Watershed,y=BRDYEAR))+
   geom_tile(mapping = aes(fill=n))
 survey_abundance
 
 #I think this gets the total number of egg masses over all years? Not quite sure, this isn't my code lol --Robin
 new_egg <-data[data$OldMass=="FALSE",]
-new_total <- new_egg$NumberofEggMasses
-sum(new_total, na.rm = TRUE)
-summary(new_total,na.rm = TRUE)
+new_total_egg_masses <- new_egg$NumberofEggMasses
+sum(new_total_egg_masses, na.rm = TRUE)
+summary(new_total_egg_masses,na.rm = TRUE)
 new_egg$BRDYEAR <- factor(new_egg$BRDYEAR)
-total <- new_egg$NumberofEggMasses
-sum(total,na.rm = TRUE)
-sum(total != 0, na.rm = TRUE)
+total_masses <- new_egg$NumberofEggMasses
+sum(total_masses,na.rm = TRUE)
+sum(total_masses != 0, na.rm = TRUE)
 
 #plots number of egg masses recorded per year across all watersheds
 ggplot(data = new_egg)+ 
@@ -80,24 +80,24 @@ ggplot(data = new_egg, mapping = aes(x = BRDYEAR, y = sqrt(NumberofEggMasses)))+
 #stats for number of egg masses by watershed by year?
 statistics <-new_egg|>
   group_by(BRDYEAR,Watershed)|>
-  summarize(count = n(),
-            mean_num = mean(NumberofEggMasses, na.rm = TRUE),
+  summarize(survey_count = n(),
+            new_egg_mean_per_survey = mean(NumberofEggMasses, na.rm = TRUE),
             total_num =sum(NumberofEggMasses, na.rm = TRUE)
   )
 statistics
 
 #plot of total egg masses over time per watershed
 ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = total_num)) +
-  geom_point(aes(size = count), alpha = 1/2) + facet_wrap(~Watershed)
+  geom_point(aes(size = survey_count), alpha = 1/2) + facet_wrap(~Watershed)
 
 #plot of mean egg masses over time by watershed
-ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = mean_num)) +
+ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = new_egg_mean_per_survey)) +
   geom_point(alpha = 1/3) + facet_wrap(~Watershed)
 
 
 newtest <-new_egg|>
   group_by(NumberofEggMasses)|>
-  summarize(count= n())
+  summarize(survey_count= n())
 newtest
 
 ggplot(data = new_egg, mapping = aes(x = NumberofEggMasses)) + 
@@ -107,7 +107,7 @@ ggplot(data = new_egg, mapping = aes(x = NumberofEggMasses)) +
 data|>
   select(Watershed,LocationID)|>
   group_by(Watershed,LocationID)|>
-  summarize(count=n())|>
+  summarize(survey_count=n())|>
   filter(Watershed=="Redwood Creek")
 
 number_of_sites_within_watershed <- data|>
