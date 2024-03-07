@@ -17,7 +17,7 @@ totalEggsPerYear <- data %>%
 eggTiming <- data %>%
   filter(NumberofEggMasses > 0, OldMass == "FALSE") %>%
   group_by(Watershed, LocationID, BRDYEAR) %>%
-  summarize(firstEgg = min(Date), lastEgg = max(Date), breedingLength = max(Date) - min(Date))
+  summarize(firstEgg = min(dayOfWY), lastEgg = max(dayOfWY), breedingLength = max(dayOfWY) - min(dayOfWY))
 
 ### ~~~ *** PLOTS *** ~~~ ###
 
