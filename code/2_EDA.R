@@ -4,6 +4,7 @@
 #I also think it would be nice to have comments for each of these graphs to let everyone know what they do (and so we can see what other
 #graphs need to be made!) this would just help the code be more readable and help with collaboration --Robin
 
+setwd(here::here("code"))
 source("1_data_prep.R")
 
 ### ~~~ *** DATA MANIPULATION (tables that are helpful for creating many graphs) *** ~~~ ###
@@ -35,12 +36,12 @@ eggTimingNoZero <- eggTiming %>% filter(breedingLength > 0) %>% group_by(Watersh
   summarize(meanFirstEgg = mean(firstEgg), meanLastEgg = mean(lastEgg), meanLength = mean(lastEgg) - mean(firstEgg))
 ggplot(data = eggTimingNoZero, aes(x = BRDYEAR, y = meanLength, color = Watershed)) + geom_line()
 
-# correlate this^^ with rainfall! (TODO -- need to do rainfall data first)·
+# correlate this^^ with rainfall! (TODO -- need to do rainfall data first)
 
-#table of how many surveys were done each year
+#table of how many surveys were done each year (not relevent)
 survey_count_by_year <- data|>
   group_by(BRDYEAR)|>
-  summarize(survey_count=n())
+  summarize(survey_count=n()) #this is wrong
 survey_count_by_year
 
 #plots survey count by year across all watersheds/sites
@@ -49,7 +50,8 @@ ggplot(data = survey_count_by_year,aes(x=BRDYEAR,y=survey_count))+geom_point()+g
 #table of number of surveys at each watershed per year
 survey_count_by_shed <-data|>
   group_by(Watershed,BRDYEAR)|>
-  summarize(survey_count=n())
+  summarize(survey_count=n()) #this is wrong
+survey_count_by_shed
 
 #only look at watersheds with decent amount of data?
 rich_watersheds <-survey_count_by_shed|>
@@ -154,3 +156,4 @@ ggplot(number_of_sites_within_watershed,aes(x=Watershed,y=distinct_count))+
 
 #histogram of response data for all years pooled (may change x-axis, not that helful)
 ggplot(data = data, aes(x = NumberofEggMasses)) + geom_histogram()
+
