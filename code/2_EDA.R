@@ -95,39 +95,45 @@ statistics <-new_egg|>
   )
 statistics
 
-#plot of total egg masses over time per watershed
+#plot of total egg masses over time per site
 ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = total_num)) +
-  geom_point(aes(size = count), alpha = 1/2) + facet_wrap(~Watershed) +
+  geom_point(aes(size = count), alpha = 1/2) + facet_wrap(~LocationID) +
+  labs(x = "Year", y = "total new egg masses")
   
 
-#plot of mean egg masses over time by watershed
+#plot of mean egg masses over time by site
 ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = mean_num)) +
-  geom_point(alpha = 1/3) + facet_wrap(~Watershed)
+  geom_point(alpha = 1/3) + facet_wrap(~LocationID)+
+  labs(x = "Year", y = "mean new egg masses")
 
 
-newtest <-new_egg|>
+egg_masses_number_by_count <-new_egg|>
   group_by(NumberofEggMasses)|>
   summarize(survey_count= n())
-newtest
+egg_masses_number_by_count
 
+#number of survey for each number of new egg masses of all watersheds by year
 ggplot(data = new_egg, mapping = aes(x = NumberofEggMasses)) + 
   geom_freqpoly(mapping = aes(colour = BRDYEAR),bins = 4)+
   scale_x_continuous(limits = c(0, 3))
 
+#example: showing the number of survey for all sites in Redwood Creek watershed
 data|>
   select(Watershed,LocationID)|>
   group_by(Watershed,LocationID)|>
   summarize(survey_count=n())|>
   filter(Watershed=="Redwood Creek")
 
+#table showing number of different sites for all watersheds
 number_of_sites_within_watershed <- data|>
   group_by(Watershed)|>
   summarize(distinct_count = n_distinct(LocationID))
 number_of_sites_within_watershed
 
+#plot of the above table.
 ggplot(number_of_sites_within_watershed,aes(x=Watershed,y=distinct_count))+
   geom_point()
 
 
-#histogram of response data for all years pooled
+#histogram of response data for all years pooled (may change x-axis, not that helful)
 ggplot(data = data, aes(x = NumberofEggMasses)) + geom_histogram()
