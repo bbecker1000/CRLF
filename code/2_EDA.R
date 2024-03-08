@@ -8,20 +8,22 @@ source("1_data_prep.R")
 
 ### ~~~ *** DATA MANIPULATION (tables that are helpful for creating many graphs) *** ~~~ ###
 
-# table for number of egg masses by year by site
+# table for number of egg masses by year by distinct location (sites)
 totalEggsPerYear <- data %>%
   group_by(Watershed, LocationID, BRDYEAR) %>%
   summarize(totalEggs = sum(NumberofEggMasses))
+totalEggsPerYear
 
 # table to denote first and last egg mass detected per year, as well as length of breeding season
 eggTiming <- data %>%
   filter(NumberofEggMasses > 0, OldMass == "FALSE") %>%
   group_by(Watershed, LocationID, BRDYEAR) %>%
   summarize(firstEgg = min(dayOfWY), lastEgg = max(dayOfWY), breedingLength = max(dayOfWY) - min(dayOfWY))
-
+eggTiming
 ### ~~~ *** PLOTS *** ~~~ ###
 
 # plot total number of eggs per year by site
+library(ggplot2)
 ggplot(data = totalEggsPerYear, aes(x = BRDYEAR, y = totalEggs)) +geom_point() + facet_wrap(totalEggsPerYear$LocationID)
 
 # plot timing of egg laying by year and watershed
