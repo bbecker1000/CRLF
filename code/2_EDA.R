@@ -22,9 +22,13 @@ eggTiming <- data %>%
 eggTiming
 ### ~~~ *** PLOTS *** ~~~ ###
 
-# plot total number of eggs per year by site
+# plot total number of eggs per year by site (shortened x-axis for view)
 library(ggplot2)
-ggplot(data = totalEggsPerYear, aes(x = BRDYEAR, y = totalEggs)) +geom_point() + facet_wrap(totalEggsPerYear$LocationID)
+number_of_eggs_per_year_by_site <-
+  ggplot(data = totalEggsPerYear, aes(x = BRDYEAR, y = totalEggs)) +
+  geom_point() + facet_wrap(totalEggsPerYear$LocationID) + 
+  scale_x_continuous(breaks = seq(min(totalEggsPerYear$BRDYEAR), max(totalEggsPerYear$BRDYEAR), by = 6))
+number_of_eggs_per_year_by_site 
 
 # plot timing of egg laying by year and watershed
 eggTimingNoZero <- eggTiming %>% filter(breedingLength > 0) %>% group_by(Watershed, BRDYEAR) %>% 
@@ -42,44 +46,47 @@ survey_count_by_year
 #plots survey count by year across all watersheds/sites
 ggplot(data = survey_count_by_year,aes(x=BRDYEAR,y=survey_count))+geom_point()+geom_smooth()
 
-#table of how many surveys were done at each watershed per year
+#table of number of surveys at each watershed per year
 survey_count_by_shed <-data|>
   group_by(Watershed,BRDYEAR)|>
   summarize(survey_count=n())
 survey_count_by_shed
 
 #plots survey count by watershed by year
-site_graph <- ggplot(survey_count_by_site,aes(x=BRDYEAR,y=survey_count,colour=Watershed,group=Watershed))+geom_point()
+site_graph <- ggplot(survey_count_by_shed,aes(x=BRDYEAR,y=survey_count,colour=Watershed,group=Watershed))+geom_point()
+site_graph <- site_graph + facet_wrap(~Watershed) #separates graphs by watershed
 site_graph
-site_graph+facet_wrap(~Watershed) #separates graphs by watershed
 
-#heatmap of suvey count per year by watershed
+#heatmap of survey count per year by watershed
 survey_abundance <-data|>
-  survey_count(Watershed,BRDYEAR)|>
+  count(Watershed,BRDYEAR)|>
   ggplot(mapping = aes(x=Watershed,y=BRDYEAR))+
   geom_tile(mapping = aes(fill=n))
 survey_abundance
 
-#I think this gets the total number of egg masses over all years? Not quite sure, this isn't my code lol --Robin
+#summary information of new egg masses count
 new_egg <-data[data$OldMass=="FALSE",]
 new_total_egg_masses <- new_egg$NumberofEggMasses
+#total number of egg masses is 4000
 sum(new_total_egg_masses, na.rm = TRUE)
+#maximum number of egg masses for a given survey is 25, while the mean is 0.84
 summary(new_total_egg_masses,na.rm = TRUE)
 new_egg$BRDYEAR <- factor(new_egg$BRDYEAR)
-total_masses <- new_egg$NumberofEggMasses
-sum(total_masses,na.rm = TRUE)
-sum(total_masses != 0, na.rm = TRUE)
 
-#plots number of egg masses recorded per year across all watersheds
+
+#plots of mean number of new egg masses per survey across all watersheds through time
 ggplot(data = new_egg)+ 
   stat_summary(mapping = aes(x = BRDYEAR, y = NumberofEggMasses),
-               fun = "mean",geom = "point",color = "blue", size= 2) 
-
-#boxplot of above graph
+               fun = "mean",geom = "point",color = "blue", size= 2)+
+  labs(x = "Year", y = "mean number of new egg masses")
+ 
+#boxplot of above graph (y-axis is square-rooted for visualization)
 ggplot(data = new_egg, mapping = aes(x = BRDYEAR, y = sqrt(NumberofEggMasses)))+
-  geom_boxplot()
+  geom_boxplot()+
+  labs(x = "Year", y = "sqrt of mean number of new egg masses")
 
-#stats for number of egg masses by watershed by year?
+#stats for 1.number of survey, 2. mean number of new egg masses per survey, and 3.
+#total number of egg masses by watershed by site by year
 statistics <-new_egg|>
   group_by(BRDYEAR,Watershed,LocationID)|>
   summarize(count = n(),
@@ -90,10 +97,11 @@ statistics
 
 #plot of total egg masses over time per watershed
 ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = total_num)) +
-  geom_point(aes(size = survey_count), alpha = 1/2) + facet_wrap(~Watershed)
+  geom_point(aes(size = count), alpha = 1/2) + facet_wrap(~Watershed) +
+  
 
 #plot of mean egg masses over time by watershed
-ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = new_egg_mean_per_survey)) +
+ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = mean_num)) +
   geom_point(alpha = 1/3) + facet_wrap(~Watershed)
 
 
