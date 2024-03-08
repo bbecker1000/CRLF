@@ -38,7 +38,7 @@ ggplot(data = eggTimingNoZero, aes(x = BRDYEAR, y = meanLength, color = Watershe
 
 # correlate this^^ with rainfall! (TODO -- need to do rainfall data first)
 
-#table of how many surveys were done each year (not relevent)
+#table of how many surveys were done each year (not relevant)
 survey_count_by_year <- data|>
   group_by(BRDYEAR)|>
   summarize(survey_count=n()) #this is wrong
