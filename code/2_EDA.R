@@ -50,12 +50,22 @@ ggplot(data = survey_count_by_year,aes(x=BRDYEAR,y=survey_count))+geom_point()+g
 survey_count_by_shed <-data|>
   group_by(Watershed,BRDYEAR)|>
   summarize(survey_count=n())
-survey_count_by_shed
 
-#plots survey count by watershed by year
+#only look at watersheds with decent amount of data?
+rich_watersheds <-survey_count_by_shed|>
+  filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
+           Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
+           Watershed == "Wilkins Gulch")
+
+rich_graph <- ggplot(rich_watersheds,aes(x=BRDYEAR,y=survey_count,colour=Watershed,group=Watershed))+geom_point()
+rich_graph <-  rich_graph+ facet_wrap(~Watershed)
+rich_graph
+
+#plots of survey count by ALL watershed by year
 site_graph <- ggplot(survey_count_by_shed,aes(x=BRDYEAR,y=survey_count,colour=Watershed,group=Watershed))+geom_point()
 site_graph <- site_graph + facet_wrap(~Watershed) #separates graphs by watershed
 site_graph
+
 
 #heatmap of survey count per year by watershed
 survey_abundance <-data|>
@@ -106,6 +116,19 @@ ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = mean_num)) +
   geom_point(alpha = 1/3) + facet_wrap(~LocationID)+
   labs(x = "Year", y = "mean new egg masses")
 
+#example: showing the number of survey for all sites in Redwood Creek watershed
+data|>
+  select(Watershed,LocationID)|>
+  group_by(Watershed,LocationID)|>
+  summarize(survey_count=n())|>
+  filter(Watershed=="Redwood Creek")
+
+Redwood <- statistics|>
+  filter(Watershed=="Redwood Creek")
+ggplot(data = Redwood, mapping = aes(x = BRDYEAR, y = total_num)) +
+  geom_point(aes(size = count), alpha = 1/2) + facet_wrap(~LocationID) +
+  labs(x = "Year", y = "total new egg masses")
+
 
 egg_masses_number_by_count <-new_egg|>
   group_by(NumberofEggMasses)|>
@@ -117,12 +140,6 @@ ggplot(data = new_egg, mapping = aes(x = NumberofEggMasses)) +
   geom_freqpoly(mapping = aes(colour = BRDYEAR),bins = 4)+
   scale_x_continuous(limits = c(0, 3))
 
-#example: showing the number of survey for all sites in Redwood Creek watershed
-data|>
-  select(Watershed,LocationID)|>
-  group_by(Watershed,LocationID)|>
-  summarize(survey_count=n())|>
-  filter(Watershed=="Redwood Creek")
 
 #table showing number of different sites for all watersheds
 number_of_sites_within_watershed <- data|>
