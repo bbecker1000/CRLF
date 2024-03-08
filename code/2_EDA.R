@@ -123,8 +123,11 @@ data|>
   summarize(survey_count=n())|>
   filter(Watershed=="Redwood Creek")
 
-Redwood <- statistics|>
-  filter(Watershed=="Redwood Creek")
+new_egg|>
+  filter(Watershed=="Redwood Creek")|>
+  filter(LocationID == "RC07")
+Redwood
+
 ggplot(data = Redwood, mapping = aes(x = BRDYEAR, y = total_num)) +
   geom_point(aes(size = count), alpha = 1/2) + facet_wrap(~LocationID) +
   labs(x = "Year", y = "total new egg masses")
