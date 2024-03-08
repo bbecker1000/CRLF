@@ -124,9 +124,9 @@ data|>
   filter(Watershed=="Redwood Creek")
 
 new_egg|>
-  filter(Watershed=="Redwood Creek")|>
-  filter(LocationID == "RC07")
-Redwood
+  filter(LocationID == "RC07")|>
+  filter(BRDYEAR == "2016")
+
 
 ggplot(data = Redwood, mapping = aes(x = BRDYEAR, y = total_num)) +
   geom_point(aes(size = count), alpha = 1/2) + facet_wrap(~LocationID) +
