@@ -13,7 +13,7 @@ marin_rain_folder <- here::here("data", "MMWD_RainfallRecords2")
 rain_files <- list.files(path = marin_rain_folder, pattern = "\\.xlsx$", full.names = TRUE)
 sheet_name = "CM"
 
-## rain_data_list = list of tables, each one = 1 year
+## rain_data_list = list of matrices, each one = 1 year
 
 rain_data_list <- rain_files %>% map( ~ {
   dates_col <- read_xlsx(.x, sheet = sheet_name, range = cell_rows(3:4), col_types = "date") %>% 
@@ -23,12 +23,39 @@ rain_data_list <- rain_files %>% map( ~ {
     set_names(c("dayOfMonth", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "dayOfMonthAgain")) %>%
     select(-dayOfMonth, -dayOfMonthAgain) %>% 
     t()
-  cbind(dates_col, totals_col)
+  as.data.frame(cbind(dates_col, totals_col))
   
 })
 
+## combine list of matrices into one single dataframe
+rain_data <- rain_data_list %>% bind_rows()
 
-## combine list of data frames into one single dataframe
-# rain_data <- rain_data_list %>% bind_rows(.id = "File")
+colnames(rain_data) <- c("date", "monthly_rain")
+rain_data <- rain_data %>% mutate(date = as.Date(date), monthly_rain = as.double(monthly_rain)) %>% 
+  mutate(
+    beginningOfWY = case_when(
+      month(date) > 9 ~ floor_date(date, unit = "year") + months(9),
+      TRUE ~ floor_date(date, unit = "year") - months(3) # gets the beginning of the water year for each date 
+    )
+  ) %>% 
+  mutate(beginningOfWY = as.Date(beginningOfWY)) %>% 
+  mutate(Water_Year = as.numeric(format(beginningOfWY, "%Y")) + 1)
 
-#extract monthly rain data from rain_data
+
+### ~~~ *** EDA PLOTS: COULD BE SEPARATED INTO ITS OWN FILE *** ~~~ ###
+
+yearly_rain_cm <- rain_data %>% 
+  group_by(Water_Year) %>% 
+  summarise(yearly_rain = sum(monthly_rain))
+
+rain_to_compare <- merge(yearly_rain_cm, muwo_rain, all = TRUE) %>% 
+  select(Water_Year, yearly_rain, TOTALS) %>% 
+  filter(Water_Year > 1998, Water_Year < 2024)
+  
+# muir woods rain is green, corte madera rain is blue
+ggplot(data = rain_to_compare, aes(x = Water_Year)) +
+        geom_line(aes(y = rain_to_compare$TOTALS), color = "darkgreen") + 
+        geom_line(aes(y = rain_to_compare$yearly_rain), color = "blue")
+  
+# TODO: calculate correlation coefficient between muir woods + corte madera rain
+
