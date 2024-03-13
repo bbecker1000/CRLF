@@ -2,6 +2,7 @@ library(tidyverse)
 library(purrr)
 library(readxl)
 library(lubridate)
+library(ggpubr)
 
 setwd(here::here("code"))
 
@@ -44,26 +45,25 @@ rain_data <- rain_data %>% mutate(date = as.Date(date), monthly_rain = as.double
 
 ### ~~~ *** EDA PLOTS: COULD BE SEPARATED INTO ITS OWN FILE *** ~~~ ###
 
-yearly_rain_cm <- rain_data %>% 
+yearly_rain_cm_table <- rain_data %>% 
   group_by(Water_Year) %>% 
-  summarise(yearly_rain = sum(monthly_rain))
+  summarise(yearly_rain_cortemadera = sum(monthly_rain))
 
-rain_to_compare <- merge(yearly_rain_cm, muwo_rain, all = TRUE) %>% 
-  select(Water_Year, yearly_rain, TOTALS) %>% 
-  filter(Water_Year > 1998, Water_Year < 2024)
+rain_to_compare <- merge(yearly_rain_cm_table, muwo_rain, all = TRUE) %>% 
+  select(Water_Year, yearly_rain_cortemadera, TOTALS) %>% 
+  filter(Water_Year > 1998, Water_Year < 2022)
   
-# muir woods rain is green, corte madera rain is blue
-ggplot(data = rain_to_compare, aes(x = Water_Year)) +
-        geom_line(aes(y = rain_to_compare$TOTALS), color = "darkgreen") + 
-        geom_line(aes(y = rain_to_compare$yearly_rain), color = "blue")
+colnames(rain_to_compare) <- c("Water_Year", "corte_madera", "muir_woods")
+
+rain_to_compare <- rain_to_compare %>% pivot_longer(cols = 2:3, names_to = "location", values_to = "rainfall")
+  
+# plot rainfall by location
+ggplot(data = rain_to_compare, aes(x = Water_Year, y = rainfall, color = location)) + geom_line()
   
 # TODO: calculate correlation coefficient between muir woods + corte madera rain
 
-rain_to_compare
 model_rain=lm(yearly_rain~TOTALS,data=rain_to_compare)
-summary
-
-library(ggpubr)
+summary(model_rain)
 
 ggscatter(rain_to_compare, x = "yearly_rain", y = "TOTALS",
           add = "reg.line",cor.coef=TRUE,coor.method="pearson",color = "orange")
