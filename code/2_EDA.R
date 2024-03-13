@@ -116,27 +116,13 @@ ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = mean_num)) +
   geom_point(alpha = 1/3) + facet_wrap(~LocationID)+
   labs(x = "Year", y = "mean new egg masses")
 
-#example: showing the number of survey for all sites in Redwood Creek watershed
+#example: showing the number of survey for all sites in Redwood Creek watershed in 2016
 data|>
-  select(Watershed,LocationID)|>
+  filter(Watershed=="Redwood Creek")|>
+  filter(BRDYEAR == "2016")|>
   group_by(Watershed,LocationID)|>
-  summarize(survey_count=n())|>
-  filter(Watershed=="Redwood Creek")
+  summarize(survey_count=n_distinct(EventGUID))
 
-new_egg|>
-  filter(LocationID == "RC07")|>
-  filter(BRDYEAR == "2016")
-
-
-ggplot(data = Redwood, mapping = aes(x = BRDYEAR, y = total_num)) +
-  geom_point(aes(size = count), alpha = 1/2) + facet_wrap(~LocationID) +
-  labs(x = "Year", y = "total new egg masses")
-
-
-egg_masses_number_by_count <-new_egg|>
-  group_by(NumberofEggMasses)|>
-  summarize(survey_count= n())
-egg_masses_number_by_count
 
 #number of survey for each number of new egg masses of all watersheds by year
 ggplot(data = new_egg, mapping = aes(x = NumberofEggMasses)) + 
