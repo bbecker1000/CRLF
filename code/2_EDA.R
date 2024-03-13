@@ -97,16 +97,16 @@ statistics <-new_egg|>
   group_by(BRDYEAR,Watershed,LocationID)|>
   summarize(count = n_distinct(EventGUID),
             mean_num = mean(NumberofEggMasses, na.rm = TRUE),
-            total_num =sum(NumberofEggMasses, na.rm = TRUE)
-  )
-statistics <- statistics |>
+            total_num =sum(NumberofEggMasses, na.rm = TRUE))
+statistics_rich <- statistics |>
   filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
                   Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
-                  Watershed == "Wilkins Gulch")
-statistics
+                  Watershed == "Wilkins Gulch") |>
+  filter(count > 1)
+statistics_rich$count <- as.factor(statistics_rich$count)
 
 #plot of total egg masses over time per site
-ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = total_num)) +
+ggplot(data = statistics_rich, mapping = aes(x = BRDYEAR, y = total_num)) +
   geom_point(aes(size = count), alpha = 1/2) + facet_wrap(~LocationID) +
   labs(x = "Year", y = "total new egg masses")
   
