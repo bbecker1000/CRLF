@@ -3,6 +3,7 @@ library(purrr)
 library(readxl)
 library(lubridate)
 library(ggpubr)
+library(here)
 
 setwd(here::here("code"))
 
@@ -40,29 +41,36 @@ rain_data <- rain_data %>% mutate(date = as.Date(date), monthly_rain = as.double
     )
   ) %>% 
   mutate(beginningOfWY = as.Date(beginningOfWY)) %>% 
-  mutate(Water_Year = as.numeric(format(beginningOfWY, "%Y")) + 1)
+  mutate(Water_Year = as.numeric(format(beginningOfWY, "%Y")) + 1) %>% 
+  select(-beginningOfWY)
 
 
 ### ~~~ *** EDA PLOTS: COULD BE SEPARATED INTO ITS OWN FILE *** ~~~ ###
 
+# for yearly rain
 yearly_rain_cm_table <- rain_data %>% 
   group_by(Water_Year) %>% 
   summarise(yearly_rain_cortemadera = sum(monthly_rain))
 
 rain_to_compare <- merge(yearly_rain_cm_table, muwo_rain, all = TRUE) %>% 
   select(Water_Year, yearly_rain_cortemadera, TOTALS) %>% 
+  rename(corte_madera = yearly_rain_cortemadera, muir_woods = TOTALS) %>% 
   filter(Water_Year > 1998, Water_Year < 2022)
   
-colnames(rain_to_compare) <- c("Water_Year", "corte_madera", "muir_woods")
-
 rain_to_compare <- rain_to_compare %>% pivot_longer(cols = 2:3, names_to = "location", values_to = "rainfall")
   
 # plot rainfall by location
 ggplot(data = rain_to_compare, aes(x = Water_Year, y = rainfall, color = location)) + geom_line()
   
-# TODO: calculate correlation coefficient between muir woods + corte madera rain
+# calculate correlation coefficient between muir woods + corte madera rain -- it is 0.039 according to this (yearly rain)
+correlation_coefficient <- cor(rain_to_compare$rainfall, as.numeric(factor(rain_to_compare$location)))
 
-model_rain=lm(yearly_rain~TOTALS,data=rain_to_compare)
+
+# monthly rain
+
+
+
+model_rain = lm (rainfall ~ location, data = rain_to_compare)
 summary(model_rain)
 
 ggscatter(rain_to_compare, x = "yearly_rain", y = "TOTALS",
