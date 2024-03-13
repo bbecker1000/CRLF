@@ -59,3 +59,11 @@ ggplot(data = rain_to_compare, aes(x = Water_Year)) +
   
 # TODO: calculate correlation coefficient between muir woods + corte madera rain
 
+rain_to_compare
+model_rain=lm(yearly_rain~TOTALS,data=rain_to_compare)
+summary
+
+library(ggpubr)
+
+ggscatter(rain_to_compare, x = "yearly_rain", y = "TOTALS",
+          add = "reg.line",cor.coef=TRUE,coor.method="pearson",color = "orange")
