@@ -8,7 +8,10 @@ library(here)
 setwd(here::here("code"))
 
 # reading in muir woods data
-muwo_rain <- read_excel(here::here("data", "muwo_rain.xlsx"))
+muwo_rain <- read_excel(here::here("data", "muwo_rain.xlsx")) %>% 
+  mutate(Oct = as.double(Oct), Nov = as.double(Nov), Dec = as.double(Dec), Jan = as.double(Jan), Feb = as.double(Feb), 
+         Mar = as.double(Mar), Apr = as.double(Apr), May = as.double(May), Jun = as.double(Jun), Jul = as.double(Jul), 
+         Aug = as.double(Aug), Sep = as.double(Sep))
 
 #reading in corte madera data
 marin_rain_folder <- here::here("data", "MMWD_RainfallRecords2")
@@ -30,10 +33,10 @@ rain_data_list <- rain_files %>% map( ~ {
 })
 
 ## combine list of matrices into one single dataframe
-rain_data <- rain_data_list %>% bind_rows()
+cm_rain_data <- rain_data_list %>% bind_rows()
 
-colnames(rain_data) <- c("date", "monthly_rain")
-rain_data <- rain_data %>% mutate(date = as.Date(date), monthly_rain = as.double(monthly_rain)) %>% 
+colnames(cm_rain_data) <- c("date", "monthly_rain")
+cm_rain_data <- cm_rain_data %>% mutate(date = as.Date(date), monthly_rain = as.double(monthly_rain)) %>% 
   mutate(
     beginningOfWY = case_when(
       month(date) > 9 ~ floor_date(date, unit = "year") + months(9),
@@ -42,13 +45,14 @@ rain_data <- rain_data %>% mutate(date = as.Date(date), monthly_rain = as.double
   ) %>% 
   mutate(beginningOfWY = as.Date(beginningOfWY)) %>% 
   mutate(Water_Year = as.numeric(format(beginningOfWY, "%Y")) + 1) %>% 
-  select(-beginningOfWY)
+  select(-beginningOfWY) %>% 
+  mutate(month = format(date, "%b"))
 
 
 ### ~~~ *** EDA PLOTS: COULD BE SEPARATED INTO ITS OWN FILE *** ~~~ ###
 
 # for yearly rain
-yearly_rain_cm_table <- rain_data %>% 
+yearly_rain_cm_table <- cm_rain_data %>% 
   group_by(Water_Year) %>% 
   summarise(yearly_rain_cortemadera = sum(monthly_rain))
 
@@ -67,7 +71,9 @@ correlation_coefficient <- cor(rain_to_compare$rainfall, as.numeric(factor(rain_
 
 
 # monthly rain
-
+muwo_monthly_rain <- muwo_rain %>%
+  select(-TOTALS) %>% 
+  pivot_longer(cols = 2:13, names_to = "month", values_to = "monthly_rain")
 
 
 model_rain = lm (rainfall ~ location, data = rain_to_compare)
