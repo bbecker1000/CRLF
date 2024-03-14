@@ -3,15 +3,10 @@ library(purrr)
 library(readxl)
 library(lubridate)
 library(ggpubr)
-library(here)
 
 setwd(here::here("code"))
 
 # reading in muir woods data
-muwo_rain <- read_excel(here::here("data", "muwo_rain.xlsx")) %>% 
-  mutate(Oct = as.double(Oct), Nov = as.double(Nov), Dec = as.double(Dec), Jan = as.double(Jan), Feb = as.double(Feb), 
-         Mar = as.double(Mar), Apr = as.double(Apr), May = as.double(May), Jun = as.double(Jun), Jul = as.double(Jul), 
-         Aug = as.double(Aug), Sep = as.double(Sep))
 
 #reading in corte madera data
 marin_rain_folder <- here::here("data", "MMWD_RainfallRecords2")
