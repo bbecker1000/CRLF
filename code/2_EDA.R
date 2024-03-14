@@ -20,6 +20,7 @@ eggTiming <- data %>%
   group_by(Watershed, LocationID, BRDYEAR) %>%
   summarize(firstEgg = min(dayOfWY), lastEgg = max(dayOfWY), breedingLength = max(dayOfWY) - min(dayOfWY))
 eggTiming
+
 ### ~~~ *** PLOTS *** ~~~ ###
 
 # plot total number of eggs per year by site (shortened x-axis for view)

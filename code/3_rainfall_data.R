@@ -56,15 +56,18 @@ yearly_rain_cm_table <- cm_rain_data %>%
   group_by(Water_Year) %>% 
   summarise(yearly_rain_cortemadera = sum(monthly_rain))
 
-rain_to_compare <- merge(yearly_rain_cm_table, muwo_rain, all = TRUE) %>% 
+rain_to_compare_wide <- merge(yearly_rain_cm_table, muwo_rain, all = TRUE) %>% 
   select(Water_Year, yearly_rain_cortemadera, TOTALS) %>% 
   rename(corte_madera = yearly_rain_cortemadera, muir_woods = TOTALS) %>% 
   filter(Water_Year > 1998, Water_Year < 2022)
   
-rain_to_compare <- rain_to_compare %>% pivot_longer(cols = 2:3, names_to = "location", values_to = "rainfall")
+rain_to_compare <- rain_to_compare_wide %>% pivot_longer(cols = 2:3, names_to = "location", values_to = "rainfall")
   
 # plot rainfall by location
 ggplot(data = rain_to_compare, aes(x = Water_Year, y = rainfall, color = location)) + geom_line()
+
+# plot muwo on x axis, cm on Y axis, geom_smooth
+ggplot(data = rain_to_compare_wide, aes(x = corte_madera, y=  muir_woods)) + geom_smooth(method = "lm") + geom_point()
   
 # calculate correlation coefficient between muir woods + corte madera rain -- it is 0.039 according to this (yearly rain)
 correlation_coefficient <- cor(rain_to_compare$rainfall, as.numeric(factor(rain_to_compare$location)))
@@ -79,5 +82,7 @@ muwo_monthly_rain <- muwo_rain %>%
 model_rain = lm (rainfall ~ location, data = rain_to_compare)
 summary(model_rain)
 
-ggscatter(rain_to_compare, x = "yearly_rain", y = "TOTALS",
-          add = "reg.line",cor.coef=TRUE,coor.method="pearson",color = "orange")
+ggscatter(rain_to_compare_wide, x = "corte_madera", y = "muir_woods",
+          add = "reg.line",cor.coef=TRUE,coor.method=" ",color = "orange")
+
+summary(lm(muir_woods ~ corte_madera, data = rain_to_compare_wide))
