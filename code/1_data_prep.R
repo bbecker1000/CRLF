@@ -29,12 +29,14 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
 
 ### ~~~ *** DATA FILTERING *** ~~~ ###
 
-# TODO: create filter to only include sites with at least 2 survey attempts in a year
-
 # filter to only include the 7 watersheds that Darren said had the most data
 filtered_data_watersheds <- data %>% 
   filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
-         Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
-         Watershed == "Wilkins Gulch")
+           Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
+           Watershed == "Wilkins Gulch")
+
+# TODO: create filter to only include sites with at least 2 survey attempts in a year
+filtered_data_threshold <- data %>% group_by(LocationID, BRDYEAR) %>% summarize(count = n_distinct(EventGUID)) 
+  
 
 #TODO: create filter that combines both of the above filters
