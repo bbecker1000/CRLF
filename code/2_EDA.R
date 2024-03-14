@@ -88,11 +88,14 @@ ggplot(data = new_egg, mapping = aes(x = BRDYEAR, y = sqrt(NumberofEggMasses)))+
 
 #stats for 1.number of survey, 2. mean number of new egg masses per survey, and 3.
 #total number of egg masses by watershed by site by year
+#mean number may be wrong (mean number of new egg masses per survey, i used old survey count)
 statistics <-new_egg|>
   group_by(BRDYEAR,Watershed,LocationID)|>
   summarize(count = n_distinct(EventGUID),
             mean_num = mean(NumberofEggMasses, na.rm = TRUE),
             total_num =sum(NumberofEggMasses, na.rm = TRUE))
+
+#above graph only looking at 7 target watersheds, and filter by having at least 2 new egg masses per year
 statistics_rich <- statistics |>
   filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
                   Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
