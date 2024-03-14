@@ -36,7 +36,10 @@ filtered_data_watersheds <- data %>%
            Watershed == "Wilkins Gulch")
 
 # TODO: create filter to only include sites with at least 2 survey attempts in a year
-filtered_data_threshold <- data %>% group_by(LocationID, BRDYEAR) %>% summarize(count = n_distinct(EventGUID)) 
+filtered_data_threshold <- data %>% 
+  group_by(LocationID, BRDYEAR) %>% 
+  summarize(survey_count_site_yr = n_distinct(EventGUID))
+  
   
 
 #TODO: create filter that combines both of the above filters
