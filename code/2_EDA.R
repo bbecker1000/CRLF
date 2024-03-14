@@ -143,3 +143,26 @@ ggplot(number_of_sites_within_watershed,aes(x=Watershed,y=distinct_count))+
 ggplot(data = data, aes(x = NumberofEggMasses)) + geom_histogram()
 
 n_distinct(raw_data$EventGUID)
+
+data$WaterSalinity
+non_na_Salinity <- na.omit(data$WaterSalinity)
+length(non_na_Salinity)
+sum(non_na_Salinity != 0)
+
+data |>
+  filter(data$WaterSalinity>0)|>
+  group_by(Watershed)|>
+  summarise(count=n())
+
+data$PercentOpenWater
+non_na_open <- na.omit(data$PercentOpenWater)
+length(non_na_open)
+sum(non_na_open != 0)
+
+data$AvgD
+non_na_depth <- na.omit(data$AvgD)
+length(non_na_depth)
+
+data$MaxD
+non_na_depth2 <- na.omit(data$MaxD)
+length(non_na_depth2)
