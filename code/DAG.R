@@ -11,6 +11,7 @@ DAG_FROG <- dagitty("dag{
   Rain -> Site -> FROG;
   Bullfrog -> FROG ;
   Salinity -> FROG ; 
+  Rain -> Salinity ;
   
   
   Year [exposure] ;
