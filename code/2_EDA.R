@@ -1,11 +1,5 @@
-#this is where all of our exploratory data analysis should go, as the 1_data_prep file should only be for data import, prep, and cleaning
-#hopefully this will help us make our code more readable and modular
-
-#I also think it would be nice to have comments for each of these graphs to let everyone know what they do (and so we can see what other
-#graphs need to be made!) this would just help the code be more readable and help with collaboration --Robin
-
-setwd(here::here("code"))
 source("1_data_prep.R")
+setwd(here::here("code"))
 
 ### ~~~ *** DATA MANIPULATION (tables that are helpful for creating many graphs) *** ~~~ ###
 

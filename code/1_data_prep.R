@@ -6,7 +6,9 @@ library(lubridate)
 setwd(here::here("code"))
 raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA.csv"))
 
-#removing unnecessary columns, making new column for total vegetation (to make sure it adds to 100), making data types more accurate/easier to use
+# removing unnecessary columns, making new column for total vegetation (to make sure it adds to 100), making data types more accurate/easier to use
+# the DATA variable that this pipe generates has all validated rows and has not been filtered
+# filtered data is denoted below this, and will always use DATA as a starting point
 data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -SEASON, -SvyLength, -SvyWidth, -tblEvents.Comments, 
                             -DateEntered, -EventID, -SpeciesID, -WaterDepth, -EggDepth, -Distance, -EggMassStageID, -AS_UTMSOURCE, -AS_UTMZONE, 
                             -GPS_ID, -tblEggCount_CRLF.Comments, -RangeofEggMasses, -AttachType) %>% 
@@ -25,5 +27,14 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
   ) %>%
   mutate(dayOfWY = as.numeric(Date - beginningWY)) # adds column for number of days after the beginning of the water year
 
-#checking type of each column
-str(data,na.rm = TRUE)
+### ~~~ *** DATA FILTERING *** ~~~ ###
+
+# TODO: create filter to only include sites with at least 2 survey attempts in a year
+
+# filter to only include the 7 watersheds that Darren said had the most data
+filtered_data_watersheds <- data %>% 
+  filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
+         Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
+         Watershed == "Wilkins Gulch")
+
+#TODO: create filter that combines both of the above filters

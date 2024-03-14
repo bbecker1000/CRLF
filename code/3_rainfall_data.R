@@ -3,10 +3,15 @@ library(purrr)
 library(readxl)
 library(lubridate)
 library(ggpubr)
+library(here)
 
 setwd(here::here("code"))
 
 # reading in muir woods data
+muwo_rain <- read_excel(here::here("data", "muwo_rain.xlsx")) %>% 
+  mutate(Oct = as.double(Oct), Nov = as.double(Nov), Dec = as.double(Dec), Jan = as.double(Jan), Feb = as.double(Feb), 
+         Mar = as.double(Mar), Apr = as.double(Apr), May = as.double(May), Jun = as.double(Jun), Jul = as.double(Jul), 
+         Aug = as.double(Aug), Sep = as.double(Sep))
 
 #reading in corte madera data
 marin_rain_folder <- here::here("data", "MMWD_RainfallRecords2")
@@ -63,17 +68,8 @@ ggplot(data = rain_to_compare, aes(x = Water_Year, y = rainfall, color = locatio
 
 # plot muwo on x axis, cm on Y axis, geom_smooth
 ggplot(data = rain_to_compare_wide, aes(x = corte_madera, y=  muir_woods)) + geom_smooth(method = "lm") + geom_point()
-  
-# calculate correlation coefficient between muir woods + corte madera rain -- it is 0.039 according to this (yearly rain)
-correlation_coefficient <- cor(rain_to_compare$rainfall, as.numeric(factor(rain_to_compare$location)))
 
-
-# monthly rain
-muwo_monthly_rain <- muwo_rain %>%
-  select(-TOTALS) %>% 
-  pivot_longer(cols = 2:13, names_to = "month", values_to = "monthly_rain")
-
-
+# calculating correlation coefficient
 model_rain = lm (rainfall ~ location, data = rain_to_compare)
 summary(model_rain)
 
@@ -81,3 +77,16 @@ ggscatter(rain_to_compare_wide, x = "corte_madera", y = "muir_woods",
           add = "reg.line",cor.coef=TRUE,coor.method=" ",color = "orange")
 
 summary(lm(muir_woods ~ corte_madera, data = rain_to_compare_wide))
+
+
+
+### monthly rain comparisons ###
+
+# making muir woods data tidy
+muwo_monthly_rain <- muwo_rain %>%
+  select(-TOTALS) %>% 
+  pivot_longer(cols = 2:13, names_to = "month", values_to = "monthly_rain")
+
+# TODO: combine with corte madera data
+
+#TODO: plot timing over individual years (then in EDA, can plot this with egg timing!)
