@@ -144,6 +144,7 @@ ggplot(data = data, aes(x = NumberofEggMasses)) + geom_histogram()
 
 n_distinct(raw_data$EventGUID)
 
+#counting the number of non-NA values for the environmental variables we are looking at 
 data$WaterSalinity
 non_na_Salinity <- na.omit(data$WaterSalinity)
 length(non_na_Salinity)
