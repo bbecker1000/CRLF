@@ -36,7 +36,7 @@ ggplot(data = eggTimingNoZero, aes(x = BRDYEAR, y = meanLength, color = Watershe
 #table of how many surveys were done each year (not relevant)
 survey_count_by_year <- data|>
   group_by(BRDYEAR)|>
-  summarize(survey_count=n_distinct(EventGUID)) #this is wrong
+  summarize(survey_count=n_distinct(EventGUID))
 survey_count_by_year
 
 #plots survey count by year across all watersheds/sites
