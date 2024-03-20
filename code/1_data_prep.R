@@ -46,4 +46,11 @@ filtered_data_threshold <- survey_count_filtered %>% full_join(data, by = c("Loc
 #TODO: create filter that combines both of the above filters
 
 ### ~~~ *** NUMBER OF OBSERVERS *** ~~~ ###
+# creates a column that takes the sum of non-NA values in Obsv1, Obsv2, Obsv3 columns
+total_observations <- data %>% group_by(EggCountGUID) %>% summarise(Obsv_Total = sum(!is.na(Obsv1),!is.na(Obsv2),!is.na(Obsv3)))
+
+data$obsv_total <- total_observations$Obsv_Total
+
+
+
 
