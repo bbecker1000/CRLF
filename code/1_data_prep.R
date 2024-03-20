@@ -44,3 +44,6 @@ filtered_data_threshold <- survey_count_filtered %>% full_join(data, by = c("Loc
   filter(survey_count_site_yr > 1)
 
 #TODO: create filter that combines both of the above filters
+
+### ~~~ *** NUMBER OF OBSERVERS *** ~~~ ###
+
