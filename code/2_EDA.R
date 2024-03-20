@@ -167,3 +167,9 @@ length(non_na_depth)
 data$MaxD
 non_na_depth2 <- na.omit(data$MaxD)
 length(non_na_depth2)
+
+# investigating number of observers (obsv_total)
+## histogram of obsv_total
+ggplot(data = data, aes(x = obsv_total)) + geom_histogram()
+
+
