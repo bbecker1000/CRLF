@@ -1,25 +1,34 @@
+library(ggplot2)
 source("1_data_prep.R")
 setwd(here::here("code"))
 
 ### ~~~ *** DATA MANIPULATION (tables that are helpful for creating many graphs) *** ~~~ ###
 
-# table for number of egg masses by year by distinct location (sites)
-totalEggsPerYear <- data %>%
-  group_by(Watershed, LocationID, BRDYEAR) %>%
-  summarize(totalEggs = sum(NumberofEggMasses))
-totalEggsPerYear
+#summary information of new egg masses count
+new_egg <-data[data$OldMass=="FALSE",]
+new_total_egg_masses <- new_egg$NumberofEggMasses
+#total number of egg masses is 4000
+sum(new_total_egg_masses, na.rm = TRUE)
+#maximum number of egg masses for a given survey is 25, while the mean is 0.84
+summary(new_total_egg_masses,na.rm = TRUE)
+new_egg$BRDYEAR <- factor(new_egg$BRDYEAR)
 
-# table to denote first and last egg mass detected per year, as well as length of breeding season
-eggTiming <- data %>%
-  filter(NumberofEggMasses > 0, OldMass == "FALSE") %>%
-  group_by(Watershed, LocationID, BRDYEAR) %>%
-  summarize(firstEgg = min(dayOfWY), lastEgg = max(dayOfWY), breedingLength = max(dayOfWY) - min(dayOfWY))
-eggTiming
+#stats for 1.number of survey, 2. mean number of new egg masses per survey, 3.
+#total number of egg masses per watershed per site per year, 4. first and last egg mass detected per year, 
+# 5. length of breeding season
+statistics <-new_egg|>
+  group_by(BRDYEAR,Watershed,LocationID)|>
+  summarize(survey_count = n_distinct(EventGUID),
+            mean_egg_num = (sum(NumberofEggMasses, na.rm = TRUE)/survey_count),
+            total_egg_num =sum(NumberofEggMasses, na.rm = TRUE),
+            firstEgg = min(dayOfWY), 
+            lastEgg = max(dayOfWY), 
+            breedingLength = max(dayOfWY) - min(dayOfWY)
+            )
 
 ### ~~~ *** PLOTS *** ~~~ ###
 
 # plot total number of eggs per year by site (shortened x-axis for view)
-library(ggplot2)
 number_of_eggs_per_year_by_site <-
   ggplot(data = totalEggsPerYear, aes(x = BRDYEAR, y = totalEggs)) +
   geom_point() + facet_wrap(totalEggsPerYear$LocationID) + 
@@ -66,24 +75,6 @@ ggplot(abundance_counts, aes(x = Watershed, y = BRDYEAR, fill = Count)) +
   labs(x = "Watershed", y = "BRDYEAR", title = "Abundance Heatmap") +  # Add axis labels and title
   theme_minimal()
 
-#summary information of new egg masses count
-new_egg <-data[data$OldMass=="FALSE",]
-new_total_egg_masses <- new_egg$NumberofEggMasses
-#total number of egg masses is 4000
-sum(new_total_egg_masses, na.rm = TRUE)
-#maximum number of egg masses for a given survey is 25, while the mean is 0.84
-summary(new_total_egg_masses,na.rm = TRUE)
-new_egg$BRDYEAR <- factor(new_egg$BRDYEAR)
-
-#stats for 1.number of survey, 2. mean number of new egg masses per survey, and 3.
-#total number of egg masses per watershed per site per year
-statistics <-new_egg|>
-  group_by(BRDYEAR,Watershed,LocationID)|>
-  summarize(count = n_distinct(EventGUID),
-            mean_num = (sum(NumberofEggMasses, na.rm = TRUE)/count),
-            total_num =sum(NumberofEggMasses, na.rm = TRUE),
-            mean_depth = mean(AvgD))
-statistics
 
 #plots of mean number of new egg masses per survey across all watersheds of all years
 ggplot(data = statistics)+ 
