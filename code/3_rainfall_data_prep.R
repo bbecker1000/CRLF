@@ -5,6 +5,8 @@ library(lubridate)
 library(ggpubr)
 library(here)
 
+# TODO: make this export rain table as CSV, can load it into data prep
+
 setwd(here::here("code"))
 
 # reading in half moon bay data
@@ -37,18 +39,18 @@ rain_data_list <- rain_files %>% map( ~ {
   dates_col <- read_xlsx(.x, sheet = sheet_name, range = cell_rows(3:4), col_types = "date") %>% 
     set_names(c("Jul", "Aug", "Sept", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun")) %>% 
     t()
-  totals_col <- read_xlsx(.x, sheet = sheet_name, range = cell_rows(36:37)) %>% 
+  days_table <- read_xlsx(.x, sheet = sheet_name, range = cell_rows(5:37)) %>% 
     set_names(c("dayOfMonth", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "dayOfMonthAgain")) %>%
     select(-dayOfMonth, -dayOfMonthAgain) %>% 
     t()
-  as.data.frame(cbind(dates_col, totals_col))
+  as.data.frame(cbind(dates_col, days_table))
   
 })
 
 ## CM: combine list of matrices into one single dataframe
 cm_rain <- rain_data_list %>% bind_rows()
 
-colnames(cm_rain) <- c("date", "monthly_rain")
+colnames(cm_rain) <- c("date", c(1:31), "monthly_rain")
 cm_rain <- cm_rain %>% mutate(date = as.Date(date), monthly_rain = as.double(monthly_rain)) %>% 
   mutate(
     beginningOfWY = case_when(
@@ -74,13 +76,19 @@ yearly_rain_cm_table <- cm_rain %>%
   group_by(Water_Year) %>% 
   summarise(yearly_rain_cortemadera = sum(monthly_rain))
 
-rain_to_compare_wide <- merge(yearly_rain_cm_table, muwo_rain, all = TRUE) %>% 
-  select(Water_Year, yearly_rain_cortemadera, TOTALS) %>% 
-  rename(corte_madera = yearly_rain_cortemadera, muir_woods = TOTALS) %>% 
+yearly_rain_hmb_table <- hmb_rain %>% 
+  group_by(Water_Year) %>% 
+  summarise(yearly_rain_halfmoonbay = sum(monthly_rain, na.rm = TRUE))
+
+rain_to_compare_wide <- merge(merge(yearly_rain_cm_table, muwo_rain, all = TRUE), yearly_rain_hmb_table, all = TRUE) %>% 
+  select(Water_Year, yearly_rain_cortemadera, TOTALS, yearly_rain_halfmoonbay) %>% 
+  rename(corte_madera = yearly_rain_cortemadera, muir_woods = TOTALS, half_moon_bay = yearly_rain_halfmoonbay) %>% 
   filter(Water_Year > 1998, Water_Year < 2022)
   
-rain_to_compare <- rain_to_compare_wide %>% pivot_longer(cols = 2:3, names_to = "location", values_to = "rainfall")
+rain_to_compare <- rain_to_compare_wide %>% pivot_longer(cols = 2:4, names_to = "location", values_to = "rainfall")
   
+rain_to_compare_after_missing_data <- rain_to_compare_wide %>% 
+  filter(Water_Year > 2003)
 
 ### ~~~ *** EDA PLOTS: COULD BE SEPARATED INTO ITS OWN FILE *** ~~~ ###
 
@@ -88,7 +96,7 @@ rain_to_compare <- rain_to_compare_wide %>% pivot_longer(cols = 2:3, names_to = 
 ggplot(data = rain_to_compare, aes(x = Water_Year, y = rainfall, color = location)) + geom_line()
 
 # plot muwo on x axis, cm on Y axis, geom_smooth
-ggplot(data = rain_to_compare_wide, aes(x = corte_madera, y=  muir_woods)) + geom_smooth(method = "lm") + geom_point()
+ggplot(data = rain_to_compare_wide, aes(x = corte_madera, y= half_moon_bay)) + geom_smooth(method = "lm") + geom_point()
 
 # calculating correlation coefficient
 model_rain = lm (rainfall ~ location, data = rain_to_compare)
@@ -97,7 +105,9 @@ summary(model_rain)
 ggscatter(rain_to_compare_wide, x = "corte_madera", y = "muir_woods",
           add = "reg.line",cor.coef=TRUE,coor.method=" ",color = "orange")
 
-summary(lm(muir_woods ~ corte_madera, data = rain_to_compare_wide))
+summary(lm(corte_madera ~ muir_woods, data = rain_to_compare_wide))
+
+summary(lm(half_moon_bay ~ corte_madera, data = rain_to_compare_after_missing_data))
 
 
 

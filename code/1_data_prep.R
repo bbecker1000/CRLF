@@ -2,7 +2,7 @@ library(tidyverse)
 library(dplyr)
 library(here)
 library(lubridate)
-source("3_rainfall_data.R")
+source("3_rainfall_data.R") #TODO: change this to read in csv from rainfall data
 
 setwd(here::here("code"))
 raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA.csv"))
@@ -28,29 +28,28 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
   ) %>%
   mutate(dayOfWY = as.numeric(Date - beginningWY)) # adds column for number of days after the beginning of the water year
 
-### ~~~ *** DATA FILTERING *** ~~~ ###
-
-# filter to only include the 7 watersheds that Darren said had the most data
-filtered_data_watersheds <- data %>% 
-  filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
-           Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
-           Watershed == "Wilkins Gulch")
-
-# TODO: create filter to only include sites with at least 2 survey attempts in a year
-survey_count_filtered <- data %>% 
-  group_by(LocationID, BRDYEAR) %>% 
-  summarize(survey_count_site_yr = n_distinct(EventGUID))
-  
-filtered_data_threshold <- survey_count_filtered %>% full_join(data, by = c("LocationID" = "LocationID", "BRDYEAR" = "BRDYEAR")) %>%
-  filter(survey_count_site_yr > 1)
-
-#TODO: create filter that combines both of the above filters
-
 ### ~~~ *** NUMBER OF OBSERVERS *** ~~~ ###
+
 # creates a column that takes the sum of non-NA values in Obsv1, Obsv2, Obsv3 columns
 total_observations <- data %>% group_by(EggCountGUID) %>% summarise(Obsv_Total = sum(!is.na(Obsv1),!is.na(Obsv2),!is.na(Obsv3)))
 
 data$obsv_total <- total_observations$Obsv_Total
+
+### ~~~ *** DATA FILTERING *** ~~~ ###
+
+# filter to only include the 7 watersheds that Darren said had the most data
+data <- data %>% 
+  filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
+           Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
+           Watershed == "Wilkins Gulch")
+
+survey_count_filtered <- data %>% 
+  group_by(LocationID, BRDYEAR) %>% 
+  summarize(survey_count_site_yr = n_distinct(EventGUID))
+  
+data <- survey_count_filtered %>% full_join(data, by = c("LocationID" = "LocationID", "BRDYEAR" = "BRDYEAR")) %>%
+  filter(survey_count_site_yr > 1)
+
 
 
 
