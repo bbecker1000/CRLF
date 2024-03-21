@@ -1,6 +1,6 @@
 library(ggplot2)
-source("1_data_prep.R")
 setwd(here::here("code"))
+source("1_data_prep.R")
 
 ### ~~~ *** DATA MANIPULATION (tables that are helpful for creating many graphs) *** ~~~ ###
 
@@ -29,18 +29,27 @@ statistics <-new_egg|>
 ### ~~~ *** PLOTS *** ~~~ ###
 
 # plot total number of eggs per year by site (shortened x-axis for view)
+## is this the true sum? double counts?
 number_of_eggs_per_year_by_site <-
   ggplot(data = totalEggsPerYear, aes(x = BRDYEAR, y = totalEggs)) +
   geom_point() + facet_wrap(totalEggsPerYear$LocationID) + 
   scale_x_continuous(breaks = seq(min(totalEggsPerYear$BRDYEAR), max(totalEggsPerYear$BRDYEAR), by = 6))
 number_of_eggs_per_year_by_site 
 
-# plot timing of egg laying by year and watershed
+# plot timing (days since october 1) of egg laying by year and watershed
 eggTimingNoZero <- eggTiming %>% filter(breedingLength > 0) %>% group_by(Watershed, BRDYEAR) %>% 
   summarize(meanFirstEgg = mean(firstEgg), meanLastEgg = mean(lastEgg), meanLength = mean(lastEgg) - mean(firstEgg))
+
+## TODO: change meanLength by SITE 
+
 ggplot(data = eggTimingNoZero, aes(x = BRDYEAR, y = meanLength, color = Watershed)) + geom_line()
 
-# correlate this^^ with rainfall! (TODO -- need to do rainfall data first)
+## timing graph improvements
+ggplot(data = eggTimingNoZero, aes(x = BRDYEAR, y = meanLength, color = Watershed)) + geom_point() + geom_smooth(method="lm", se=F)
+
+## TODO: correlate breeding season length with rainfall
+### start of season with rainfall
+
 
 #table of how many surveys were done each year (not relevant)
 survey_count_by_year <- data|>
@@ -54,7 +63,7 @@ ggplot(data = survey_count_by_year,aes(x=BRDYEAR,y=survey_count))+geom_point()+g
 #table of number of surveys at each watershed per year
 abundance_counts <- data %>%
   group_by(Watershed, BRDYEAR) %>%
-  summarize(Count = n_distinct(EventGUID))
+  summarize(survey_count = n_distinct(EventGUID))
 abundance_counts
 
 #Plot showing number of surveys per year
@@ -64,23 +73,30 @@ rich_watersheds <-abundance_counts|>
            Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
            Watershed == "Wilkins Gulch")
 
-rich_graph <- ggplot(rich_watersheds,aes(x=BRDYEAR,y=Count,colour=Watershed,group=Watershed))+geom_point()
+rich_graph <- ggplot(rich_watersheds,aes(x=BRDYEAR,y=survey_count,colour=Watershed,group=Watershed))+geom_point()
 rich_graph <- rich_graph+ facet_wrap(~Watershed)
 rich_graph
 
 #heatmap of survey count per year by watershed
-ggplot(abundance_counts, aes(x = Watershed, y = BRDYEAR, fill = Count)) +
+## edit x-axis labels
+ggplot(abundance_counts, aes(x = BRDYEAR, y = Watershed, fill = survey_count)) +
   geom_tile() +
-  scale_fill_gradient(low = "lightblue", high = "darkblue") +  # Adjust color gradient
-  labs(x = "Watershed", y = "BRDYEAR", title = "Abundance Heatmap") +  # Add axis labels and title
+  scale_fill_gradient(low = "lightgreen", high = "darkblue") +  # Adjust color gradient
+  labs(x = "Breeding Year", y = "Watershed", title = "Abundance Heatmap") +  # Add axis labels and title
   theme_minimal()
 
 
-#plots of mean number of new egg masses per survey across all watersheds of all years
+#plots of mean number of NEW egg masses per survey across all watersheds of all years
 ggplot(data = statistics)+ 
-  stat_summary(mapping = aes(x = BRDYEAR, y = mean_num),
+  stat_summary(mapping = aes(x = (as.integer(BRDYEAR)+1996), y = mean_egg_num),
                fun = "mean",geom = "point",color = "blue", size= 2)+
   labs(x = "Year", y = "mean number of new egg masses")
+
+## TODO: alternate plot of NEW egg masses = all observations with a TRENDLINE (=mean)
+### ALL watersheds
+
+### by watershed
+
 
 
 #above graph only looking at 7 target watersheds, and filter by having at least 2 new egg masses per year
@@ -88,16 +104,16 @@ statistics_rich <- statistics |>
   filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
                   Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
                   Watershed == "Wilkins Gulch") |>
-  filter(count > 1)
-statistics_rich$count <- as.factor(statistics_rich$count)
+  filter(survey_count > 1)
+statistics_rich$count <- as.factor(statistics_rich$survey_count)
 
 #plot of total egg masses over time per site at the 7 "rich"watersheds
-ggplot(data = statistics_rich, mapping = aes(x = BRDYEAR, y = total_num)) +
-  geom_point(aes(size = count), alpha = 1/2) + facet_wrap(~LocationID) +
+ggplot(data = statistics_rich, mapping = aes(x = BRDYEAR, y = total_egg_num)) +
+  geom_point(aes(size = survey_count), alpha = 1/2) + facet_wrap(~LocationID) +
   labs(x = "Year", y = "total new egg masses")
   
 #plot of mean egg masses over time per site at the 7 "rich"watersheds
-ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = mean_num)) +
+ggplot(data = statistics_rich, mapping = aes(x = BRDYEAR, y = mean_egg_num)) +
   geom_point(alpha = 1/3) + facet_wrap(~LocationID)+
   labs(x = "Year", y = "mean new egg masses")
 
@@ -105,13 +121,13 @@ ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = mean_num)) +
 data|>
   filter(Watershed=="Redwood Creek")|>
   filter(BRDYEAR == "2016")|>
-  group_by(Watershed,LocationID)|>.
+  group_by(Watershed,LocationID)|>
   summarize(survey_count=n_distinct(EventGUID))
 
 #number of survey count for each number of new egg masses of all watersheds by year
-ggplot(data = statistics, mapping = aes(x = total_num)) + 
-  geom_freqpoly(mapping = aes(colour = BRDYEAR),bins = 4)+
-  scale_x_continuous(limits = c(0, 200))
+ggplot(data = statistics, mapping = aes(x = total_egg_num)) + 
+  geom_freqpoly(mapping = aes(colour = BRDYEAR))+
+  scale_x_continuous(limits = c(0, 170))
 
 #table showing number of different sites for all watersheds
 number_of_sites_within_watershed <- data|>
