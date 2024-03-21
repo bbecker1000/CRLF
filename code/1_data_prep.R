@@ -2,6 +2,7 @@ library(tidyverse)
 library(dplyr)
 library(here)
 library(lubridate)
+source("3_rainfall_data.R")
 
 setwd(here::here("code"))
 raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA.csv"))

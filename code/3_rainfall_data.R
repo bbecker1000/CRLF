@@ -7,6 +7,20 @@ library(here)
 
 setwd(here::here("code"))
 
+# reading in half moon bay data
+hmb_rain <- read_csv(here::here("data", "hmb_rain.csv")) %>% 
+  select("DATE", "PRCP") %>% 
+  mutate(DATE = trimws(DATE), DATE = ym(DATE)) %>% 
+  rename(monthly_rain = PRCP, date = DATE) %>% 
+  mutate(
+    beginningWY = case_when(
+      month(date) > 9 ~ floor_date(date, unit = "year") + months(9),
+      TRUE ~ floor_date(date, unit = "year") - months(3) # gets the beginning of the water year for each date 
+    ),
+    Water_Year = as.numeric(year(beginningWY)) + 1) %>% 
+  select(-beginningWY) %>% 
+  mutate(month = format(date, "%b"))
+
 # reading in muir woods data
 muwo_rain <- read_excel(here::here("data", "muwo_rain.xlsx")) %>% 
   mutate(Oct = as.double(Oct), Nov = as.double(Nov), Dec = as.double(Dec), Jan = as.double(Jan), Feb = as.double(Feb), 
@@ -19,7 +33,6 @@ rain_files <- list.files(path = marin_rain_folder, pattern = "\\.xlsx$", full.na
 sheet_name = "CM"
 
 ## rain_data_list = list of matrices, each one = 1 year
-
 rain_data_list <- rain_files %>% map( ~ {
   dates_col <- read_xlsx(.x, sheet = sheet_name, range = cell_rows(3:4), col_types = "date") %>% 
     set_names(c("Jul", "Aug", "Sept", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun")) %>% 
@@ -32,11 +45,11 @@ rain_data_list <- rain_files %>% map( ~ {
   
 })
 
-## combine list of matrices into one single dataframe
-cm_rain_data <- rain_data_list %>% bind_rows()
+## CM: combine list of matrices into one single dataframe
+cm_rain <- rain_data_list %>% bind_rows()
 
-colnames(cm_rain_data) <- c("date", "monthly_rain")
-cm_rain_data <- cm_rain_data %>% mutate(date = as.Date(date), monthly_rain = as.double(monthly_rain)) %>% 
+colnames(cm_rain) <- c("date", "monthly_rain")
+cm_rain <- cm_rain %>% mutate(date = as.Date(date), monthly_rain = as.double(monthly_rain)) %>% 
   mutate(
     beginningOfWY = case_when(
       month(date) > 9 ~ floor_date(date, unit = "year") + months(9),
@@ -48,11 +61,16 @@ cm_rain_data <- cm_rain_data %>% mutate(date = as.Date(date), monthly_rain = as.
   select(-beginningOfWY) %>% 
   mutate(month = format(date, "%b"))
 
+# combine into one monthly rain table for all locations
+temp_monthly_rain_table <- inner_join(hmb_rain, cm_rain, by = "date", suffix = c(".hmb", ".cm")) %>% 
+  select(Water_Year.hmb, month.hmb, monthly_rain.hmb, monthly_rain.cm) %>% 
+  rename(Water_Year = Water_Year.hmb, month = month.hmb, hmb_monthly_rain = monthly_rain.hmb, cm_monthly_rain = monthly_rain.cm)
 
-### ~~~ *** EDA PLOTS: COULD BE SEPARATED INTO ITS OWN FILE *** ~~~ ###
+full_monthly_rain_table <- inner_join(temp_monthly_rain_table, muwo_monthly_rain, by = c("Water_Year", "month")) %>% 
+  rename(muwo_monthly_rain = monthly_rain)
 
-# for yearly rain
-yearly_rain_cm_table <- cm_rain_data %>% 
+# for yearly rain -- all locations
+yearly_rain_cm_table <- cm_rain %>% 
   group_by(Water_Year) %>% 
   summarise(yearly_rain_cortemadera = sum(monthly_rain))
 
@@ -63,6 +81,9 @@ rain_to_compare_wide <- merge(yearly_rain_cm_table, muwo_rain, all = TRUE) %>%
   
 rain_to_compare <- rain_to_compare_wide %>% pivot_longer(cols = 2:3, names_to = "location", values_to = "rainfall")
   
+
+### ~~~ *** EDA PLOTS: COULD BE SEPARATED INTO ITS OWN FILE *** ~~~ ###
+
 # plot rainfall by location
 ggplot(data = rain_to_compare, aes(x = Water_Year, y = rainfall, color = location)) + geom_line()
 
