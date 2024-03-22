@@ -67,13 +67,7 @@ abundance_counts <- data %>%
 abundance_counts
 
 #Plot showing number of surveys per year
-#only at watersheds with decent amount of data (7 watersheds in total) 
-rich_watersheds <-abundance_counts|>
-  filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
-           Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
-           Watershed == "Wilkins Gulch")
-
-rich_graph <- ggplot(rich_watersheds,aes(x=BRDYEAR,y=survey_count,colour=Watershed,group=Watershed))+geom_point()
+rich_graph <- ggplot(abundance_counts,aes(x=BRDYEAR,y=survey_count,colour=Watershed,group=Watershed))+geom_point()
 rich_graph <- rich_graph+ facet_wrap(~Watershed)
 rich_graph
 
@@ -87,8 +81,9 @@ ggplot(abundance_counts, aes(x = BRDYEAR, y = Watershed, fill = survey_count)) +
 
 
 #plots of mean number of NEW egg masses per survey across all watersheds of all years
+
 ggplot(data = statistics)+ 
-  stat_summary(mapping = aes(x = (as.integer(BRDYEAR)+1996), y = mean_egg_num),
+  stat_summary(mapping = aes(x = BRDYEAR, y = mean_egg_num),
                fun = "mean",geom = "point",color = "blue", size= 2)+
   labs(x = "Year", y = "mean number of new egg masses")
 
