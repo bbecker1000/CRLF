@@ -27,7 +27,8 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
       TRUE ~ floor_date(Date, unit = "year") - months(3) # gets the beginning of the water year for each date 
     )
   ) %>%
-  mutate(dayOfWY = as.numeric(Date - beginningWY)) # adds column for number of days after the beginning of the water year
+  mutate(dayOfWY = as.numeric(Date - beginningWY)) %>%  # adds column for number of days after the beginning of the water year
+  select(-Obsv1, -Obsv2, -Obsv3, -Validation)
 
 ### ~~~ *** NUMBER OF OBSERVERS *** ~~~ ###
 
@@ -37,9 +38,9 @@ total_observations <- data %>% group_by(EggCountGUID) %>% summarise(Obsv_Total =
 data$obsv_total <- total_observations$Obsv_Total
 
 ### ~~~ *** INCORPORATING RAINFALL DATA *** ~~~ ###
-data %>% mutate(
-  wy_rain <- rainfall_yearly$yearly_rain
-)
+# data %>% mutate(
+#   wy_rain <- rainfall_yearly$yearly_rain
+# )
 
 ### ~~~ *** DATA FILTERING *** ~~~ ###
 
