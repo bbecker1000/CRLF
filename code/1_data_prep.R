@@ -40,9 +40,9 @@ data$obsv_total <- total_observations$Obsv_Total
 data <- left_join(data, rainfall_yearly, join_by(BRDYEAR == Water_Year))
 
 # temp_daily_rain_table <- left_join(data, rainfall_daily, join_by())
-data %>% mutate(
-  wy_rain <- rainfall_yearly$yearly_rain
-)
+
+# make daily rain table have 365 columns, one for each day of WY
+# index of col = day of WY
 
 ### ~~~ *** DATA FILTERING *** ~~~ ###
 
