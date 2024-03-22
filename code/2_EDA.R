@@ -5,7 +5,10 @@ source("1_data_prep.R")
 ### ~~~ *** DATA MANIPULATION (tables that are helpful for creating many graphs) *** ~~~ ###
 
 #summary information of new egg masses count
-new_egg <-data[data$OldMass=="FALSE",]
+new_egg <- data|>
+  filter(OldMass == "FALSE")
+new_egg
+typeof(new_egg)
 new_total_egg_masses <- new_egg$NumberofEggMasses
 #total number of egg masses is 4000
 sum(new_total_egg_masses, na.rm = TRUE)
@@ -81,7 +84,6 @@ ggplot(abundance_counts, aes(x = BRDYEAR, y = Watershed, fill = survey_count)) +
 
 
 #plots of mean number of NEW egg masses per survey across all watersheds of all years
-
 ggplot(data = statistics)+ 
   stat_summary(mapping = aes(x = BRDYEAR, y = mean_egg_num),
                fun = "mean",geom = "point",color = "blue", size= 2)+
