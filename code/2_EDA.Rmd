@@ -14,6 +14,11 @@ setwd(here::here("code"))
 source("1_data_prep.R")
 ```
 
+# TODO
+
+-   data = filtered by 2+ surveys, from the main 7 watersheds
+-   *delete anything that is filtering/selecting 7 watersheds in this file*
+
 # data manipulation
 
 tables that are helpful for creating many graphs
@@ -172,13 +177,62 @@ ggplot(abundance_counts, aes(x = BRDYEAR, y = Watershed, fill = survey_count)) +
   theme_minimal()
 ```
 
-```{r example_survey_redwood}
-#example: number of survey for all sites in Redwood Creek watershed in 2016
-data|>
-  filter(Watershed=="Redwood Creek")|>
-  filter(BRDYEAR == "2016")|>
-  group_by(Watershed,LocationID)|>
-  summarize(survey_count=n_distinct(EventGUID))
+```{r survey_count_vs_new_egg}
+#number of survey count for each number of new egg masses of all watersheds by year
+ggplot(data = statistics, mapping = aes(x = total_egg_num)) + 
+  geom_freqpoly(mapping = aes(colour = BRDYEAR))+
+  scale_x_continuous(limits = c(0, 170))
+```
+
+##### observers
+
+```{r obsv_total}
+# investigating number of observers (obsv_total)
+## histogram of obsv_total
+ggplot(data = data, aes(x = obsv_total)) + geom_histogram()
+```
+
+#### environmental covariates
+
+```{r}
+#counting the number of non-NA values for the environmental variables we are looking at 
+## SALINITY
+data$WaterSalinity
+non_na_Salinity <- na.omit(data$WaterSalinity)
+length(non_na_Salinity)
+sum(non_na_Salinity != 0)
+#there are 1200 salinity data, only 92 of them is non-zero. 
+
+data |>
+  filter(data$WaterSalinity>0)|>
+  group_by(Watershed)|>
+  summarise(count=n())
+#the distribution of these 92 non-zero salinity data by watershed.
+
+## OPEN WATER
+data$PercentOpenWater
+non_na_open <- na.omit(data$PercentOpenWater)
+length(non_na_open)
+sum(non_na_open != 0)
+#there are 4937 non-zero open water data
+
+## DEPTH (AVG & MAX)
+data$AvgD
+non_na_depth <- na.omit(data$AvgD)
+length(non_na_depth)
+#there are 3404 non-zero open water data
+
+data$MaxD
+non_na_depth2 <- na.omit(data$MaxD)
+length(non_na_depth2)
+#there are 5091 non-zero open water data
+
+#correlation between average depth and max depth is significantly positive 
+regression_depth=lm(AvgD~MaxD,data=new_egg)
+summary(regression_depth)
+
+ggscatter(new_egg, x = "MaxD", y = "AvgD",
+          add = "reg.line",cor.coef=TRUE,coor.method=" ")
 ```
 
 ```{r}
