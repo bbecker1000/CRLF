@@ -75,12 +75,15 @@ number_of_eggs_per_year_by_site
 ggplot(data = statistics)+ 
   stat_summary(mapping = aes(x = (as.integer(BRDYEAR)+1996), y = mean_egg_num),
                fun = "mean",geom = "point",color = "blue", size= 2)+
-  labs(x = "Year", y = "mean number of new egg masses")
+  labs(x = "Year", y = "mean number of new egg masses per survey")
 
-## TODO: alternate plot of NEW egg masses = all observations (scatter plot) with a TRENDLINE (=mean)
+## TODO: alternate plot of NEW egg masses = all observations (scatter plot) with a TRENDLINE (= mean)
 ### ALL 7 watersheds
+ggplot(data = statistics, aes(x = BRDYEAR, y = mean_egg_num)) + geom_point() +
+  labs(x = "Year", y = "mean number of new egg masses") + geom_smooth(method="lm")+ggtitle("mean number of new egg masses per survey (all watersheds)")
 
 ### by watershed
+
 
 #plot of total egg masses over time per site
 ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = total_egg_num)) +
