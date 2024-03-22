@@ -234,3 +234,10 @@ summary(regression_depth)
 ggscatter(new_egg, x = "MaxD", y = "AvgD",
           add = "reg.line",cor.coef=TRUE,coor.method=" ")
 ```
+
+```{r}
+#number of survey count for each number of new egg masses of all watersheds by year
+ggplot(data = statistics, mapping = aes(x = total_egg_num)) + 
+  geom_freqpoly(mapping = aes(colour = BRDYEAR))+
+  scale_x_continuous(limits = c(0, 170))
+```

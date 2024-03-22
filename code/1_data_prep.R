@@ -37,6 +37,9 @@ total_observations <- data %>% group_by(EggCountGUID) %>% summarise(Obsv_Total =
 data$obsv_total <- total_observations$Obsv_Total
 
 ### ~~~ *** INCORPORATING RAINFALL DATA *** ~~~ ###
+data <- left_join(data, rainfall_yearly, join_by(BRDYEAR == Water_Year))
+
+# temp_daily_rain_table <- left_join(data, rainfall_daily, join_by())
 data %>% mutate(
   wy_rain <- rainfall_yearly$yearly_rain
 )
@@ -49,6 +52,7 @@ data <- data %>%
            Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
            Watershed == "Wilkins Gulch")
 
+# filters data to only include sites that had at least 2 surveys in a given year
 survey_count_filtered <- data %>% 
   group_by(LocationID, BRDYEAR) %>% 
   summarize(survey_count_site_yr = n_distinct(EventGUID))
