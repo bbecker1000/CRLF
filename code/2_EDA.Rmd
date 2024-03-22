@@ -120,6 +120,20 @@ ggplot(data = eggTimingNoZero, aes(x = BRDYEAR, y = meanLength, color = Watershe
 
 ```
 
+#### sites
+
+```{r num_sites}
+#table showing number of different sites for all watersheds
+number_of_sites_within_watershed <- data|>
+  group_by(Watershed)|>
+  summarize(distinct_count = n_distinct(LocationID))
+number_of_sites_within_watershed
+
+#plot of the above table.
+ggplot(number_of_sites_within_watershed,aes(x=Watershed,y=distinct_count))+
+  geom_point()
+```
+
 #### survey counts
 
 ```{r survey_counts}
@@ -165,4 +179,11 @@ data|>
   filter(BRDYEAR == "2016")|>
   group_by(Watershed,LocationID)|>
   summarize(survey_count=n_distinct(EventGUID))
+```
+
+```{r}
+#number of survey count for each number of new egg masses of all watersheds by year
+ggplot(data = statistics, mapping = aes(x = total_egg_num)) + 
+  geom_freqpoly(mapping = aes(colour = BRDYEAR))+
+  scale_x_continuous(limits = c(0, 170))
 ```
