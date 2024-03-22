@@ -78,29 +78,30 @@ ggplot(data = statistics)+
   labs(x = "Year", y = "mean number of new egg masses")
 
 ## TODO: alternate plot of NEW egg masses = all observations (scatter plot) with a TRENDLINE (=mean)
-### ALL watersheds
+### ALL 7 watersheds
 
 ### by watershed
-```
 
-```{r rich_watershed_new_eggs}
-#only looking at 7 target watersheds, and filter by having at least 2 new egg masses per year
-statistics_rich <- statistics |>
-  filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
-                  Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
-                  Watershed == "Wilkins Gulch") |>
-  filter(survey_count > 1)
-statistics_rich$count <- as.factor(statistics_rich$survey_count)
+#plot of total egg masses over time per site
+ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = total_egg_num)) +
+  geom_point(alpha = 1/3) + facet_wrap(~LocationID) +
+  labs(x = "Year", y = "total new egg masses")
 
-#plot of total egg masses over time per site at the 7 "rich"watersheds
-ggplot(data = statistics_rich, mapping = aes(x = BRDYEAR, y = total_egg_num)) +
-  geom_point(aes(size = survey_count), alpha = 1/2) + facet_wrap(~LocationID) +
+## above with size of point = survey_count
+ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = total_egg_num)) +
+  geom_point(aes(size = survey_count), alpha = 1/3) + facet_wrap(~LocationID) +
   labs(x = "Year", y = "total new egg masses")
   
-#plot of mean egg masses over time per site at the 7 "rich"watersheds
-ggplot(data = statistics_rich, mapping = aes(x = BRDYEAR, y = mean_egg_num)) +
+#plot of mean egg masses over time per site
+ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = mean_egg_num)) +
   geom_point(alpha = 1/3) + facet_wrap(~LocationID)+
   labs(x = "Year", y = "mean new egg masses")
+
+## above with size of point = survey_count
+ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = mean_egg_num)) +
+  geom_point(aes(size = survey_count), alpha = 1/3) + facet_wrap(~LocationID)+
+  labs(x = "Year", y = "mean new egg masses")
+
 ```
 
 #### breeding season
