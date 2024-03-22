@@ -1,0 +1,17 @@
+---
+title: "2_EDA"
+output: html_document
+date: "2024-03-22"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# set-up
+
+```{r}
+library(ggplot2)
+setwd(here::here("code"))
+source("1_data_prep.R")
+```
