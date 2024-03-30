@@ -48,6 +48,7 @@ data <- data %>%
            Watershed == "Wilkins Gulch")
 
 # filters data to only include sites that had at least 2 surveys in a given year
+# for some reason this is returning a grouped dataframe... I'm not sure if it should do that?
 survey_count_filtered <- data %>% 
   group_by(LocationID, BRDYEAR) %>% 
   summarize(survey_count_site_yr = n_distinct(EventGUID))
@@ -58,10 +59,22 @@ data <- survey_count_filtered %>% full_join(data, by = c("LocationID" = "Locatio
 ### ~~~ *** INCORPORATING RAINFALL DATA *** ~~~ ###
 data <- left_join(data, rainfall_yearly, join_by(BRDYEAR == Water_Year))
 
-temp_daily_rain_table <- left_join(data, rainfall_daily, by = c("BRDYEAR" = "Water_Year")) %>% 
+# small_test_data <- sample_n(data, 50, replace = FALSE)
+
+temp_daily_rain_table <- left_join(data, rainfall_daily, by = c("BRDYEAR" = "Water_Year")) %>%
   mutate(across(starts_with("day_"), as.numeric)) %>%
-  ungroup() %>% 
-  rowwise() %>% 
-  mutate(rain_to_date = sum(select(., starts_with("day_"))[, 1:(dayOfWY + 1)], na.rm = TRUE)) %>% 
-  ungroup()
+  ungroup() %>%
+  mutate(rain_to_date = rowSums(select(., starts_with("day_"))[, 1:(dayOfWY + 1)], na.rm = TRUE)) %>%
+  select(-starts_with("day_")) %>%
+  select(LocationID, BRDYEAR, beginningWY, dayOfWY, rain_to_date)
+
+# temp_daily_rain_table <- left_join(data, rainfall_daily, by = c("BRDYEAR" = "Water_Year")) %>%
+#   mutate(across(starts_with("day_"), as.numeric)) %>%
+#   ungroup() %>%
+#   rowwise() %>% 
+#   mutate(rain_to_date = select(., starts_with("day_")) %>% 
+#            c_across(1:get(dayOfWY))) %>%
+#   ungroup() %>% 
+#   select(-starts_with("day_")) %>%
+#   select(LocationID, BRDYEAR, beginningWY, dayOfWY, rain_to_date)
 
