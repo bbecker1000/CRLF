@@ -5,6 +5,7 @@ library(lubridate)
 library(reshape2)
 
 setwd(here::here("code"))
+
 raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA.csv"))
 rainfall_daily <- read_csv(here::here("data", "cm_daily_rain.csv"))
 rainfall_yearly <- read_csv(here::here("data", "cm_yearly_rain.csv"))
@@ -38,14 +39,6 @@ total_observations <- data %>% group_by(EggCountGUID) %>% summarise(Obsv_Total =
 
 data$obsv_total <- total_observations$Obsv_Total
 
-### ~~~ *** INCORPORATING RAINFALL DATA *** ~~~ ###
-data <- left_join(data, rainfall_yearly, join_by(BRDYEAR == Water_Year))
-
-# temp_daily_rain_table <- left_join(data, rainfall_daily, join_by())
-
-# make daily rain table have 365 columns, one for each day of WY
-# index of col = day of WY
-
 ### ~~~ *** DATA FILTERING *** ~~~ ###
 
 # filter to only include the 7 watersheds that Darren said had the most data
@@ -62,4 +55,13 @@ survey_count_filtered <- data %>%
 data <- survey_count_filtered %>% full_join(data, by = c("LocationID" = "LocationID", "BRDYEAR" = "BRDYEAR")) %>%
   filter(survey_count_site_yr > 1)
 
+### ~~~ *** INCORPORATING RAINFALL DATA *** ~~~ ###
+data <- left_join(data, rainfall_yearly, join_by(BRDYEAR == Water_Year))
+
+temp_daily_rain_table <- left_join(data, rainfall_daily, by = c("BRDYEAR" = "Water_Year")) %>% 
+  mutate(across(starts_with("day_"), as.numeric)) %>%
+  ungroup() %>% 
+  rowwise() %>% 
+  mutate(rain_to_date = sum(select(., starts_with("day_"))[, 1:(dayOfWY + 1)], na.rm = TRUE)) %>% 
+  ungroup()
 

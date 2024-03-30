@@ -57,9 +57,10 @@ cm_daily_rain <- cm_rain %>%
   mutate(dayOfWY = as.numeric(date - beginningWY)) %>% 
   select(-day, -beginningWY, -date) %>% 
   pivot_wider(names_from = dayOfWY, values_from = daily_rain, values_fn = max) %>% 
-              # values_fn is there because sometimes days that do not exist (e.g. Feb 31st) are inputted as 0 instead of NA on the spreadsheets >:(
-              # by taking the max, we will ignore those zeroes
-  select(Water_Year, order(as.numeric(colnames(.))))
+  # values_fn is there because sometimes days that do not exist (e.g. Feb 31st) are inputted as 0 instead of NA on the spreadsheets >:(
+  # by taking the max, we will ignore those zeroes
+  select(Water_Year, order(as.numeric(colnames(.)))) %>% 
+  rename_with(~ paste0("day_", .), -1)
 
 # for yearly rain
 cm_yearly_rain <- cm_rain %>% 

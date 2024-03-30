@@ -7,7 +7,7 @@ library(here)
 library(lubridate)
 library(readxl)
 
-setwd(here::here("code"))
+setwd(here::here("CRLF", "code"))
 
 # reading in corte madera data
 cm_rain<- read_csv(here::here("data", "cm_yearly_rain.csv"))
@@ -38,8 +38,9 @@ muwo_rain <- read_excel(here::here("data", "muwo_rain.xlsx")) %>%
 # for yearly rain -- all locations
 
 rain_to_compare_wide <- cm_rain %>% 
-  inner_join(muwo_rain, by = c("date", "Water_Year"), suffix = c("_cm", "_muwo")) %>% 
-  left_join(hmb_rain, by = c("date", "Water_Year"), suffix = c("", "_hmb"))
+  left_join(muwo_rain, by = c("Water_Year"), suffix = c("_cm", "_muwo")) %>% 
+  left_join(hmb_rain, by = c("Water_Year"), suffix = c("", "_hmb")) %>% 
+  rename(half_moon_bay = yearly_rain, corte_madera = yearly_rain_cm, muir_woods = yearly_rain_muwo)
 
 # rain_to_compare_wide <- merge(merge(cm_rain, muwo_rain, all = TRUE), hmb_rain, all = TRUE) %>% 
 #   select(Water_Year, yearly_rain, TOTALS, yearly_rain) %>% 
@@ -54,7 +55,10 @@ rain_to_compare_after_missing_data <- rain_to_compare_wide %>%
 # plot rainfall by location
 ggplot(data = rain_to_compare, aes(x = Water_Year, y = rainfall, color = location)) + geom_line()
 
-# plot muwo on x axis, cm on Y axis, geom_smooth
+# plot corte madera on x axis, muir woods on y axis, geom_smooth
+ggplot(data = rain_to_compare_wide, aes(x = corte_madera, y= muir_woods)) + geom_smooth(method = "lm") + geom_point()
+
+# plot corte madera on x axis, half moon bay on Y axis, geom_smooth
 ggplot(data = rain_to_compare_wide, aes(x = corte_madera, y= half_moon_bay)) + geom_smooth(method = "lm") + geom_point()
 
 # calculating correlation coefficient
@@ -64,19 +68,6 @@ summary(model_rain)
 ggscatter(rain_to_compare_wide, x = "corte_madera", y = "muir_woods",
           add = "reg.line",cor.coef=TRUE,coor.method=" ",color = "orange")
 
-summary(lm(corte_madera ~ muir_woods, data = rain_to_compare_wide))
+summary(lm(corte_madera ~ muir_woods, data = rain_to_compare_after_missing_data))
 
 summary(lm(half_moon_bay ~ corte_madera, data = rain_to_compare_after_missing_data))
-
-
-
-### monthly rain comparisons ###
-
-# making muir woods data tidy
-muwo_monthly_rain <- muwo_rain %>%
-  select(-TOTALS) %>% 
-  pivot_longer(cols = 2:13, names_to = "month", values_to = "monthly_rain")
-
-# TODO: combine with corte madera data
-
-#TODO: plot timing over individual years (then in EDA, can plot this with egg timing!)
