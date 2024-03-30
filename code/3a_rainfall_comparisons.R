@@ -1,9 +1,16 @@
-# rainfall correlations, etc
 # rainfall calculations that are helpful for EDA but not part of data prep or analysis
+# main goal is to chow high correlations between corte madera data and muir woods/half moon bay data
 
-### *** ~~~ THIS CODE WILL NOT WORK OR RUN AT ALL ~~~ *** ###
-# that's ok, and by design (for now). the goal is to get 3_rainfall_data_prep.R to output
-# a CSV file that can be used for EDA here
+library(tidyverse)
+library(dplyr)
+library(here)
+library(lubridate)
+library(readxl)
+
+setwd(here::here("code"))
+
+# reading in corte madera data
+cm_rain<- read_csv(here::here("data", "cm_yearly_rain.csv"))
 
 # reading in half moon bay data
 hmb_rain <- read_csv(here::here("data", "hmb_rain.csv")) %>% 
@@ -17,35 +24,27 @@ hmb_rain <- read_csv(here::here("data", "hmb_rain.csv")) %>%
     ),
     Water_Year = as.numeric(year(beginningWY)) + 1) %>% 
   select(-beginningWY) %>% 
-  mutate(month = format(date, "%b"))
+  mutate(month = format(date, "%b")) %>% 
+  group_by(Water_Year) %>% 
+  summarise(yearly_rain = sum(monthly_rain))
 
 # reading in muir woods data
 muwo_rain <- read_excel(here::here("data", "muwo_rain.xlsx")) %>% 
   mutate(Oct = as.double(Oct), Nov = as.double(Nov), Dec = as.double(Dec), Jan = as.double(Jan), Feb = as.double(Feb), 
          Mar = as.double(Mar), Apr = as.double(Apr), May = as.double(May), Jun = as.double(Jun), Jul = as.double(Jul), 
-         Aug = as.double(Aug), Sep = as.double(Sep))
-
-# combine into one monthly rain table for all locations
-temp_monthly_rain_table <- inner_join(hmb_rain, cm_rain, by = "date", suffix = c(".hmb", ".cm")) %>% 
-  select(Water_Year.hmb, month.hmb, monthly_rain.hmb, monthly_rain.cm) %>% 
-  rename(Water_Year = Water_Year.hmb, month = month.hmb, hmb_monthly_rain = monthly_rain.hmb, cm_monthly_rain = monthly_rain.cm)
-
-full_monthly_rain_table <- inner_join(temp_monthly_rain_table, muwo_monthly_rain, by = c("Water_Year", "month")) %>% 
-  rename(muwo_monthly_rain = monthly_rain)
+         Aug = as.double(Aug), Sep = as.double(Sep), yearly_rain = TOTALS) %>% 
+  select(Water_Year, yearly_rain)
 
 # for yearly rain -- all locations
-yearly_rain_cm_table <- cm_rain %>% 
-  group_by(Water_Year) %>% 
-  summarise(yearly_rain_cortemadera = sum(monthly_rain))
 
-yearly_rain_hmb_table <- hmb_rain %>% 
-  group_by(Water_Year) %>% 
-  summarise(yearly_rain_halfmoonbay = sum(monthly_rain, na.rm = TRUE))
+rain_to_compare_wide <- cm_rain %>% 
+  inner_join(muwo_rain, by = c("date", "Water_Year"), suffix = c("_cm", "_muwo")) %>% 
+  left_join(hmb_rain, by = c("date", "Water_Year"), suffix = c("", "_hmb"))
 
-rain_to_compare_wide <- merge(merge(yearly_rain_cm_table, muwo_rain, all = TRUE), yearly_rain_hmb_table, all = TRUE) %>% 
-  select(Water_Year, yearly_rain_cortemadera, TOTALS, yearly_rain_halfmoonbay) %>% 
-  rename(corte_madera = yearly_rain_cortemadera, muir_woods = TOTALS, half_moon_bay = yearly_rain_halfmoonbay) %>% 
-  filter(Water_Year > 1998, Water_Year < 2022)
+# rain_to_compare_wide <- merge(merge(cm_rain, muwo_rain, all = TRUE), hmb_rain, all = TRUE) %>% 
+#   select(Water_Year, yearly_rain, TOTALS, yearly_rain) %>% 
+#   rename(corte_madera = yearly_rain_cortemadera, muir_woods = TOTALS, half_moon_bay = yearly_rain_halfmoonbay) %>% 
+#   filter(Water_Year > 1998, Water_Year < 2022)
 
 rain_to_compare <- rain_to_compare_wide %>% pivot_longer(cols = 2:4, names_to = "location", values_to = "rainfall")
 

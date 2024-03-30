@@ -2,6 +2,7 @@ library(tidyverse)
 library(dplyr)
 library(here)
 library(lubridate)
+library(reshape2)
 
 setwd(here::here("code"))
 raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA.csv"))
@@ -25,7 +26,8 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
     beginningWY = case_when(
       month(Date) > 9 ~ floor_date(Date, unit = "year") + months(9),
       TRUE ~ floor_date(Date, unit = "year") - months(3) # gets the beginning of the water year for each date 
-    )
+    ) # might be relevant to add that day of water year is zero-indexed, so October 1st is the 0th day of the water year. 
+      # I think this makes the most sense, as computers like zero-indexed things, but humans often don't so we can reconsider if y'all want
   ) %>%
   mutate(dayOfWY = as.numeric(Date - beginningWY)) # adds column for number of days after the beginning of the water year
 
