@@ -61,6 +61,3 @@ data <- survey_count_filtered %>% full_join(data, by = c("LocationID" = "Locatio
   filter(survey_count_site_yr > 1)
 
 
-
-
-

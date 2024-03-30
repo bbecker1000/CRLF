@@ -51,8 +51,7 @@ statistics <-new_egg|>
             total_egg_num =sum(NumberofEggMasses, na.rm = TRUE),
             firstEgg = min(dayOfWY), 
             lastEgg = max(dayOfWY), 
-            breedingLength = max(dayOfWY) - min(dayOfWY)
-            )
+            breedingLength = max(dayOfWY) - min(dayOfWY))
 ```
 
 # plots
@@ -112,21 +111,22 @@ ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = mean_egg_num)) +
 
 ```{r breeding_length}
 # timing (days since october 1) of egg laying by year and watershed
-eggTimingNoZero <- eggTiming %>% 
-  filter(breedingLength > 0) %>% 
-  group_by(Watershed, BRDYEAR) %>% 
-  summarize(meanFirstEgg = mean(firstEgg), meanLastEgg = mean(lastEgg), meanLength = mean(lastEgg) - mean(firstEgg))
 
-## TODO: change meanLength by SITE 
+eggTiming <- data %>%
+  filter(NumberofEggMasses > 0, OldMass == "FALSE") %>%
+  group_by(Watershed, LocationID, BRDYEAR) %>%
+  summarize(firstEgg = min(dayOfWY), 
+            lastEgg = max(dayOfWY), 
+            breedingLength = max(dayOfWY) - min(dayOfWY))
+eggTiming
 
 ## plot timing v.1
-ggplot(data = eggTimingNoZero, aes(x = BRDYEAR, y = meanLength, color = Watershed)) + geom_line()
+ggplot(data = eggTiming, aes(x = BRDYEAR, y = breedingLength, color = Watershed)) + geom_line()
 
 ## improved plot timing v.2
-ggplot(data = eggTimingNoZero, aes(x = BRDYEAR, y = meanLength, color = Watershed)) + geom_point() + geom_smooth(method="lm", se=F)
+ggplot(data = eggTiming, aes(x = BRDYEAR, y = breedingLength, color = Watershed)) + geom_point() + geom_smooth(method="loess", se=F)
 
 ## TODO: correlate breeding season length with rainfall
-### start of season with rainfall
 
 ```
 
