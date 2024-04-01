@@ -6,6 +6,7 @@ date: "2024-03-22"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
 ```
 
 ```{r}
@@ -16,7 +17,7 @@ source("1_data_prep.R")
 
 # TODO
 
--   data = filtered by 2+ surveys, from the main 7 watersheds
+-   data = filtered by 2+ surveys, from the main 7 watersheds, only new egg masses
 -   *delete anything that is filtering/selecting 7 watersheds in this file*
 
 # data manipulation
@@ -24,15 +25,13 @@ source("1_data_prep.R")
 tables that are helpful for creating many graphs
 
 ```{r summary_new_eggs}
-#summary information of new egg masses count
-new_egg <-data[data$OldMass=="FALSE",]
-new_total_egg_masses <- new_egg$NumberofEggMasses
+#summary information of egg masses count
 
-#total number of egg masses is 4000
-sum(new_total_egg_masses, na.rm = TRUE)
+#total number of egg masses is 3939
+sum(data$NumberofEggMasses, na.rm = TRUE)
 
-#maximum number of egg masses for a given survey is 25, while the mean is 0.84
-summary(new_total_egg_masses,na.rm = TRUE)
+#maximum number of egg masses for a given survey is 25, while the mean is 0.857
+summary(data$NumberofEggMasses,na.rm = TRUE)
 ```
 
 #### dataframe: "statistics"
@@ -44,7 +43,7 @@ summary(new_total_egg_masses,na.rm = TRUE)
 5.  length of breeding season
 
 ```{r statistics_dataframe}
-statistics <-new_egg|>
+statistics <-data|>
   group_by(BRDYEAR,Watershed,LocationID)|>
   summarize(survey_count = n_distinct(EventGUID),
             mean_egg_num = (sum(NumberofEggMasses, na.rm = TRUE)/survey_count),
@@ -52,26 +51,17 @@ statistics <-new_egg|>
             firstEgg = min(dayOfWY), 
             lastEgg = max(dayOfWY), 
             breedingLength = max(dayOfWY) - min(dayOfWY))
+statistics
 ```
 
 # plots
 
 #### eggs
 
-```{r total_eggs}
-# plot total number of eggs per year by site (shortened x-axis for view)
-## is this the true sum? double counts?
-number_of_eggs_per_year_by_site <-
-  ggplot(data = totalEggsPerYear, aes(x = BRDYEAR, y = totalEggs)) +
-  geom_point() + facet_wrap(totalEggsPerYear$LocationID) + 
-  scale_x_continuous(breaks = seq(min(totalEggsPerYear$BRDYEAR), max(totalEggsPerYear$BRDYEAR), by = 6))
-number_of_eggs_per_year_by_site 
-```
-
 ```{r mean_NEW_eggs}
 #plots of mean number of NEW egg masses per survey
-ggplot(data = statistics)+ 
-  stat_summary(mapping = aes(x = BRDYEAR, y = mean_egg_num),
+ggplot(data = data)+ 
+  stat_summary(mapping = aes(x = BRDYEAR, y = NumberofEggMasses),
                fun = "mean",geom = "point",color = "blue", size= 2)+
   labs(x = "Year", y = "mean number of new egg masses per survey")
 
