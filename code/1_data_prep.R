@@ -17,6 +17,7 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
                             -DateEntered, -EventID, -SpeciesID, -WaterDepth, -EggDepth, -Distance, -EggMassStageID, -AS_UTMSOURCE, -AS_UTMZONE, 
                             -GPS_ID, -tblEggCount_CRLF.Comments, -RangeofEggMasses, -AttachType) %>% 
   filter(Validation == 'TRUE') %>%
+  filter(OldMass == "FALSE") %>%
   mutate(TotalVeg = PercentSubVeg + PercentEmergVeg + PercentOpenWater) %>%
   mutate(Date = strptime(Date, format = "%m/%d/%Y")) %>%
   mutate(Survey_MONTH = as.integer(format(Date, "%m"))) %>%
@@ -53,7 +54,10 @@ survey_count_filtered <- data %>%
   group_by(LocationID, BRDYEAR) %>% 
   summarize(survey_count_site_yr = n_distinct(EventGUID))
   
-data <- survey_count_filtered %>% full_join(data, by = c("LocationID" = "LocationID", "BRDYEAR" = "BRDYEAR")) %>%
+data <- survey_count_filtered %>%
+  full_join(data, by = c("LocationID" = "LocationID", "BRDYEAR" = "BRDYEAR")) 
+
+data <- data %>%
   filter(survey_count_site_yr > 1)
 
 ### ~~~ *** INCORPORATING RAINFALL DATA *** ~~~ ###
