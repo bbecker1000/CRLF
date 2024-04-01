@@ -63,7 +63,6 @@ data <- left_join(data, rainfall_yearly, join_by(BRDYEAR == Water_Year))
 
 temp_daily_rain_table <- left_join(data, rainfall_daily, by = c("BRDYEAR" = "Water_Year")) %>%
   mutate(across(starts_with("day_"), as.numeric)) %>%
-  ungroup() %>%
   mutate(rain_to_date = rowSums(select(., starts_with("day_"))[, 1:(dayOfWY + 1)], na.rm = TRUE)) %>%
   select(-starts_with("day_")) %>%
   select(LocationID, BRDYEAR, beginningWY, dayOfWY, rain_to_date)
