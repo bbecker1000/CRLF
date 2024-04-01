@@ -60,10 +60,13 @@ statistics
 
 ```{r mean_NEW_eggs}
 #plots of mean number of NEW egg masses per survey
+#this code has been updated. If anyone can help adding label info (the mean value) besides each point that would be great. Also should we only use data after 2010 and make a trend line?
 ggplot(data = data)+ 
   stat_summary(mapping = aes(x = BRDYEAR, y = NumberofEggMasses),
                fun = "mean",geom = "point",color = "blue", size= 2)+
   labs(x = "Year", y = "mean number of new egg masses per survey")
+
+
 
 ## TODO: alternate plot of NEW egg masses = all observations (scatter plot) with a TRENDLINE (= mean)
 ### ALL 7 watersheds
