@@ -65,11 +65,20 @@ data <- left_join(data, rainfall_yearly, join_by(BRDYEAR == Water_Year))
 
 # small_test_data <- sample_n(data, 50, replace = FALSE)
 
-temp_daily_rain_table <- left_join(data, rainfall_daily, by = c("BRDYEAR" = "Water_Year")) %>%
-  mutate(across(starts_with("day_"), as.numeric)) %>%
-  mutate(rain_to_date = rowSums(select(., starts_with("day_"))[, 1:(dayOfWY + 1)], na.rm = TRUE)) %>%
-  select(-starts_with("day_")) %>%
-  select(LocationID, BRDYEAR, beginningWY, dayOfWY, rain_to_date)
+# temp_daily_rain_table <- left_join(data, rainfall_daily, by = c("BRDYEAR" = "Water_Year")) %>%
+#   mutate(across(starts_with("day_"), as.numeric))
+# 
+# rain_to_date_col <- data.frame(matrix(nrow = nrow(temp_daily_rain_table), ncol = 1))
+# for (i in nrow(temp_daily_rain_table)) {
+#   dayOfWY <- temp_daily_rain_table$dayOfWY[i]
+#   print(dayOfWY)
+#   daysToSum <- select(temp_daily_rain_table[i , ], starts_with("day_"))[ , 1:(dayOfWY + 1)]
+#   rain_to_date_col[1, i] <- sum(daysToSum)
+# }
+# 
+#   mutate(rain_to_date = rowSums(select(., starts_with("day_")), na.rm = TRUE)) %>%
+#   select(-starts_with("day_")) %>%
+#   select(LocationID, BRDYEAR, beginningWY, dayOfWY, rain_to_date)
 
 # temp_daily_rain_table <- left_join(data, rainfall_daily, by = c("BRDYEAR" = "Water_Year")) %>%
 #   mutate(across(starts_with("day_"), as.numeric)) %>%
