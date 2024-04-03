@@ -31,7 +31,9 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
     ) # might be relevant to add that day of water year is zero-indexed, so October 1st is the 0th day of the water year. 
       # I think this makes the most sense, as computers like zero-indexed things, but humans often don't so we can reconsider if y'all want
   ) %>%
-  mutate(dayOfWY = as.numeric(Date - beginningWY)) # adds column for number of days after the beginning of the water year
+  mutate(dayOfWY = as.numeric(Date - beginningWY)) %>% # adds column for number of days after the beginning of the water year
+  mutate(WaterSalinity = if_else(!(LocationID == "LS01" | LocationID == "LS02" | LocationID == "LS03" | LocationID == "LS04" | LocationID == "LS11" | LocationID == "RC20"
+                                 | LocationID == "RC21" | LocationID == "RL04" | LocationID == "RL05" | LocationID == "TV06" | LocationID == "WG01") & is.na(WaterSalinity), 0, WaterSalinity))
 
 ### ~~~ *** NUMBER OF OBSERVERS *** ~~~ ###
 
@@ -63,30 +65,27 @@ data <- data %>%
 ### ~~~ *** INCORPORATING RAINFALL DATA *** ~~~ ###
 data <- left_join(data, rainfall_yearly, join_by(BRDYEAR == Water_Year))
 
-# small_test_data <- sample_n(data, 50, replace = FALSE)
+temp_daily_rain_table <- left_join(data, rainfall_daily, by = c("BRDYEAR" = "Water_Year")) %>%
+  mutate(across(starts_with("day_"), as.numeric))
 
-# temp_daily_rain_table <- left_join(data, rainfall_daily, by = c("BRDYEAR" = "Water_Year")) %>%
-#   mutate(across(starts_with("day_"), as.numeric))
-# 
-# rain_to_date_col <- data.frame(matrix(nrow = nrow(temp_daily_rain_table), ncol = 1))
-# for (i in nrow(temp_daily_rain_table)) {
-#   dayOfWY <- temp_daily_rain_table$dayOfWY[i]
-#   print(dayOfWY)
-#   daysToSum <- select(temp_daily_rain_table[i , ], starts_with("day_"))[ , 1:(dayOfWY + 1)]
-#   rain_to_date_col[1, i] <- sum(daysToSum)
-# }
-# 
-#   mutate(rain_to_date = rowSums(select(., starts_with("day_")), na.rm = TRUE)) %>%
-#   select(-starts_with("day_")) %>%
-#   select(LocationID, BRDYEAR, beginningWY, dayOfWY, rain_to_date)
+rain_to_date_col <- data.frame(matrix(nrow = nrow(temp_daily_rain_table), ncol = 1))
+for (i in 1:nrow(temp_daily_rain_table)) {
+  dayOfWY <- temp_daily_rain_table$dayOfWY[i]
+  daysToSum <- select(temp_daily_rain_table[i , ], starts_with("day_"))[ , 1:(dayOfWY + 1)]
+  rain_to_date_col[i, 1] <- sum(daysToSum)
+}
 
+colnames(rain_to_date_col) <- c("Rain_to_date")
+temp_daily_rain_table <- cbind(temp_daily_rain_table, rain_to_date_col) %>% select(-starts_with("day_"))
+
+### ~~~ *** RAINFALL CODE THAT DOESN'T WORK (but I'm keeping it for now in case there's a way to do this without a loop) *** ~~~ ###
 # temp_daily_rain_table <- left_join(data, rainfall_daily, by = c("BRDYEAR" = "Water_Year")) %>%
 #   mutate(across(starts_with("day_"), as.numeric)) %>%
 #   ungroup() %>%
-#   rowwise() %>% 
-#   mutate(rain_to_date = select(., starts_with("day_")) %>% 
-#            c_across(1:get(dayOfWY))) %>%
-#   ungroup() %>% 
-#   select(-starts_with("day_")) %>%
-#   select(LocationID, BRDYEAR, beginningWY, dayOfWY, rain_to_date)
+#   rowwise() %>%
+#   mutate(rain_to_date = select(., starts_with("day_")) %>%
+#           c_across(1:get(dayOfWY))) %>%
+# ungroup() %>%
+# select(-starts_with("day_")) %>%
+# select(LocationID, BRDYEAR, beginningWY, dayOfWY, rain_to_date)
 
