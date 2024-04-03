@@ -3,22 +3,23 @@ library(dplyr)
 library(here)
 library(lubridate)
 library(reshape2)
+library(readxl)
 
+# reading in data from spreadsheets
 setwd(here::here("code"))
-
 raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA.csv"))
 rainfall_daily <- read_csv(here::here("data", "cm_daily_rain.csv"))
 rainfall_yearly <- read_csv(here::here("data", "cm_yearly_rain.csv"))
+cover_data <- read_xlsx(here::here("data", "canopy_cover.xlsx"), sheet = "Data")
 
 # removing unnecessary columns, making new column for total vegetation (to make sure it adds to 100), making data types more accurate/easier to use
 # the DATA variable that this pipe generates has all validated rows and has not been filtered
 # filtered data is denoted below this, and uses DATA as a starting point
 data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -SEASON, -SvyLength, -SvyWidth, -tblEvents.Comments, 
                             -DateEntered, -EventID, -SpeciesID, -WaterDepth, -EggDepth, -Distance, -EggMassStageID, -AS_UTMSOURCE, -AS_UTMZONE, 
-                            -GPS_ID, -tblEggCount_CRLF.Comments, -RangeofEggMasses, -AttachType) %>% 
+                            -GPS_ID, -tblEggCount_CRLF.Comments, -RangeofEggMasses, -AttachType, -PercentSubVeg, -PercentEmergVeg, -PercentOpenWater) %>% 
   filter(Validation == 'TRUE') %>%
   filter(OldMass == "FALSE") %>%
-  mutate(TotalVeg = PercentSubVeg + PercentEmergVeg + PercentOpenWater) %>%
   mutate(Date = strptime(Date, format = "%m/%d/%Y")) %>%
   mutate(Survey_MONTH = as.integer(format(Date, "%m"))) %>%
   mutate(LocationID = as.factor(LocationID), Watershed = as.factor(Watershed), Date = as.Date(Date), Obsv1 = as.factor(Obsv1), Obsv2 = as.factor(Obsv2), Obsv3 = as.factor(Obsv3), 
