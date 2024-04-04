@@ -247,4 +247,3 @@ library(ggpubr)
 ggscatter(new_egg, x = "MaxD", y = "AvgD",
           add = "reg.line",cor.coef=TRUE,coor.method=" ")
 ```
-
