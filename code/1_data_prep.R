@@ -76,5 +76,5 @@ for (i in 1:nrow(temp_daily_rain_table)) {
 }
 
 colnames(rain_to_date_col) <- c("Rain_to_date")
-temp_daily_rain_table <- cbind(temp_daily_rain_table, rain_to_date_col) %>% select(-starts_with("day_"))
+data <- cbind(temp_daily_rain_table, rain_to_date_col) %>% select(-starts_with("day_"))
 
