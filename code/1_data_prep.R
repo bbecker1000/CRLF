@@ -31,16 +31,14 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
       # I think this makes the most sense, as computers like zero-indexed things, but humans often don't so we can reconsider if y'all want
   ) %>%
   mutate(dayOfWY = as.numeric(Date - beginningWY)) %>% # adds column for number of days after the beginning of the water year
-  mutate(WaterSalinity = if_else(!(LocationID == "LS01" | LocationID == "LS02" | LocationID == "LS03" | LocationID == "LS04" | LocationID == "LS11" | LocationID == "RC20"
-                                 | LocationID == "RC21" | LocationID == "RL04" | LocationID == "RL05" | LocationID == "TV06" | LocationID == "WG01") & is.na(WaterSalinity), 0, WaterSalinity))
-
-### ~~~ *** NUMBER OF OBSERVERS *** ~~~ ###
-
-# creates a column that takes the sum of non-NA values in Obsv1, Obsv2, Obsv3 columns
-total_observations <- data %>% group_by(EggCountGUID) %>% 
-  summarise(Obsv_Total = sum(!is.na(Obsv1),!is.na(Obsv2),!is.na(Obsv3)))
-
-data$obsv_total <- total_observations$Obsv_Total
+  mutate(CoastalSite = if_else((LocationID == "LS01" | LocationID == "LS02" | LocationID == "LS03" | LocationID == "LS04" | LocationID == "LS11" | LocationID == "RC20"
+                                   | LocationID == "RC21" | LocationID == "RL04" | LocationID == "RL05" | LocationID == "TV06" | LocationID == "WG01"), TRUE, FALSE)) %>% 
+  mutate(WaterSalinity = if_else(!CoastalSite & is.na(WaterSalinity), 0, WaterSalinity)) %>% 
+  group_by(EggCountGUID) %>% 
+  mutate(obsv_total = sum(!is.na(Obsv1), !is.na(Obsv2), !is.na(Obsv3))) %>% 
+  ungroup() %>% 
+  select(-Obsv1, -Obsv2, -Obsv3, -OldMass) %>% 
+  left_join(., rainfall_yearly, join_by(BRDYEAR == Water_Year))
 
 ### ~~~ *** DATA FILTERING *** ~~~ ###
 
@@ -62,8 +60,16 @@ data <- survey_count_filtered %>%
 data <- data %>%
   filter(survey_count_site_yr > 1)
 
-### ~~~ *** INCORPORATING RAINFALL DATA *** ~~~ ###
-data <- left_join(data, rainfall_yearly, join_by(BRDYEAR == Water_Year))
+### ~~~ *** BETWEEN YEAR DATA *** ~~~ ###
+
+between_year_data <- data %>% 
+  select(-dayOfWY, -Date, -Survey_MONTH, -Weather, -Wind, -AirTemp, -WaterTemp, -WaterVis, -Validation, -SurveyMethodID, -SalinityMethodID, -WaterFlowID, -MassID, -Stranded,
+         -UTMNY_EggObs, -UTMEX_EggObs, -HorizontalError_m, -Lat_EggObs, -Long_EggObs, -beginningWY, -GageHeight, -DominantSub, -DominantEmerg, -OtherVeg) %>% 
+  group_by(LocationID, BRDYEAR) %>% 
+  mutate(avg_max_depth_per_year = mean(MaxD),
+         max_max_depth_per_year = max(MaxD))
+
+### ~~~ *** WITHIN YEAR DATA *** ~~~ ###
 
 temp_daily_rain_table <- left_join(data, rainfall_daily, by = c("BRDYEAR" = "Water_Year")) %>%
   mutate(across(starts_with("day_"), as.numeric))
