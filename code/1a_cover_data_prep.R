@@ -22,6 +22,32 @@ cover_data <- cover_data %>%
 cover_data_first_and_last <- cover_data %>% 
   filter(first_date | last_date)
 
+# visualization purpose: open water and veg. proportion of site LS01 over time.
+cover_data_LS01 <- cover_data |>
+  filter(LocationID == "LS01")
+cover_data_LS01$GoogleEarthPhotoDate <- as.Date(cover_data_LS01$GoogleEarthPhotoDate)
+cover_data_LS01$year_numeric <- as.numeric(format(cover_data_LS01$GoogleEarthPhotoDate, "%Y"))
+cover_data_LS01 <- cover_data_LS01 |>
+  select(year_numeric,OpenWater_percent,SubmergentVegetation_percent,EmergentVegetation_percent)
+cover_data_LS01_long <- gather(cover_data_LS01, key = "component", value = "proportion", -year_numeric)
+cover_data_LS01_long
+ggplot(cover_data_LS01_long,aes(x=year_numeric,y=proportion,fill=component)) + geom_area() + 
+  scale_fill_manual(values = c("lightgreen", "steelblue", "darkgreen"))
+
+# visualization purpose: open water and veg. proportion of site RS07 over time.
+cover_data_RC07 <- cover_data |>
+  filter(LocationID == "RC07")
+cover_data_RC07$GoogleEarthPhotoDate <- as.Date(cover_data_RC07$GoogleEarthPhotoDate)
+cover_data_RC07$year_numeric <- as.numeric(format(cover_data_RC07$GoogleEarthPhotoDate, "%Y"))
+cover_data_RC07 <- cover_data_RC07 |>
+  select(year_numeric,OpenWater_percent,SubmergentVegetation_percent,EmergentVegetation_percent)
+cover_data_RC07_long <- gather(cover_data_RC07, key = "component", value = "proportion", -year_numeric)
+cover_data_RC07_long
+ggplot(cover_data_RC07_long,aes(x=year_numeric,y=proportion,fill=component)) + geom_area() + 
+  scale_fill_manual(values = c("lightgreen", "steelblue", "darkgreen"))
+
+
+
 # TODO: create a filtered cover data table with intermediates for only the sites that Ruby did for every year
 # to see if it's actually a linear relationship
 # sites are LS01, RC07, RC10, RL02, TV02
