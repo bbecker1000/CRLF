@@ -37,7 +37,8 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
 ### ~~~ *** NUMBER OF OBSERVERS *** ~~~ ###
 
 # creates a column that takes the sum of non-NA values in Obsv1, Obsv2, Obsv3 columns
-total_observations <- data %>% group_by(EggCountGUID) %>% summarise(Obsv_Total = sum(!is.na(Obsv1),!is.na(Obsv2),!is.na(Obsv3)))
+total_observations <- data %>% group_by(EggCountGUID) %>% 
+  summarise(Obsv_Total = sum(!is.na(Obsv1),!is.na(Obsv2),!is.na(Obsv3)))
 
 data$obsv_total <- total_observations$Obsv_Total
 
@@ -50,10 +51,10 @@ data <- data %>%
            Watershed == "Wilkins Gulch")
 
 # filters data to only include sites that had at least 2 surveys in a given year
-# for some reason this is returning a grouped dataframe... I'm not sure if it should do that?
 survey_count_filtered <- data %>% 
   group_by(LocationID, BRDYEAR) %>% 
-  summarize(survey_count_site_yr = n_distinct(EventGUID))
+  summarize(survey_count_site_yr = n_distinct(EventGUID), .groups = "drop") %>% 
+  ungroup()
   
 data <- survey_count_filtered %>%
   full_join(data, by = c("LocationID" = "LocationID", "BRDYEAR" = "BRDYEAR")) 
@@ -76,15 +77,4 @@ for (i in 1:nrow(temp_daily_rain_table)) {
 
 colnames(rain_to_date_col) <- c("Rain_to_date")
 temp_daily_rain_table <- cbind(temp_daily_rain_table, rain_to_date_col) %>% select(-starts_with("day_"))
-
-### ~~~ *** RAINFALL CODE THAT DOESN'T WORK (but I'm keeping it for now in case there's a way to do this without a loop) *** ~~~ ###
-# temp_daily_rain_table <- left_join(data, rainfall_daily, by = c("BRDYEAR" = "Water_Year")) %>%
-#   mutate(across(starts_with("day_"), as.numeric)) %>%
-#   ungroup() %>%
-#   rowwise() %>%
-#   mutate(rain_to_date = select(., starts_with("day_")) %>%
-#           c_across(1:get(dayOfWY))) %>%
-# ungroup() %>%
-# select(-starts_with("day_")) %>%
-# select(LocationID, BRDYEAR, beginningWY, dayOfWY, rain_to_date)
 
