@@ -67,13 +67,15 @@ data_after2009
 statistics_after2009 <- statistics |>
   filter(BRDYEAR>2009)
 statistics_after2009
+```
 
+```{r mean_NEW_eggs}
 #plots of mean number of NEW egg masses per survey
 #This code has been updated. If anyone can help adding label info (the mean value) besides each point that would be great. 
-ggplot(data = data_after2009)+ 
-  stat_summary(mapping = aes(x = BRDYEAR, y = NumberofEggMasses),
-               fun = "mean",geom = "point",color = "black", size= 2)+
-  geom_smooth(mapping = aes(x = BRDYEAR, y = NumberofEggMasses), method = "lm", color = "blue",se = FALSE)+
+ggplot(data = data_after2009,mapping = aes(x = BRDYEAR, y = NumberofEggMasses))+ 
+  geom_jitter(alpha=0.1,width = 0.1)+
+  stat_summary(fun = "mean",geom = "point",color = "orange", size= 2)+
+  geom_smooth(method = "lm", color = "blue",se = FALSE)+
   labs(x = "Year", y = "mean number of new egg masses per survey") 
 
 ### above plot facet by watershed
@@ -90,6 +92,9 @@ ggplot(data = data_after2009)+
   geom_smooth(mapping = aes(x = BRDYEAR, y = NumberofEggMasses), method = "lm", color = "blue",se = FALSE)+
   facet_wrap(~LocationID)+ scale_y_continuous(limits = c(0,1.5))
 
+```
+
+```{r mean_NEW_eggs}
 #plot of total egg masses over time per Watershed
 ggplot(data = data_after2009)+ 
   stat_summary(mapping = aes(x = BRDYEAR, y = NumberofEggMasses),
@@ -115,6 +120,9 @@ ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = mean_egg_num)) +
 
 
 ```
+
+
+
 
 #### breeding season
 
@@ -174,7 +182,9 @@ abundance_counts <- data %>%
   group_by(Watershed, BRDYEAR) %>%
   summarize(survey_count = n_distinct(EventGUID))
 abundance_counts
+```
 
+```{r survey_counts}
 # above table but containing only after year 2009. There is a few survey before that and all in one single year in Watershed: redwood creek.
 abundance_counts_after2009 <- data_after2009 %>%
   group_by(Watershed, BRDYEAR) %>%
@@ -189,7 +199,9 @@ survey_graph
 survey_graph_after2009 <- ggplot(abundance_counts_after2009,aes(x=BRDYEAR,y=survey_count,colour=Watershed))+geom_point()+ facet_wrap(~Watershed)
 survey_graph_after2009
 
+```
 
+```{r survey_counts}
 #heatmap of survey count per year by watershed
 ggplot(abundance_counts, aes(x = BRDYEAR, y = Watershed, fill = survey_count)) +
   geom_tile() +
@@ -247,4 +259,3 @@ library(ggpubr)
 ggscatter(new_egg, x = "MaxD", y = "AvgD",
           add = "reg.line",cor.coef=TRUE,coor.method=" ")
 ```
-
