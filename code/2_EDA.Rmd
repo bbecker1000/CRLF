@@ -115,9 +115,6 @@ ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = total_egg_num)) +
   
 ```
 
-
-
-
 #### breeding season
 
 ```{r breeding_length}

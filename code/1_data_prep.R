@@ -67,7 +67,9 @@ between_year_data <- data %>%
          -UTMNY_EggObs, -UTMEX_EggObs, -HorizontalError_m, -Lat_EggObs, -Long_EggObs, -beginningWY, -GageHeight, -DominantSub, -DominantEmerg, -OtherVeg) %>% 
   group_by(LocationID, BRDYEAR) %>% 
   mutate(avg_max_depth_per_year = mean(MaxD),
-         max_max_depth_per_year = max(MaxD))
+         max_max_depth_per_year = max(MaxD),
+         avg_salinity_per_year = mean(WaterSalinity, na.rm = TRUE),
+         max_salinity_per_year = ifelse(all(is.na(WaterSalinity)), NA, max(WaterSalinity, na.rm = TRUE)))
 
 ### ~~~ *** WITHIN YEAR DATA *** ~~~ ###
 
@@ -82,5 +84,7 @@ for (i in 1:nrow(temp_daily_rain_table)) {
 }
 
 colnames(rain_to_date_col) <- c("Rain_to_date")
-data <- cbind(temp_daily_rain_table, rain_to_date_col) %>% select(-starts_with("day_"))
+within_year_data <- cbind(temp_daily_rain_table, rain_to_date_col) %>% select(-starts_with("day_")) %>% 
+  select(-Weather, -Wind, -AirTemp, -WaterTemp, -WaterVis, -Validation, -SurveyMethodID, -SalinityMethodID, -WaterFlowID, -MassID, -Stranded,
+         -UTMNY_EggObs, -UTMEX_EggObs, -HorizontalError_m, -Lat_EggObs, -Long_EggObs, -GageHeight, -DominantSub, -DominantEmerg, -OtherVeg)
 
