@@ -15,16 +15,29 @@ rainfall_daily_long <- read_csv(here::here("data", "cm_daily_rain.csv")) %>%
   mutate(day_of_year = as.numeric(gsub("day_", "", day_of_year))) %>% 
   filter(Water_Year > 2009, Water_Year < 2024)
 
+rainfall_cum_long <- rainfall_daily_long %>% 
+  group_by(Water_Year) %>% 
+  mutate(cum_rain = cumsum(rainfall))
+
 ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall, color = factor(Water_Year))) + 
   geom_point(alpha = 0.2) + 
   stat_summary(fun = "mean",geom = "point",color = "black", alpha = 0.5) +
   geom_smooth(method = "loess", color = "red4", se = FALSE, size = 2) +
   labs(x = "Day of water year", y = "Rainfall (inches)")
 
+
+ggplot(data = rainfall_cum_long, aes(x = day_of_year, y = cum_rain, color = factor(Water_Year))) + 
+  geom_line() + 
+  stat_summary(fun = "mean",geom = "line",color = "black", size = 2) +
+  labs(x = "Day of water year", y = "Cumulative Rainfall (inches)")
+
 ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall)) + 
   geom_point(alpha = 0.1) + geom_smooth(method = "loess", color = "red4", se = FALSE, size = 2) +
+  geom_vline(xintercept = 60,linetype = 2)+
+  geom_vline(xintercept = 120,linetype = 2)+
   scale_y_continuous(trans = "log10") +
   facet_wrap(~Water_Year)
+<<<<<<< HEAD
 
 #Example to add first and last
 # ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall)) + 
@@ -36,6 +49,8 @@ ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall)) +
 
 
   
+=======
+>>>>>>> b439bb37a49c69903da578b1d543699243ec6b63
 
 ### ~~~ *** COMPARING YEARLY RAIN ACROSS LOCATIONS *** ~~~ ###
 
