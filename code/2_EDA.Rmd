@@ -87,32 +87,31 @@ ggplot(data = data_after2009,mapping = aes(x = BRDYEAR, y = NumberofEggMasses))+
   facet_wrap(~Watershed)+ scale_y_continuous(limits = c(0,5))
 
 ### above plot facet by site
-ggplot(data = data_after2009)+ 
-  stat_summary(mapping = aes(x = BRDYEAR, y = NumberofEggMasses),
-               fun = "mean",geom = "point",color = "black", size= 2)+
-  geom_smooth(mapping = aes(x = BRDYEAR, y = NumberofEggMasses), method = "lm", color = "blue",se = FALSE)+
-  facet_wrap(~LocationID)+ scale_y_continuous(limits = c(0,1.5))
+ggplot(data = data_after2009,mapping = aes(x = BRDYEAR, y = NumberofEggMasses))+ 
+  geom_jitter(alpha=0.1,width = 0.1)+
+  stat_summary(fun = "mean",geom = "point",color = "orange", size= 2)+
+  geom_smooth(method = "lm", color = "blue",se = FALSE)+
+  facet_wrap(~LocationID)+ scale_y_continuous(limits = c(0,5))
 
 ```
 
 ```{r mean_NEW_eggs}
 #plot of total egg masses over time per Watershed
-ggplot(data = data_after2009)+ 
-  stat_summary(mapping = aes(x = BRDYEAR, y = NumberofEggMasses),
-               fun = "sum",geom = "point",alpha = 1/2, color = "black", size= 2) + facet_wrap(~Watershed)+
+ggplot(data = data_after2009,mapping = aes(x = BRDYEAR, y = NumberofEggMasses))+ 
+  stat_summary(fun = "sum",geom = "point", color = "black", size= 2) + facet_wrap(~Watershed)+
   labs(x = "Year", y = "total new egg masses")
 
 #plot of total egg masses over time per site
 ggplot(data = data_after2009)+ 
   stat_summary(mapping = aes(x = BRDYEAR, y = NumberofEggMasses),
-               fun = "sum",geom = "point",alpha = 1/2, color = "black", size= 2) + facet_wrap(~LocationID)+
+               fun = "sum",geom = "point",color = "black", size= 2) + facet_wrap(~LocationID)+
   labs(x = "Year", y = "total new egg masses")
 
 ## above with size of point = survey_count (per site)
 ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = total_egg_num)) +
-  geom_point(aes(size = survey_count), alpha = 1/3) + facet_wrap(~LocationID) +
+  geom_point(aes(alpha = survey_count)) + facet_wrap(~LocationID) +
   labs(x = "Year", y = "total new egg masses")
-  
+
 ```
 
 #### breeding season
@@ -137,9 +136,10 @@ ggplot(data = eggTiming, aes(x = BRDYEAR, y = breedingLength, color = Watershed)
 #above plot but facet by watershed
 ggplot(data = eggTiming, aes(x = BRDYEAR, y = breedingLength,color = Watershed)) + geom_point() + geom_smooth(method="loess", se=F)+ facet_wrap(~Watershed)
 
+ggplot(data = eggTiming, aes(x = BRDYEAR, y = breedingLength,color = Watershed)) + geom_point() + geom_smooth(method="loess", se=F)+ facet_wrap(~LocationID)
 
+# Which one of the 3 rainfall dataset should we use for each of these sites?
 ## TODO: correlate breeding season length with rainfall
-
 ```
 
 #### sites
@@ -182,11 +182,7 @@ abundance_counts_after2009 <- data_after2009 %>%
   summarize(survey_count = n_distinct(EventGUID))
 abundance_counts_after2009
 
-# plot: number of surveys per year per Watershed 
-survey_graph <- ggplot(abundance_counts,aes(x=BRDYEAR,y=survey_count,colour=Watershed))+geom_point()+ facet_wrap(~Watershed)
-survey_graph
-
-# above plot containing only year after 2009.
+# plot: number of surveys per year per Watershed after 2009.
 survey_graph_after2009 <- ggplot(abundance_counts_after2009,aes(x=BRDYEAR,y=survey_count,colour=Watershed))+geom_point()+ facet_wrap(~Watershed)
 survey_graph_after2009
 
