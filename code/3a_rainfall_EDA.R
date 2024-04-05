@@ -27,7 +27,7 @@ ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall, color = fa
 
 ggplot(data = rainfall_cum_long, aes(x = day_of_year, y = cum_rain, color = factor(Water_Year))) + 
   geom_line() + 
-  stat_summary(fun = "mean",geom = "point",color = "black", size = 2) +
+  stat_summary(fun = "mean",geom = "line",color = "black", size = 2) +
   labs(x = "Day of water year", y = "Cumulative Rainfall (inches)")
 
 ### ~~~ *** COMPARING YEARLY RAIN ACROSS LOCATIONS *** ~~~ ###
