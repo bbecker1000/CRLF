@@ -76,14 +76,15 @@ ggplot(data = data_after2009,mapping = aes(x = BRDYEAR, y = NumberofEggMasses))+
   geom_jitter(alpha=0.1,width = 0.1)+
   stat_summary(fun = "mean",geom = "point",color = "orange", size= 2)+
   geom_smooth(method = "lm", color = "blue",se = FALSE)+
-  labs(x = "Year", y = "mean number of new egg masses per survey") 
+  labs(x = "Year", y = "mean number of new egg masses per survey")+
+  scale_y_continuous(limits = c(0,5))
 
 ### above plot facet by watershed
-ggplot(data = data_after2009)+ 
-  stat_summary(mapping = aes(x = BRDYEAR, y = NumberofEggMasses),
-               fun = "mean",geom = "point",color = "black", size= 2)+
-  geom_smooth(mapping = aes(x = BRDYEAR, y = NumberofEggMasses), method = "lm", color = "blue",se = FALSE)+
-  facet_wrap(~Watershed)+ scale_y_continuous(limits = c(0,1.5))
+ggplot(data = data_after2009,mapping = aes(x = BRDYEAR, y = NumberofEggMasses))+ 
+  geom_jitter(alpha=0.1,width = 0.1)+
+  stat_summary(fun = "mean",geom = "point",color = "orange", size= 2)+
+  geom_smooth(method = "lm", color = "blue",se = FALSE)+
+  facet_wrap(~Watershed)+ scale_y_continuous(limits = c(0,5))
 
 ### above plot facet by site
 ggplot(data = data_after2009)+ 
@@ -112,13 +113,6 @@ ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = total_egg_num)) +
   geom_point(aes(size = survey_count), alpha = 1/3) + facet_wrap(~LocationID) +
   labs(x = "Year", y = "total new egg masses")
   
-## above with size of point = survey_count
-# Do we need this graph? I don't think there is a relationship between survey count and mean of egg masses, unlike total egg masses. We can keep this for now.
-ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = mean_egg_num)) +
-  geom_point(aes(size = survey_count), alpha = 1/3) + facet_wrap(~LocationID)+
-  labs(x = "Year", y = "mean new egg masses")
-
-
 ```
 
 
@@ -259,3 +253,8 @@ library(ggpubr)
 ggscatter(new_egg, x = "MaxD", y = "AvgD",
           add = "reg.line",cor.coef=TRUE,coor.method=" ")
 ```
+
+
+
+
+
