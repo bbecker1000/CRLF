@@ -82,6 +82,22 @@ ggplot(cover_data_TV02_long,aes(x=year_numeric,y=proportion,fill=component)) + g
 
 
 
+cover_data$GoogleEarthPhotoDate <- as.Date(cover_data$GoogleEarthPhotoDate)
+cover_data$year_numeric <- as.numeric(format(cover_data$GoogleEarthPhotoDate, "%Y"))
+t1 <- cover_data %>%
+  filter(LocationID == "LS01") 
+
+## create model for all site
+
+
+summary(lm(OpenWater_percent~year_numeric, data = t1))
+plot(lm(OpenWater_percent~year_numeric, data = t1))
+
+  
+  
+
+
+
 
 # TODO: create a filtered cover data table with intermediates for only the sites that Ruby did for every year
 # to see if it's actually a linear relationship
