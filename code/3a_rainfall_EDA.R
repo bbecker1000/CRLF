@@ -25,6 +25,16 @@ ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall)) +
   geom_point(alpha = 0.1) + geom_smooth(method = "loess", color = "red4", se = FALSE, size = 2) +
   scale_y_continuous(trans = "log10") +
   facet_wrap(~Water_Year)
+
+#Example to add first and last
+# ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall)) + 
+#   geom_point(alpha = 0.1) + geom_smooth(method = "loess", color = "red4", se = FALSE, size = 2) +
+#   geom_line(data = temp.egg.range, aes(x = date, y = Y)) + 
+#   scale_y_continuous(trans = "log10") +
+#   facet_wrap(~Water_Year)
+
+
+
   
 
 ### ~~~ *** COMPARING YEARLY RAIN ACROSS LOCATIONS *** ~~~ ###
