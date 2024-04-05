@@ -25,10 +25,18 @@ ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall, color = fa
   geom_smooth(method = "loess", color = "red4", se = FALSE, size = 2) +
   labs(x = "Day of water year", y = "Rainfall (inches)")
 
+
 ggplot(data = rainfall_cum_long, aes(x = day_of_year, y = cum_rain, color = factor(Water_Year))) + 
   geom_line() + 
   stat_summary(fun = "mean",geom = "line",color = "black", size = 2) +
   labs(x = "Day of water year", y = "Cumulative Rainfall (inches)")
+
+ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall)) + 
+  geom_point(alpha = 0.1) + geom_smooth(method = "loess", color = "red4", se = FALSE, size = 2) +
+  geom_vline(xintercept = 60,linetype = 2)+
+  geom_vline(xintercept = 120,linetype = 2)+
+  scale_y_continuous(trans = "log10") +
+  facet_wrap(~Water_Year)
 
 ### ~~~ *** COMPARING YEARLY RAIN ACROSS LOCATIONS *** ~~~ ###
 
