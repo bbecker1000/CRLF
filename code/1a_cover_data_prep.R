@@ -99,6 +99,7 @@ plot(lm(OpenWater_percent~year_numeric, data = t1))
 
 
 
+
 # TODO: create a filtered cover data table with intermediates for only the sites that Ruby did for every year
 # to see if it's actually a linear relationship
 # sites are LS01, RC07, RC10, RL02, TV02
