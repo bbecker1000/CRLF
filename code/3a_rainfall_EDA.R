@@ -37,7 +37,7 @@ ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall)) +
   geom_vline(xintercept = 120,linetype = 2)+
   scale_y_continuous(trans = "log10") +
   facet_wrap(~Water_Year)
-<<<<<<< HEAD
+
 
 #Example to add first and last
 # ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall)) + 
@@ -46,11 +46,6 @@ ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall)) +
 #   scale_y_continuous(trans = "log10") +
 #   facet_wrap(~Water_Year)
 
-
-
-  
-=======
->>>>>>> b439bb37a49c69903da578b1d543699243ec6b63
 
 ### ~~~ *** COMPARING YEARLY RAIN ACROSS LOCATIONS *** ~~~ ###
 
