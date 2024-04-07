@@ -95,13 +95,14 @@ plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC10))
 summary(lm(OpenWater_percent~year_numeric, data = cover_data_RL02))
 plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC02))
 
-x <- c(0, 50)     
-y <- c(12, 35)   
+
+# Linear interpolation of all sites
+KC01x <- c(0, 50)     
+KC01y <- c(12, 35)   
 
 # Apply approx function 
-data_approx1 <- approx(x, y)        
-data_approx1     
-
+data_approx1 <- approx(KC01x, KC01y)        
+  
 # Draw output of approx function 
 plot(data_approx1$x,                  
      data_approx1$y) 
@@ -109,5 +110,9 @@ points(x, y,
        col = "red", 
        pch = 16)
 
+KC02x <- c(0, 50) 
+KC02y <- c(12, 35)   
+
+data_approx2 <- approx(KC02x, KC02y)        
 
 
