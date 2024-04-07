@@ -83,6 +83,7 @@ ggplot(cover_data_TV02_long,aes(x=year_numeric,y=proportion,fill=component)) + g
 cover_data$GoogleEarthPhotoDate <- as.Date(cover_data$GoogleEarthPhotoDate)
 cover_data$year_numeric <- as.numeric(format(cover_data$GoogleEarthPhotoDate, "%Y"))
 
+#  linear models for 5 sites
 summary(lm(OpenWater_percent~year_numeric, data = cover_data_LS01))
 plot(lm(OpenWater_percent~year_numeric, data = cover_data_LS01))
 
@@ -96,23 +97,38 @@ summary(lm(OpenWater_percent~year_numeric, data = cover_data_RL02))
 plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC02))
 
 
-# Linear interpolation of all sites
-KC01x <- c(0, 50)     
-KC01y <- c(12, 35)   
+# linear interpolation of all sites
+KC01x <- c(0, 12)     
+KC01y <- c(50, 35)   
 
 # Apply approx function 
-data_approx1 <- approx(KC01x, KC01y)        
+data_approxKC01 <- approx(KC01x, KC01y)        
   
 # Draw output of approx function 
-plot(data_approx1$x,                  
-     data_approx1$y) 
-points(x, y, 
-       col = "red", 
-       pch = 16)
+plot(data_approxKC01$x,                  
+     data_approxKC01$y) 
 
-KC02x <- c(0, 50) 
-KC02y <- c(12, 35)   
 
-data_approx2 <- approx(KC02x, KC02y)        
+KC02x <- c(1, 11) 
+KC02y <- c(20, 0)   
 
+data_approxKC02 <- approx(KC02x, KC02y)
+plot(data_approxKC02$x,                  
+     data_approxKC02$y) 
+
+
+KC03x <- c(1, 12) 
+KC03y <- c(20, 0)   
+
+data_approxKC03 <- approx(KC03x, KC03y)
+plot(data_approxKC03$x,                  
+     data_approxKC03$y) 
+
+
+LS05x <- c(1, 19) 
+LS05y <- c(66.67, 0)   
+
+data_approxLS05 <- approx(LS05x, LS05y)
+plot(data_approxLS05$x,                  
+     data_approxLS05$y) 
 
