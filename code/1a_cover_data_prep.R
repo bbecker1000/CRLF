@@ -80,26 +80,34 @@ ggplot(cover_data_TV02_long,aes(x=year_numeric,y=proportion,fill=component)) + g
   scale_fill_manual(values = c("lightgreen", "steelblue", "grey","darkgreen"))
 
 
-
-
 cover_data$GoogleEarthPhotoDate <- as.Date(cover_data$GoogleEarthPhotoDate)
 cover_data$year_numeric <- as.numeric(format(cover_data$GoogleEarthPhotoDate, "%Y"))
-t1 <- cover_data %>%
-  filter(LocationID == "LS01") 
 
-## create model for all site
+summary(lm(OpenWater_percent~year_numeric, data = cover_data_LS01))
+plot(lm(OpenWater_percent~year_numeric, data = cover_data_LS01))
+
+summary(lm(OpenWater_percent~year_numeric, data = cover_data_RC07))
+plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC07))
+
+summary(lm(OpenWater_percent~year_numeric, data = cover_data_RC10))
+plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC10))  
+
+summary(lm(OpenWater_percent~year_numeric, data = cover_data_RL02))
+plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC02))
+
+x <- c(0, 50)     
+y <- c(12, 35)   
+
+# Apply approx function 
+data_approx1 <- approx(x, y)        
+data_approx1     
+
+# Draw output of approx function 
+plot(data_approx1$x,                  
+     data_approx1$y) 
+points(x, y, 
+       col = "red", 
+       pch = 16)
 
 
-summary(lm(OpenWater_percent~year_numeric, data = t1))
-plot(lm(OpenWater_percent~year_numeric, data = t1))
 
-  
-  
-
-
-
-
-
-# TODO: create a filtered cover data table with intermediates for only the sites that Ruby did for every year
-# to see if it's actually a linear relationship
-# sites are LS01, RC07, RC10, RL02, TV02
