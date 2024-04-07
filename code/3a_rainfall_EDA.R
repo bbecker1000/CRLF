@@ -31,21 +31,23 @@ ggplot(data = rainfall_cum_long, aes(x = day_of_year, y = cum_rain, color = fact
   stat_summary(fun = "mean",geom = "line",color = "black", size = 2) +
   labs(x = "Day of water year", y = "Cumulative Rainfall (inches)")
 
-ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall)) + 
+merged_df <- left_join(eggTiming_new, rainfall_daily_long, by = "Water_Year")
+merged_df <- merged_df|>
+  group_by(Water_Year)|>
+  mutate(mean_breedingLength = mean(breedingLength, na.rm = TRUE))
+
+
+p <-ggplot(data = merged_df, aes(x = day_of_year, y = rainfall)) + 
   geom_point(alpha = 0.1) + geom_smooth(method = "loess", color = "red4", se = FALSE, size = 2) +
-  geom_vline(xintercept = 60,linetype = 2)+
-  geom_vline(xintercept = 120,linetype = 2)+
-  scale_y_continuous(trans = "log10") +
+  scale_y_continuous(trans = "log10")+
   facet_wrap(~Water_Year)
 
-
-#Example to add first and last
-# ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall)) + 
-#   geom_point(alpha = 0.1) + geom_smooth(method = "loess", color = "red4", se = FALSE, size = 2) +
-#   geom_line(data = temp.egg.range, aes(x = date, y = Y)) + 
-#   scale_y_continuous(trans = "log10") +
-#   facet_wrap(~Water_Year)
-
+for (i in unique(merged_df$Water_Year)) {
+  xintercept_value <- merged_df$firstEgg[i]
+  subset_data <- merged_df[merged_df$Water_Year == i, ]
+  p <- p + geom_vline(data = subset_data, aes(xintercept = xintercept_value), color = "blue", linetype = "dashed")
+}  
+p
 
 ### ~~~ *** COMPARING YEARLY RAIN ACROSS LOCATIONS *** ~~~ ###
 
