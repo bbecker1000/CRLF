@@ -125,7 +125,6 @@ eggTiming <- data %>%
   summarize(firstEgg = min(dayOfWY), 
             lastEgg = max(dayOfWY), 
             breedingLength = max(dayOfWY) - min(dayOfWY))
-eggTiming
 
 ## plot timing v.1
 ggplot(data = eggTiming, aes(x = BRDYEAR, y = breedingLength, color = Watershed)) + geom_line()
@@ -246,3 +245,28 @@ library(ggpubr)
 ggscatter(new_egg, x = "MaxD", y = "AvgD",
           add = "reg.line",cor.coef=TRUE,coor.method=" ")
 ```
+
+```{r}
+eggTiming|>
+  group_by(BRDYEAR)
+```
+
+```{r}
+# Calculate the full breeding length of all sites for a given year, to be correlated with rainfall data.
+eggTiming_new <- data %>%
+  filter(NumberofEggMasses > 0) %>%
+  group_by(BRDYEAR) %>%
+  summarize(firstEgg = min(dayOfWY), 
+            lastEgg = max(dayOfWY), 
+            breedingLength = max(dayOfWY) - min(dayOfWY))
+eggTiming_new$Water_Year <- eggTiming_new$BRDYEAR
+ggplot(data = eggTiming_new, aes(x = Water_Year, y = breedingLength,)) + geom_point() + geom_smooth(method="loess", se=F)
+```
+
+
+
+
+
+
+
+
