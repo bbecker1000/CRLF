@@ -37,17 +37,13 @@ merged_df <- merged_df|>
   mutate(mean_breedingLength = mean(breedingLength, na.rm = TRUE))
 
 
-p <-ggplot(data = merged_df, aes(x = day_of_year, y = rainfall)) + 
+ggplot(data = merged_df, aes(x = day_of_year, y = rainfall)) + 
   geom_point(alpha = 0.1) + geom_smooth(method = "loess", color = "red4", se = FALSE, size = 2) +
   scale_y_continuous(trans = "log10")+
+  geom_vline(aes(xintercept = merged_df$firstEgg),color = "lightblue")+
+  geom_vline(aes(xintercept = merged_df$lastEgg), color = "darkblue")+
   facet_wrap(~Water_Year)
 
-for (i in unique(merged_df$Water_Year)) {
-  xintercept_value <- merged_df$firstEgg[i]
-  subset_data <- merged_df[merged_df$Water_Year == i, ]
-  p <- p + geom_vline(data = subset_data, aes(xintercept = xintercept_value), color = "blue", linetype = "dashed")
-}  
-p
 
 ### ~~~ *** COMPARING YEARLY RAIN ACROSS LOCATIONS *** ~~~ ###
 
