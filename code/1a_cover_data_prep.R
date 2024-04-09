@@ -32,7 +32,7 @@ cover_data_LS01 <- cover_data_LS01 |>
   select(year_numeric,OpenWater_percent,SubmergentVegetation_percent,EmergentVegetation_percent)
 cover_data_LS01_long <- gather(cover_data_LS01, key = "component", value = "proportion", -year_numeric)
 ggplot(cover_data_LS01_long,aes(x=year_numeric,y=proportion,fill=component)) + geom_area() + 
-  scale_fill_manual(values = c("lightgreen", "steelblue", "darkgreen"))
+  scale_fill_manual(values = c("darkolivegreen3", "steelblue", "darkgreen"))
 
 ## RS07
 cover_data_RC07 <- cover_data |>
@@ -43,7 +43,7 @@ cover_data_RC07 <- cover_data_RC07 |>
   select(year_numeric,OpenWater_percent,SubmergentVegetation_percent,EmergentVegetation_percent,TreeCover_percent)
 cover_data_RC07_long <- gather(cover_data_RC07, key = "component", value = "proportion", -year_numeric)
 ggplot(cover_data_RC07_long,aes(x=year_numeric,y=proportion,fill=component)) + geom_area() + 
-  scale_fill_manual(values = c("lightgreen", "steelblue", "grey","darkgreen"))
+  scale_fill_manual(values = c("darkolivegreen3", "steelblue", "grey","darkgreen"))
 
 ## RS10
 cover_data_RC10 <- cover_data |>
@@ -54,7 +54,7 @@ cover_data_RC10 <- cover_data_RC10 |>
   select(year_numeric,OpenWater_percent,SubmergentVegetation_percent,EmergentVegetation_percent,TreeCover_percent)
 cover_data_RC10_long <- gather(cover_data_RC10, key = "component", value = "proportion", -year_numeric)
 ggplot(cover_data_RC10_long,aes(x=year_numeric,y=proportion,fill=component)) + geom_area() + 
-  scale_fill_manual(values = c("lightgreen", "steelblue", "grey","darkgreen"))
+  scale_fill_manual(values = c("darkolivegreen3", "steelblue", "grey","darkgreen"))
 
 
 ## RL02
@@ -66,7 +66,7 @@ cover_data_RL02 <- cover_data_RL02 |>
   select(year_numeric,OpenWater_percent,SubmergentVegetation_percent,EmergentVegetation_percent,TreeCover_percent)
 cover_data_RL02_long <- gather(cover_data_RL02, key = "component", value = "proportion", -year_numeric)
 ggplot(cover_data_RL02_long,aes(x=year_numeric,y=proportion,fill=component)) + geom_area() + 
-  scale_fill_manual(values = c("lightgreen", "steelblue", "grey","darkgreen"))
+  scale_fill_manual(values = c("darkolivegreen3", "steelblue", "grey","darkgreen"))
 
 ## TV02
 cover_data_TV02 <- cover_data |>
@@ -77,7 +77,7 @@ cover_data_TV02 <- cover_data_TV02 |>
   select(year_numeric,OpenWater_percent,SubmergentVegetation_percent,EmergentVegetation_percent,TreeCover_percent)
 cover_data_TV02_long <- gather(cover_data_TV02, key = "component", value = "proportion", -year_numeric)
 ggplot(cover_data_TV02_long,aes(x=year_numeric,y=proportion,fill=component)) + geom_area() + 
-  scale_fill_manual(values = c("lightgreen", "steelblue", "grey","darkgreen"))
+  scale_fill_manual(values = c("darkolivegreen3", "steelblue", "grey","darkgreen"))
 
 
 cover_data$GoogleEarthPhotoDate <- as.Date(cover_data$GoogleEarthPhotoDate)
