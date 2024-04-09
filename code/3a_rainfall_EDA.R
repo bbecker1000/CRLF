@@ -19,13 +19,14 @@ rainfall_cum_long <- rainfall_daily_long %>%
   group_by(Water_Year) %>% 
   mutate(cum_rain = cumsum(rainfall))
 
+# plot: day of water year vs. daily rainfall
 ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall, color = factor(Water_Year))) + 
   geom_point(alpha = 0.2) + 
-  stat_summary(fun = "mean",geom = "point",color = "black", alpha = 0.5) +
+  stat_summary(fun = "mean", geom = "point",color = "black", alpha = 0.5) +
   geom_smooth(method = "loess", color = "red4", se = FALSE, size = 2) +
   labs(x = "Day of water year", y = "Rainfall (inches)")
 
-
+# plot: day of water year vs. cumulative rainfall
 ggplot(data = rainfall_cum_long, aes(x = day_of_year, y = cum_rain, color = factor(Water_Year))) + 
   geom_line() + 
   stat_summary(fun = "mean",geom = "line",color = "black", size = 2) +
