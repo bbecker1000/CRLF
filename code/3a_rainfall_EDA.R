@@ -24,27 +24,26 @@ ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall, color = fa
   geom_point(alpha = 0.2) + 
   stat_summary(fun = "mean", geom = "point",color = "black", alpha = 0.5) +
   geom_smooth(method = "loess", color = "red4", se = FALSE, size = 2) +
-  labs(x = "Day of water year", y = "Rainfall (inches)")
+  labs(title = "Daily Rainfall", x = "Day of water year", y = "Rainfall (inches)")
 
 # plot: day of water year vs. cumulative rainfall
 ggplot(data = rainfall_cum_long, aes(x = day_of_year, y = cum_rain, color = factor(Water_Year))) + 
   geom_line() + 
   stat_summary(fun = "mean",geom = "line",color = "black", size = 2) +
-  labs(x = "Day of water year", y = "Cumulative Rainfall (inches)")
+  labs(title = "Cumulative Rainfall", x = "Day of water year", y = "Cumulative Rainfall (inches)")
 
 merged_df <- left_join(eggTiming_new, rainfall_daily_long, by = "Water_Year")
 merged_df <- merged_df|>
   group_by(Water_Year)|>
   mutate(mean_breedingLength = mean(breedingLength, na.rm = TRUE))
 
-
+# plot: facet wrap by year vs. daily rainfall
 ggplot(data = merged_df, aes(x = day_of_year, y = rainfall)) + 
-  geom_point(alpha = 0.1) + geom_smooth(method = "loess", color = "red4", se = FALSE, size = 2) +
+  geom_point(alpha = 0.1) + geom_smooth(method = "loess", color = "red4", se = FALSE, size = 1.5) +
   scale_y_continuous(trans = "log10")+
-  geom_vline(aes(xintercept = merged_df$firstEgg),color = "lightblue")+
-  geom_vline(aes(xintercept = merged_df$lastEgg), color = "darkblue")+
+  geom_vline(aes(xintercept = merged_df$firstEgg),color = "darkolivegreen3")+
+  geom_vline(aes(xintercept = merged_df$lastEgg), color = "cornflowerblue")+
   facet_wrap(~Water_Year)
-
 
 ### ~~~ *** COMPARING YEARLY RAIN ACROSS LOCATIONS *** ~~~ ###
 
