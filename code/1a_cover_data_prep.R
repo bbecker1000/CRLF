@@ -32,7 +32,7 @@ cover_data_LS01 <- cover_data_LS01 |>
   select(year_numeric,OpenWater_percent,SubmergentVegetation_percent,EmergentVegetation_percent)
 cover_data_LS01_long <- gather(cover_data_LS01, key = "component", value = "proportion", -year_numeric)
 ggplot(cover_data_LS01_long,aes(x=year_numeric,y=proportion,fill=component)) + geom_area() + 
-  scale_fill_manual(values = c("lightgreen", "steelblue", "darkgreen"))
+  scale_fill_manual(values = c("darkolivegreen3", "steelblue", "darkgreen"))
 
 ## RS07
 cover_data_RC07 <- cover_data |>
