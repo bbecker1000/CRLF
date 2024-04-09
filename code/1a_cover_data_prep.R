@@ -132,3 +132,7 @@ data_approxLS05 <- approx(LS05x, LS05y)
 plot(data_approxLS05$x,                  
      data_approxLS05$y) 
 
+RC10x <- c(2010,2023)
+RC10y <- c(8,100)
+data_approxRC10 <- approx(RC10x,RC10y)
+plot(data_approxRC10$x, data_approxRC10$y)
