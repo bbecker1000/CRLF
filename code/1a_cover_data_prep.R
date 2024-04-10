@@ -34,7 +34,7 @@ cover_data_LS01_long <- gather(cover_data_LS01, key = "component", value = "prop
 ggplot(cover_data_LS01_long,aes(x=year_numeric,y=proportion,fill=component)) + geom_area() + 
   scale_fill_manual(values = c("darkolivegreen3", "steelblue", "darkgreen"))
 
-## RS07
+## RC07
 cover_data_RC07 <- cover_data |>
   filter(LocationID == "RC07")
 cover_data_RC07$GoogleEarthPhotoDate <- as.Date(cover_data_RC07$GoogleEarthPhotoDate)
@@ -45,7 +45,7 @@ cover_data_RC07_long <- gather(cover_data_RC07, key = "component", value = "prop
 ggplot(cover_data_RC07_long,aes(x=year_numeric,y=proportion,fill=component)) + geom_area() + 
   scale_fill_manual(values = c("darkolivegreen3", "steelblue", "grey","darkgreen"))
 
-## RS10
+## RC10
 cover_data_RC10 <- cover_data |>
   filter(LocationID == "RC10")
 cover_data_RC10$GoogleEarthPhotoDate <- as.Date(cover_data_RC10$GoogleEarthPhotoDate)
@@ -136,3 +136,4 @@ RC10x <- c(2010,2023)
 RC10y <- c(8,100)
 data_approxRC10 <- approx(RC10x,RC10y)
 plot(data_approxRC10$x, data_approxRC10$y)
+
