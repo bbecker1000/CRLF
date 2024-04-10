@@ -15,11 +15,6 @@ setwd(here::here("code"))
 source("1_data_prep.R")
 ```
 
-# TODO
-
--   data = filtered by 2+ surveys, from the main 7 watersheds, only new egg masses
--   *delete anything that is filtering/selecting 7 watersheds in this file*
-
 # data manipulation
 
 tables that are helpful for creating many graphs
@@ -115,6 +110,12 @@ ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = total_egg_num)) +
 ```
 
 #### breeding season
+
+```{r plots for within year data}
+
+ggplot(data = within_year_data, aes(x = dayOfWY, y = NumberofEggMasses)) + geom_point()
+
+```
 
 ```{r breeding_length}
 # timing (days since october 1) of egg laying by year and watershed
