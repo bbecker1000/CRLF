@@ -26,12 +26,10 @@ m.cover.gaussian <- glmmTMB(OpenWater_percent ~ year_numeric + (1|LocationID),
 
 summary(m.cover.gaussian)
 
-plot_model(m.cover.gaussian, type = "re")
 plot_model(m.cover.gaussian, type = "diag")
 
 #plot model
 p.model <- plot_model(m.cover.gaussian, type = "pred",
-           #axis.lim = c(0,1),
            show.data=TRUE) + #wrong scale from raw input data...won't plot
   theme_gray(base_size = 18) +
   theme(legend.position = c(0.8, 0.8)) +
@@ -41,8 +39,7 @@ p.model
 
 
 #plot model and raw data
-p.model <- plot_model(m.cover.gaussian, type = "pred",
-                      axis.lim = c(0,1)) + 
+p.model <- plot_model(m.cover.gaussian, type = "pred") +
   theme_gray(base_size = 18) +
   theme(legend.position = c(0.8, 0.8)) +
   ylab(" ") +
