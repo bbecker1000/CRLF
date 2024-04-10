@@ -22,7 +22,7 @@ cover_data <- cover_data %>%
 cover_data_first_and_last <- cover_data %>% 
   filter(first_date | last_date)
 
-# visualization purpose: open water and veg. proportion of the 5 site with continuous data over time.
+# visualization purpose: open water and veg. proportion of the 5 site with continuous data over time.: LS01, RC07, RC10, RL02,TV02
 ## LS01 
 cover_data_LS01 <- cover_data |>
   filter(LocationID == "LS01")
