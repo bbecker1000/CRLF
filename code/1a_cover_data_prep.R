@@ -94,7 +94,7 @@ summary(lm(OpenWater_percent~year_numeric, data = cover_data_RC10))
 plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC10))  
 
 summary(lm(OpenWater_percent~year_numeric, data = cover_data_RL02))
-plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC02))
+plot(lm(OpenWater_percent~year_numeric, data = cover_data_RL02))
 
 ### ~~~ *** LINEAR INTERPOLATION (all sites) *** ~~~ ###
 # 1.INITIAL MANUAL CODE (see below for automated process)
@@ -157,6 +157,8 @@ end_year <- cover_data %>%
 range_table <- merge(start_year, end_year)
 range_table %>% 
   mutate(range = last_year_numeric - first_year_numeric)
+
+
 
 
   
