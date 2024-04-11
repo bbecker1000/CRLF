@@ -140,6 +140,7 @@ Df_new <-data.frame(data_approxRC10)
 Df_new
 ## create function for correct number of year length
 
+
 # 2. AUTOMATING APPROXIMATION & ADDING TO DATA TABLE
 # figuring out year range
 library(dplyr)
@@ -148,17 +149,52 @@ start_year <- cover_data %>%
   select(LocationID, year_numeric) %>% 
   rename(first_year_numeric = year_numeric)
 
-end_year <- cover_data %>% 
+last_year <- cover_data %>% 
   filter(last_date == T) %>% 
   select(LocationID, year_numeric) %>% 
   rename(last_year_numeric = year_numeric)
 
 ## creating column "range" = difference between first and last years
-range_table <- merge(start_year, end_year)
-range_table %>% 
-  mutate(range = last_year_numeric - first_year_numeric)
+range_table <- merge(start_year, last_year) %>% 
+range_table <- merge(start_year, end_year) %>% 
+  mutate(year_range = last_year_numeric - first_year_numeric)
 
+# start and end year cover values
+start_cover <- cover_data %>% 
+  filter(first_date == T) %>% 
+  select(LocationID, OpenWater_percent, year_numeric)
 
+## checking to see if years align
+start_year_check <- merge(start_cover, start_year) %>% 
+  mutate(same_start_year = year_numeric == first_year_numeric) # all TRUE!
+
+# start and last year cover values
+## start
+start_cover <- cover_data %>% 
+  filter(first_date == T) %>% 
+  select(LocationID, OpenWater_percent, year_numeric) %>% 
+  rename(start_open_water = OpenWater_percent)
+  
+
+### checking to see if start years align
+check_start <- merge(start_cover, start_year) %>% 
+  mutate(same_start_year = year_numeric == first_year_numeric) # all TRUE!
+
+## last
+last_cover <- cover_data %>% 
+  filter(last_date == T) %>% 
+  select(LocationID, OpenWater_percent, year_numeric) %>% 
+  rename(last_open_water = OpenWater_percent)
+
+### checking to see if last years align
+check_last <- merge(last_cover, last_year) %>% 
+  mutate(same_last_year = year_numeric == last_year_numeric) # all TRUE!
+
+## merging start & final cover
+#TODO: combine start_cover, last_cover, and range_table$year_range
+approx_table <- start_cover %>% 
+  full_join(last_cover) ## not doing what i want it to! 
+ ## goal: table with site, year, percent open water
 
 
   
