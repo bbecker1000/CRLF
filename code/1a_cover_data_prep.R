@@ -154,10 +154,17 @@ end_year <- cover_data %>%
   rename(last_year_numeric = year_numeric)
 
 ## creating column "range" = difference between first and last years
-range_table <- merge(start_year, end_year)
-range_table %>% 
-  mutate(range = last_year_numeric - first_year_numeric)
+range_table <- merge(start_year, end_year) %>% 
+  mutate(year_range = last_year_numeric - first_year_numeric)
 
+# start and end year cover values
+start_cover <- cover_data %>% 
+  filter(first_date == T) %>% 
+  select(LocationID, OpenWater_percent, year_numeric)
+
+## checking to see if years align
+start_year_check <- merge(start_cover, start_year) %>% 
+  mutate(same_start_year = year_numeric == first_year_numeric) # all TRUE!
 
 
 
