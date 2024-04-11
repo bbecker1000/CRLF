@@ -9,14 +9,18 @@ source("1_data_prep.R")
 
 # onset_of_breeding is the relevant table here
 
-# I am getting weird errors when I try to use lme4 or glmmTMB... not sure if I'm doing something wrong here?
-# stack overflow says the glmmTMB error could also be because of the Matrix error...
-
-within_year_model <- glmmTMB(first_breeding ~ rain_to_date + MaxD + (1|LocationID), family = gaussian, data = onset_of_breeding)
-within_year_model <- lmer(first_breeding ~ rain_to_date + MaxD + (1|LocationID), data = onset_of_breeding)
+# the internet said Gamma is the correct family to use for timing variables, but I'm not attached to it if anyone has other ideas
+within_year_model <- glmmTMB(first_breeding ~ rain_to_date + MaxD + (1|LocationID), family = Gamma, data = onset_of_breeding)
+within_year_model_lmer <- lmer(first_breeding ~ rain_to_date + MaxD + (1|LocationID), data = onset_of_breeding)
 
 summary(within_year_model)
+summary(within_year_model_lmer)
 
 plot_model(within_year_model, type = "diag")
+plot_model(within_year_model_lmer, type = "diag")
 
 
+p.raw <- ggplot(onset_of_breeding, aes(x = first_breeding, y = rain_to_date, color = Watershed)) +
+  geom_point() +
+  geom_smooth(method = "loess", se = FALSE)
+p.raw
