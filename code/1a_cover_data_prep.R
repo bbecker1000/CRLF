@@ -133,7 +133,12 @@ plot(data_approxLS05$x,
      data_approxLS05$y) 
 
 RC10x <- c(2010,2023)
-RC10y <- c(8,100)
-data_approxRC10 <- approx(RC10x,RC10y)
+RC10y <- c(100,8)
+data_approxRC10 <- approx(RC10x,RC10y, n=14)
 plot(data_approxRC10$x, data_approxRC10$y)
+
+Df_new <-data.frame(data_approxRC10)
+Df_new
+#create function for correct number of year length
+
 
