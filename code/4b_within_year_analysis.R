@@ -18,3 +18,5 @@ within_year_model <- lmer(first_breeding ~ rain_to_date + MaxD + (1|LocationID),
 summary(within_year_model)
 
 plot_model(within_year_model, type = "diag")
+
+
