@@ -5,6 +5,8 @@ library(lme4) #glmer won't run today...having issue with matrix as of 2024-04-09
 library(glmmTMB) #instead of lme4
 library(cowplot)
 
+setwd(here::here("code"))
+source("1a_cover_data_prep.R")
 # from 1a_cover_data_prep.R
 
 # sites with >2 time points
