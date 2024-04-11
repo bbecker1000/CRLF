@@ -143,10 +143,21 @@ Df_new
 # 2. AUTOMATING APPROXIMATION & ADDING TO DATA TABLE
 # figuring out year range
 library(dplyr)
-cover_data %>% 
-  select_if("first_date" == T) %>% 
-  select(LocationID, year_numeric)
-start_year <- cover_data$first_date == TRUE
+start_year <- cover_data %>% 
+  filter(first_date == T) %>% 
+  select(LocationID, year_numeric) %>% 
+  rename(first_year_numeric = year_numeric)
+
+end_year <- cover_data %>% 
+  filter(last_date == T) %>% 
+  select(LocationID, year_numeric) %>% 
+  rename(last_year_numeric = year_numeric)
+
+## creating column "range" = difference between first and last years
+range_table <- merge(start_year, end_year)
+range_table %>% 
+  mutate(range = last_year_numeric - first_year_numeric)
+
 
   
   
