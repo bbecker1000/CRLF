@@ -94,7 +94,7 @@ summary(lm(OpenWater_percent~year_numeric, data = cover_data_RC10))
 plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC10))  
 
 summary(lm(OpenWater_percent~year_numeric, data = cover_data_RL02))
-plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC02))
+plot(lm(OpenWater_percent~year_numeric, data = cover_data_RL02))
 
 ### ~~~ *** LINEAR INTERPOLATION (all sites) *** ~~~ ###
 # 1.INITIAL MANUAL CODE (see below for automated process)
