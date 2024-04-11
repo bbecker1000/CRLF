@@ -87,8 +87,11 @@ for (i in 1:nrow(temp_daily_rain_table)) {
   rain_to_date_col[i, 1] <- sum(daysToSum)
 }
 
-colnames(rain_to_date_col) <- c("Rain_to_date")
-within_year_data <- cbind(temp_daily_rain_table, rain_to_date_col) %>% select(-starts_with("day_")) %>% 
-  select(-Weather, -Wind, -AirTemp, -WaterTemp, -WaterVis, -Validation, -SurveyMethodID, -SalinityMethodID, -WaterFlowID, -MassID, -Stranded,
-         -UTMNY_EggObs, -UTMEX_EggObs, -HorizontalError_m, -Lat_EggObs, -Long_EggObs, -GageHeight, -DominantSub, -DominantEmerg, -OtherVeg)
-
+colnames(rain_to_date_col) <- c("rain_to_date")
+onset_of_breeding <- cbind(temp_daily_rain_table, rain_to_date_col) %>% select(-starts_with("day_")) %>% 
+  select(LocationID, BRDYEAR, Watershed, dayOfWY, rain_to_date, MaxD, NumberofEggMasses, yearly_rain) %>% 
+  group_by(BRDYEAR, LocationID) %>% 
+  filter(NumberofEggMasses > 0) %>% 
+  arrange(BRDYEAR, LocationID, dayOfWY) %>% 
+  slice(1) %>% 
+  rename(first_breeding = dayOfWY)
