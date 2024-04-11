@@ -20,16 +20,18 @@ cover_multi_df <- cover_data %>%
 unique(cover_multi_df$LocationID)
 
 # binomial TMB for cover
-m.cover <- glmmTMB(cbind(OpenWater_percent, 100) ~ year_numeric + (1|LocationID), 
+m.cover.bin <- glmmTMB(cbind(OpenWater_percent, 100) ~ year_numeric + (1|LocationID), 
                  family = binomial, 
                  data = cover_multi_df)
-summary(m.cover)
+m.cover.gaussian <- glmmTMB(OpenWater_percent ~ year_numeric + (1|LocationID), 
+                   data = cover_multi_df)
 
-plot_model(m.cover, type = "re")
-plot_model(m.cover, type = "diag")
+summary(m.cover.gaussian)
 
-p.model <- plot_model(m.cover, type = "pred",
-           axis.lim = c(0,1),
+plot_model(m.cover.gaussian, type = "diag")
+
+#plot model
+p.model <- plot_model(m.cover.gaussian, type = "pred",
            show.data=TRUE) + #wrong scale from raw input data...won't plot
   theme_gray(base_size = 18) +
   theme(legend.position = c(0.8, 0.8)) +
@@ -37,14 +39,34 @@ p.model <- plot_model(m.cover, type = "pred",
   xlab("Year") 
 p.model
 
-#plot raw data
-p.raw <- ggplot(cover_multi_df, aes(year_numeric, OpenWater_percent, color = LocationID)) +
-  geom_point(size = 4) +
- # geom_smooth(method = "lm", level = 0.8, alpha = 0.2) +
-  geom_smooth(method = "loess", span = 6, level = 0.8, alpha = 0.2, size = 2) +
-  ylim(0,100) +
+
+#plot model and raw data
+p.model <- plot_model(m.cover.gaussian, type = "pred") +
   theme_gray(base_size = 18) +
   theme(legend.position = c(0.8, 0.8)) +
+  ylab(" ") +
+  xlab("Year")
+  
+p.model + 
+  geom_point(data=cover_multi_df, 
+             aes(x=year_numeric, 
+                 y = OpenWater_percent, 
+                 group = LocationID)) + 
+  geom_smooth(data=cover_multi_df, 
+             aes(x=year_numeric, 
+                 y = OpenWater_percent, 
+                 group = LocationID),
+             method = "lm", alpha = 0.2, level = 0.8) +
+  ylim(0,100)
+
+#plot raw data
+p.raw <- ggplot(cover_multi_df, aes(year_numeric, OpenWater_percent/100, color = LocationID)) +
+  geom_point(size = 4) +
+  geom_smooth(method = "glm",
+              method.args = list(family = binomial()),
+              alpha = 0.2, size = 2, level = 0.8) +
+  theme_gray(base_size = 18) +
+  theme(legend.position = c(0.85, 0.75)) +
   ylab("Percent open water") +
   xlab("Year")
 p.raw 
