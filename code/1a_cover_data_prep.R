@@ -96,18 +96,17 @@ plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC10))
 summary(lm(OpenWater_percent~year_numeric, data = cover_data_RL02))
 plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC02))
 
-
-# linear interpolation of all sites
+### ~~~ *** LINEAR INTERPOLATION (all sites) *** ~~~ ###
+# 1.INITIAL MANUAL CODE (see below for automated process)
 KC01x <- c(0, 12)     
 KC01y <- c(50, 35)   
 
-# Apply approx function 
+## Apply approx function 
 data_approxKC01 <- approx(KC01x, KC01y)        
   
-# Draw output of approx function 
+## Draw output of approx function 
 plot(data_approxKC01$x,                  
      data_approxKC01$y) 
-
 
 KC02x <- c(1, 11) 
 KC02y <- c(20, 0)   
@@ -139,6 +138,16 @@ plot(data_approxRC10$x, data_approxRC10$y)
 
 Df_new <-data.frame(data_approxRC10)
 Df_new
-#create function for correct number of year length
+## create function for correct number of year length
 
+# 2. AUTOMATING APPROXIMATION & ADDING TO DATA TABLE
+# figuring out year range
+library(dplyr)
+cover_data %>% 
+  select_if("first_date" == T) %>% 
+  select(LocationID, year_numeric)
+start_year <- cover_data$first_date == TRUE
+
+  
+  
 
