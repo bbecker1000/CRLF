@@ -20,7 +20,7 @@ plot_model(within_year_model, type = "diag")
 plot_model(within_year_model_lmer, type = "diag")
 
 
-p.raw <- ggplot(onset_of_breeding, aes(x = first_breeding, y = rain_to_date, color = Watershed)) +
+p.raw <- ggplot(onset_of_breeding, aes(x = first_breeding, y = rain_to_date, color = LocationID)) +
   geom_point() +
   geom_smooth(method = "loess", se = FALSE)
 p.raw
