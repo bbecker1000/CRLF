@@ -27,7 +27,7 @@ ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall, color = fa
   labs(title = "Daily Rainfall", x = "Day of water year", y = "Rainfall (inches)")
 
 
-ggplot(data = merged_df_new, aes(x = day_of_year, y = cum_rain, color = factor(Water_Year))) + 
+ggplot(data = merged_df_new, aes(x = day_of_year, y = cum_rain)) + 
   geom_line()+facet_wrap(~Water_Year)+
   geom_vline(aes(xintercept = merged_df$firstEgg),color = "darkolivegreen3")+
   geom_vline(aes(xintercept = merged_df$lastEgg), color = "cornflowerblue")
