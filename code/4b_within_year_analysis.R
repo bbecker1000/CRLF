@@ -13,6 +13,7 @@ source("1_data_prep.R")
 # the internet said Gamma is the correct family to use for timing variables, but I'm not attached to it if anyone has other ideas
 within_year_model <- glmmTMB(first_breeding ~ rain_to_date + (1|LocationID),family = Gamma, data = onset_of_breeding)
 within_year_model_lmer <- lmer(first_breeding ~ rain_to_date  + (1|LocationID), data = onset_of_breeding)
+within_year_model_lmer <- lmer(rain_to_date ~ (1|LocationID), data = onset_of_breeding)
 
 summary(within_year_model)
 summary(within_year_model_lmer)
