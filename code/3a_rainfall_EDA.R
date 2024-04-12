@@ -26,6 +26,16 @@ ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall, color = fa
   geom_smooth(method = "loess", color = "red4", se = FALSE, size = 2) +
   labs(title = "Daily Rainfall", x = "Day of water year", y = "Rainfall (inches)")
 
+
+ggplot(data = merged_df_new, aes(x = day_of_year, y = cum_rain, color = factor(Water_Year))) + 
+  geom_line()+facet_wrap(~Water_Year)+
+  geom_vline(aes(xintercept = merged_df$firstEgg),color = "darkolivegreen3")+
+  geom_vline(aes(xintercept = merged_df$lastEgg), color = "cornflowerblue")
+
+merged_df_new <- left_join(eggTiming_new, rainfall_cum_long, by = "Water_Year")
+merged_df_new <- merged_df_new |>
+  
+
 # plot: day of water year vs. cumulative rainfall
 ggplot(data = rainfall_cum_long, aes(x = day_of_year, y = cum_rain, color = factor(Water_Year))) + 
   geom_line() + 
@@ -33,9 +43,7 @@ ggplot(data = rainfall_cum_long, aes(x = day_of_year, y = cum_rain, color = fact
   labs(title = "Cumulative Rainfall", x = "Day of water year", y = "Cumulative Rainfall (inches)")
 
 merged_df <- left_join(eggTiming_new, rainfall_daily_long, by = "Water_Year")
-merged_df <- merged_df|>
-  group_by(Water_Year)|>
-  mutate(mean_breedingLength = mean(breedingLength, na.rm = TRUE))
+merged_df
 
 # plot: facet wrap by year vs. daily rainfall
 ggplot(data = merged_df, aes(x = day_of_year, y = rainfall)) + 
