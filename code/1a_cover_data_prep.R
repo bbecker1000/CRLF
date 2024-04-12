@@ -155,7 +155,7 @@ last_year <- cover_data %>%
   rename(last_year_numeric = year_numeric)
 
 ## creating column "range" = difference between first and last years
-range_table <- merge(start_year, end_year) %>% 
+range_table <- merge(start_year, last_year) %>% 
   mutate(year_range = last_year_numeric - first_year_numeric)
 
 # start and end year cover values
@@ -195,6 +195,37 @@ approx_table <- start_cover %>%
  ## goal: table with site, year, percent open water
 
 
-  
+
+## BB try using expand.grid
+# create all combinations of year and locationID
+d1 <- expand.grid(
+  year_numeric = c((min(cover_data$year_numeric)):(max(cover_data$year_numeric))),
+  LocationID = c(unique(cover_data$LocationID))
+  )
+
+#select columns wanted from cover_data
+d2 <- cover_data %>%
+  select(LocationID, year_numeric, OpenWater_percent)
+
+#join using unique combinations of locationID and year
+d3 <- as_tibble(left_join(d1, d2, by = c('LocationID'='LocationID', 'year_numeric'='year_numeric')))
+
+library(zoo) #for na.approx function
+d4 <- d3 %>%
+  group_by(LocationID) %>%
+  mutate(OpenWater_percent = na.approx(OpenWater_percent, na.rm=FALSE)) %>%  #interpolate NA by LocationID
+  group_by(LocationID) %>%
+  fill(OpenWater_percent, .direction = "downup") %>%                         #fill in leading and trailing NAs
+  ungroup() %>%
+  filter(year_numeric > 2009)                                                 #remove pre 2010 data
+
+#check data
+ggplot(d4, aes(year_numeric, OpenWater_percent)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(.~LocationID)
+
+
+
   
 
