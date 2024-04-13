@@ -217,7 +217,7 @@ d4 <- d3 %>%
   group_by(LocationID) %>%
   fill(OpenWater_percent, .direction = "downup") %>%                         #fill in leading and trailing NAs
   ungroup() %>%
-  filter(year_numeric > 2009)                                                 #remove pre 2010 data
+  filter(year_numeric > 2009)                                                #remove pre 2010 data
 
 #check data
 ggplot(d4, aes(year_numeric, OpenWater_percent)) +
