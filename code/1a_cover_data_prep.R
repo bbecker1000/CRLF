@@ -143,7 +143,6 @@ Df_new
 
 # 2. AUTOMATING APPROXIMATION & ADDING TO DATA TABLE
 # figuring out year range
-library(dplyr)
 start_year <- cover_data %>% 
   filter(first_date == T) %>% 
   select(LocationID, year_numeric) %>% 
@@ -248,6 +247,8 @@ ggplot(d4EV, aes(year_numeric, EmergentVegetation_percent)) +
   geom_point() +
   geom_line() +
   facet_wrap(.~LocationID)
-  
-  
+
+## ADDING BACK INTO TABLE
+#combined open_water & emergent percents
+cover_estimates <- d4EV %>% merge(d4)
 
