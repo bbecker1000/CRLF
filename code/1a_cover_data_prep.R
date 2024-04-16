@@ -203,6 +203,7 @@ d1 <- expand.grid(
   LocationID = c(unique(cover_data$LocationID))
   )
 
+## OPEN WATER
 #select columns wanted from cover_data
 d2 <- cover_data %>%
   select(LocationID, year_numeric, OpenWater_percent)
@@ -225,7 +226,28 @@ ggplot(d4, aes(year_numeric, OpenWater_percent)) +
   geom_line() +
   facet_wrap(.~LocationID)
 
+## EMERGENT VEGETATION
+#select columns wanted from cover_data
+d2EV <- cover_data %>% 
+  select(LocationID, year_numeric, EmergentVegetation_percent)
 
+#join using unique combinations of locationID and year
+d3EV <- as_tibble(left_join(d1, d2EV, by=c('LocationID'='LocationID', 'year_numeric'='year_numeric')))
 
+# following BB process from above: interpolating and filling in NAs
+d4EV <- d3EV %>% 
+  group_by(LocationID) %>% 
+  mutate(EmergentVegetation_percent = na.approx(EmergentVegetation_percent, na.rm=FALSE)) %>% 
+  group_by(LocationID) %>% 
+  fill(EmergentVegetation_percent, .direction="downup") %>% 
+  ungroup() %>% 
+  filter(year_numeric > 2009)
+
+# check data
+ggplot(d4EV, aes(year_numeric, EmergentVegetation_percent)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(.~LocationID)
+  
   
 
