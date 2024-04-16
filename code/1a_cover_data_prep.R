@@ -252,9 +252,14 @@ ggplot(d4EV, aes(year_numeric, EmergentVegetation_percent)) +
 cover_estimates <- d4EV %>% 
   merge(d4) %>% 
   mutate(SubmergentVegetation_percent = 100 - (EmergentVegetation_percent + OpenWater_percent)) #approximating submergent vegetation
-view(cover_estimates)
-view(cover_data)
 
-d5 <- left_join(cover_data, cover_estimates, by=c('LocationID'='LocationID', 'year_numeric'='year_numeric'))
-view(d5)
+# combined plot
+ggplot(cover_estimates, aes(x=year_numeric)) +
+  geom_line(aes(y=EmergentVegetation_percent), color="darkolivegreen4") +
+  geom_line(aes(y=OpenWater_percent), color="cornflowerblue")+
+  facet_wrap(.~LocationID)+
+  ylab("Percent Cover") +
+  xlab("Year")
+
+
 
