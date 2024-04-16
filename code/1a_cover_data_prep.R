@@ -203,6 +203,7 @@ d1 <- expand.grid(
   LocationID = c(unique(cover_data$LocationID))
   )
 
+## OPEN WATER
 #select columns wanted from cover_data
 d2 <- cover_data %>%
   select(LocationID, year_numeric, OpenWater_percent)
@@ -224,6 +225,8 @@ ggplot(d4, aes(year_numeric, OpenWater_percent)) +
   geom_point() +
   geom_line() +
   facet_wrap(.~LocationID)
+
+## EMERGENT VEGETATION
 
 
 
