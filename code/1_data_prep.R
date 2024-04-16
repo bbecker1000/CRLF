@@ -9,7 +9,6 @@ setwd(here::here("code"))
 raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA.csv"))
 rainfall_daily <- read_csv(here::here("data", "cm_daily_rain.csv"))
 rainfall_yearly <- read_csv(here::here("data", "cm_yearly_rain.csv"))
-cover_data <- read_csv(here::here("data", "canopy_cover.xlsx"))
 
 # removing unnecessary columns, making new column for total vegetation (to make sure it adds to 100), making data types more accurate/easier to use
 # the DATA variable that this pipe generates has all validated rows and has not been filtered
@@ -41,6 +40,10 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
   ungroup() %>% 
   select(-Obsv1, -Obsv2, -Obsv3, -OldMass) %>% 
   left_join(., rainfall_yearly, join_by(BRDYEAR == Water_Year))
+
+# adding in COVER_DATA
+data <- cover_estimates %>% 
+  full_join(data, by=c("LocationID"="LocationID"))
 
 ### ~~~ *** DATA FILTERING *** ~~~ ###
 
@@ -76,6 +79,7 @@ between_year_data <- data %>%
          egg_masses_per_year = sum(NumberofEggMasses), 
          across(everything(), ~first(.))) %>% 
   select(-AvgD, -MaxD, -WaterSalinity, -EggCountGUID, -NumberofEggMasses)
+
 
 ### ~~~ *** WITHIN YEAR DATA *** ~~~ ###
 

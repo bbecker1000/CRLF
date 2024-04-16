@@ -253,3 +253,8 @@ cover_estimates <- d4EV %>%
   merge(d4) %>% 
   mutate(SubmergentVegetation_percent = 100 - (EmergentVegetation_percent + OpenWater_percent)) #approximating submergent vegetation
 view(cover_estimates)
+view(cover_data)
+
+d5 <- left_join(cover_data, cover_estimates, by=c('LocationID'='LocationID', 'year_numeric'='year_numeric'))
+view(d5)
+
