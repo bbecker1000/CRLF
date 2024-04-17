@@ -26,15 +26,14 @@ ggplot(data = rainfall_daily_long, aes(x = day_of_year, y = rainfall, color = fa
   geom_smooth(method = "loess", color = "red4", se = FALSE, size = 2) +
   labs(title = "Daily Rainfall", x = "Day of water year", y = "Rainfall (inches)")
 
+merged_df_new <- left_join(eggTiming_new, rainfall_cum_long, by = "Water_Year")
+merged_df_new <- merged_df_new 
 
 ggplot(data = merged_df_new, aes(x = day_of_year, y = cum_rain)) + 
   geom_line()+facet_wrap(~Water_Year)+
   geom_vline(aes(xintercept = merged_df$firstEgg),color = "darkolivegreen3")+
   geom_vline(aes(xintercept = merged_df$lastEgg), color = "cornflowerblue")
 
-merged_df_new <- left_join(eggTiming_new, rainfall_cum_long, by = "Water_Year")
-merged_df_new <- merged_df_new |>
-  
 
 # plot: day of water year vs. cumulative rainfall
 ggplot(data = rainfall_cum_long, aes(x = day_of_year, y = cum_rain, color = factor(Water_Year))) + 
