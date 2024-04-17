@@ -40,11 +40,13 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
   mutate(obsv_total = sum(!is.na(Obsv1), !is.na(Obsv2), !is.na(Obsv3))) %>% 
   ungroup() %>% 
   select(-Obsv1, -Obsv2, -Obsv3, -OldMass) %>% 
-  left_join(., rainfall_yearly, join_by(BRDYEAR == Water_Year))
+  left_join(., rainfall_yearly, join_by(BRDYEAR == Water_Year)) %>% 
+  left_join(., land_cover, join_by(LocationID, BRDYEAR == year_numeric))
 
-# adding in COVER_DATA
-data <- cover_estimates %>% 
-  full_join(data, by=c("LocationID"="LocationID"))
+# adding in COVER_DATA -- the full join creates a new row for every site for each site/year, which is not what we want. 
+# working code added above
+# data <- cover_estimates %>% 
+#   full_join(data, by=c("LocationID"="LocationID"))
 
 ### ~~~ *** DATA FILTERING *** ~~~ ###
 
