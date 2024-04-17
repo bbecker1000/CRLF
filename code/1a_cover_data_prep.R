@@ -265,7 +265,7 @@ cover_estimates <- d4EV %>%
 write_csv(cover_estimates, here::here("data", "cover_estimates.csv"))
 
 # combined plot
-ggplot(cover_estimates, aes(x=year_numeric)) +
+cover_estimate_plot <- ggplot(cover_estimates, aes(x=year_numeric)) +
   geom_line(aes(y=EmergentVegetation_percent), color="darkolivegreen4") +
   geom_line(aes(y=OpenWater_percent), color="cornflowerblue")+
   facet_wrap(.~LocationID)+
