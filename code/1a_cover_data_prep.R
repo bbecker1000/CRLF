@@ -262,6 +262,7 @@ cover_estimates <- d4EV %>%
   mutate(SubmergentVegetation_percent = 100 - (EmergentVegetation_percent + OpenWater_percent)) %>%  #approximating submergent vegetation
   merge(canopy_boolean)
 
+# converting into csv
 write_csv(cover_estimates, here::here("data", "cover_estimates.csv"))
 
 # combined plot
