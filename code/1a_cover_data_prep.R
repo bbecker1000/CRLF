@@ -248,10 +248,21 @@ ggplot(d4EV, aes(year_numeric, EmergentVegetation_percent)) +
   geom_line() +
   facet_wrap(.~LocationID)
 
+# canopy cover
+canopy_boolean <- cover_data %>% 
+  mutate(canopy = if_else(TreeCover_percent > 0, TRUE, FALSE)) %>% 
+  group_by(LocationID, canopy) %>% 
+  summarize() %>% 
+  arrange(LocationID, desc(canopy)) %>% 
+  distinct(LocationID, .keep_all = TRUE)
+
 ## COMBINING
 cover_estimates <- d4EV %>% 
   merge(d4) %>% 
-  mutate(SubmergentVegetation_percent = 100 - (EmergentVegetation_percent + OpenWater_percent)) #approximating submergent vegetation
+  mutate(SubmergentVegetation_percent = 100 - (EmergentVegetation_percent + OpenWater_percent)) %>%  #approximating submergent vegetation
+  merge(canopy_boolean)
+
+write_csv(cover_estimates, here::here("data", "cover_estimates.csv"))
 
 # combined plot
 ggplot(cover_estimates, aes(x=year_numeric)) +

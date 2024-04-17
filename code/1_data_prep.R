@@ -9,6 +9,7 @@ setwd(here::here("code"))
 raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA.csv"))
 rainfall_daily <- read_csv(here::here("data", "cm_daily_rain.csv"))
 rainfall_yearly <- read_csv(here::here("data", "cm_yearly_rain.csv"))
+land_cover <- read_csv(here::here("data", "cover_estimates.csv"))
 
 # removing unnecessary columns, making new column for total vegetation (to make sure it adds to 100), making data types more accurate/easier to use
 # the DATA variable that this pipe generates has all validated rows and has not been filtered
@@ -69,7 +70,7 @@ data <- data %>%
 ### this is complete besides BULLFROG and COVER DATA ###
 
 between_year_data <- data %>% 
-  select(-dayOfWY, -Date, -Survey_MONTH, -Weather, -Wind, -AirTemp, -WaterTemp, -WaterVis, -Validation, -SurveyMethodID, -SalinityMethodID, -WaterFlowID, -MassID, -Stranded,
+  select(-dayOfWY, -Date, -Survey_MONTH, -Weather, -Wind, -WaterVis, -Validation, -SurveyMethodID, -SalinityMethodID, -WaterFlowID, -MassID, -Stranded,
          -UTMNY_EggObs, -UTMEX_EggObs, -HorizontalError_m, -Lat_EggObs, -Long_EggObs, -beginningWY, -GageHeight, -DominantSub, -DominantEmerg, -OtherVeg, -EventGUID, -obsv_total) %>% 
   group_by(LocationID, BRDYEAR) %>% 
   summarize(avg_max_depth_per_year = mean(MaxD),
