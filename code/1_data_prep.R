@@ -49,48 +49,53 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
     interpolated_sub = SubmergentVegetation_percent,
     interpolated_emerg = EmergentVegetation_percent,
     interpolated_open_water = OpenWater_percent
+  ) %>% 
+  mutate(ground_percent_cover_validation = if_else(ground_sub + ground_emerg + ground_open_water == 100 & !is.na(ground_sub) & !is.na(ground_emerg) & !is.na(ground_open_water), TRUE, FALSE),
+         interpolated_percent_cover_validation = !is.na(interpolated_sub)) %>% 
+  rowwise() %>% 
+  mutate(
+    mean_percent_sub = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_sub", "interpolated_sub")))), ground_sub), interpolated_sub),
+    mean_percent_emerg = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_emerg", "interpolated_emerg")))), ground_emerg), interpolated_emerg),
+    mean_percent_water = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_open_water", "interpolated_open_water")))), ground_open_water), interpolated_open_water)
   )
-  # mutate(percent_cover_validation = if_else(ground_sub + ground_emerg + ground_open_water == 100 | is.na(ground_sub | is.na(ground_emerg) | is.na(ground_open_water), TRUE, FALSE),
-  #        avg_percent_sub = if_else(percent_cover_validation, , NA),
-  #        avg_percent_emerg = ,
-  #        avg_percent_water = ,
-  #        ))
 
 ### ~~~ *** DATA FILTERING *** ~~~ ###
 
-# filter to only include the 7 watersheds that Darren said had the most data
+# filter to only include the 7 watersheds that Darren said had the most data and only sites that had at least 2 surveys in a given year
 data <- data %>% 
+  group_by(LocationID, BRDYEAR) %>% 
+  summarize(survey_count_site_yr = n_distinct(EventGUID), .groups = "drop") %>% 
+  ungroup() %>% 
+  full_join(data, by = c("LocationID" = "LocationID", "BRDYEAR" = "BRDYEAR")) %>% 
+  filter(survey_count_site_yr > 1) %>% 
   filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
            Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
            Watershed == "Wilkins Gulch")
-
-# filters data to only include sites that had at least 2 surveys in a given year
-survey_count_filtered <- data %>% 
-  group_by(LocationID, BRDYEAR) %>% 
-  summarize(survey_count_site_yr = n_distinct(EventGUID), .groups = "drop") %>% 
-  ungroup()
-  
-data <- survey_count_filtered %>%
-  full_join(data, by = c("LocationID" = "LocationID", "BRDYEAR" = "BRDYEAR")) 
-
-data <- data %>%
-  filter(survey_count_site_yr > 1)
 
 ### ~~~ *** BETWEEN YEAR DATA *** ~~~ ###
 ### this is complete besides BULLFROG and COVER DATA ###
 
 between_year_data <- data %>% 
-  select(-dayOfWY, -Date, -Survey_MONTH, -Weather, -Wind, -WaterVis, -Validation, -SurveyMethodID, -SalinityMethodID, -WaterFlowID, -MassID, -Stranded,
-         -UTMNY_EggObs, -UTMEX_EggObs, -HorizontalError_m, -Lat_EggObs, -Long_EggObs, -beginningWY, -GageHeight, -DominantSub, -DominantEmerg, -OtherVeg, -EventGUID, -obsv_total) %>% 
+  select(LocationID, BRDYEAR, Watershed, NumberofEggMasses, AirTemp, WaterTemp, MaxD, WaterSalinity, CoastalSite, yearly_rain, mean_percent_sub, 
+         mean_percent_emerg, mean_percent_water, ground_sub, ground_emerg, ground_open_water, interpolated_sub, interpolated_emerg, interpolated_open_water) %>% 
   group_by(LocationID, BRDYEAR) %>% 
   summarize(avg_max_depth_per_year = mean(MaxD),
          max_max_depth_per_year = max(MaxD),
          avg_salinity_per_year = mean(WaterSalinity, na.rm = TRUE),
          max_salinity_per_year = ifelse(all(is.na(WaterSalinity)), NA, max(WaterSalinity, na.rm = TRUE)),
          egg_masses_per_year = sum(NumberofEggMasses), 
+         mean_percent_sub = mean(mean_percent_sub),
+         mean_percent_emerg = mean(mean_percent_emerg),
+         mean_percent_water = mean(mean_percent_water),
+         mean_ground_sub = mean(ground_sub),
+         mean_ground_emerg = mean(ground_emerg),
+         mean_ground_open_water = mean(ground_open_water),
+         mean_interpolated_sub = mean(interpolated_sub),
+         mean_interpolated_emerg = mean(interpolated_emerg),
+         mean_interpolated_open_water = mean(interpolated_open_water),
          across(everything(), ~first(.))) %>% 
-  select(-AvgD, -MaxD, -WaterSalinity, -EggCountGUID, -NumberofEggMasses)
-
+  select(-MaxD, -WaterSalinity, -NumberofEggMasses, -ground_sub, -ground_emerg, -ground_open_water, -interpolated_sub, -interpolated_emerg, -interpolated_open_water) %>% 
+  ungroup()
 
 ### ~~~ *** WITHIN YEAR DATA *** ~~~ ###
 
