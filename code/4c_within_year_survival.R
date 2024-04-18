@@ -43,10 +43,11 @@ ggsurvplot(
   risk.table.col = "strata",
   conf.int.style = "step", #or ribbon
   xlab = "Culumative rainfall",   # customize X axis label.
-  ylab = "1-p(breeding)",
+  ylab = "p(breeding)",
   break.time.by = 5,      # break X axis in time intervals by 200.
   ggtheme = theme_light(), # customize plot and risk table with a theme.
-  surv.median.line = "hv"# add the median survival pointer.
+  surv.median.line = "hv",  # add the median survival pointer.
+  fun = "event"             #flips plot to culumative probability
   
 )
 

@@ -104,3 +104,4 @@ onset_of_breeding <- cbind(temp_daily_rain_table, rain_to_date_col) %>% select(-
   arrange(BRDYEAR, LocationID, dayOfWY) %>% 
   slice(1) %>% 
   rename(first_breeding = dayOfWY)
+
