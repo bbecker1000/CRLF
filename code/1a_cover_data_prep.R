@@ -194,7 +194,7 @@ approx_table <- start_cover %>%
  ## goal: table with site, year, percent open water
 
 
-
+### ~ WORKING METHOD FOR INTERPOLATIONS ~ ##
 ## BB try using expand.grid
 # create all combinations of year and locationID
 d1 <- expand.grid(
@@ -233,7 +233,7 @@ d2EV <- cover_data %>%
 #join using unique combinations of locationID and year
 d3EV <- as_tibble(left_join(d1, d2EV, by=c('LocationID'='LocationID', 'year_numeric'='year_numeric')))
 
-# following BB process from above: interpolating and filling in NAs
+# following BB process from above: interpolating & filling in NAs
 d4EV <- d3EV %>% 
   group_by(LocationID) %>% 
   mutate(EmergentVegetation_percent = na.approx(EmergentVegetation_percent, na.rm=FALSE)) %>% 
@@ -248,7 +248,24 @@ ggplot(d4EV, aes(year_numeric, EmergentVegetation_percent)) +
   geom_line() +
   facet_wrap(.~LocationID)
 
-# canopy cover
+# SUBMERGENT VEGETATION
+# select columns from cover_data
+d2SV <- cover_data %>% 
+  select(LocationID, year_numeric, SubmergentVegetation_percent)
+
+# join using unique combinations of LocationID and year
+d3SV <- as_tibble(left_join(d1, d2SV, by=c('LocationID'='LocationID', 'year_numeric'='year_numeric')))
+
+## BB process from above: interpolating & filling in NAs
+d4SV <- d3SV %>% 
+  group_by(LocationID) %>% 
+  mutate(SubmergentVegetation_percent = na.approx(SubmergentVegetation_percent, na.rm = FALSE)) %>% 
+  group_by(LocationID) %>% 
+  fill(SubmergentVegetation_percent, .direction = 'downup') %>% 
+  ungroup() %>% 
+  filter(year_numeric >2009)
+# CANOPY COVER
+## canopy cover boolean
 canopy_boolean <- cover_data %>% 
   mutate(canopy = if_else(TreeCover_percent > 0, TRUE, FALSE)) %>% 
   group_by(LocationID, canopy) %>% 
@@ -256,7 +273,12 @@ canopy_boolean <- cover_data %>%
   arrange(LocationID, desc(canopy)) %>% 
   distinct(LocationID, .keep_all = TRUE)
 
-## COMBINING
+## canopy cover linear interpolation
+
+
+
+
+## COMBINING ALL  COVER DATA
 cover_estimates <- d4EV %>% 
   merge(d4) %>% 
   mutate(SubmergentVegetation_percent = 100 - (EmergentVegetation_percent + OpenWater_percent)) %>%  #approximating submergent vegetation
