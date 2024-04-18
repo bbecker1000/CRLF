@@ -264,6 +264,13 @@ d4SV <- d3SV %>%
   fill(SubmergentVegetation_percent, .direction = 'downup') %>% 
   ungroup() %>% 
   filter(year_numeric >2009)
+
+# check data
+ggplot(d4SV, aes(year_numeric, SubmergentVegetation_percent)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(.~LocationID)
+
 # CANOPY COVER
 ## canopy cover boolean
 canopy_boolean <- cover_data %>% 
@@ -274,6 +281,7 @@ canopy_boolean <- cover_data %>%
   distinct(LocationID, .keep_all = TRUE)
 
 ## canopy cover linear interpolation
+
 
 
 
