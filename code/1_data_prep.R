@@ -17,7 +17,7 @@ land_cover <- read_csv(here::here("data", "cover_estimates.csv"))
 # filtered data is denoted below this, and uses DATA as a starting point
 data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -SEASON, -SvyLength, -SvyWidth, -tblEvents.Comments, 
                             -DateEntered, -EventID, -SpeciesID, -WaterDepth, -EggDepth, -Distance, -EggMassStageID, -AS_UTMSOURCE, -AS_UTMZONE, 
-                            -GPS_ID, -tblEggCount_CRLF.Comments, -RangeofEggMasses, -AttachType, -PercentSubVeg, -PercentEmergVeg, -PercentOpenWater) %>% 
+                            -GPS_ID, -tblEggCount_CRLF.Comments, -RangeofEggMasses, -AttachType) %>% 
   filter(Validation == 'TRUE') %>%
   filter(OldMass == "FALSE") %>%
   mutate(Date = strptime(Date, format = "%m/%d/%Y")) %>%
@@ -41,12 +41,20 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
   ungroup() %>% 
   select(-Obsv1, -Obsv2, -Obsv3, -OldMass) %>% 
   left_join(., rainfall_yearly, join_by(BRDYEAR == Water_Year)) %>% 
-  left_join(., land_cover, join_by(LocationID, BRDYEAR == year_numeric))
-
-# adding in COVER_DATA -- the full join creates a new row for every site for each site/year, which is not what we want. 
-# working code added above
-# data <- cover_estimates %>% 
-#   full_join(data, by=c("LocationID"="LocationID"))
+  left_join(., land_cover, join_by(LocationID, BRDYEAR == year_numeric)) %>% 
+  rename(
+    ground_sub = PercentSubVeg,
+    ground_emerg = PercentEmergVeg,
+    ground_open_water = PercentOpenWater,
+    interpolated_sub = SubmergentVegetation_percent,
+    interpolated_emerg = EmergentVegetation_percent,
+    interpolated_open_water = OpenWater_percent
+  )
+  # mutate(percent_cover_validation = if_else(ground_sub + ground_emerg + ground_open_water == 100 | is.na(ground_sub | is.na(ground_emerg) | is.na(ground_open_water), TRUE, FALSE),
+  #        avg_percent_sub = if_else(percent_cover_validation, , NA),
+  #        avg_percent_emerg = ,
+  #        avg_percent_water = ,
+  #        ))
 
 ### ~~~ *** DATA FILTERING *** ~~~ ###
 
@@ -98,7 +106,7 @@ for (i in 1:nrow(temp_daily_rain_table)) {
 
 colnames(rain_to_date_col) <- c("rain_to_date")
 onset_of_breeding <- cbind(temp_daily_rain_table, rain_to_date_col) %>% select(-starts_with("day_")) %>% 
-  select(LocationID, BRDYEAR, Watershed, dayOfWY, rain_to_date, MaxD, NumberofEggMasses, yearly_rain) %>% 
+  select(LocationID, BRDYEAR, Watershed, dayOfWY, rain_to_date, MaxD, NumberofEggMasses, yearly_rain, AirTemp, WaterTemp) %>% 
   group_by(BRDYEAR, LocationID) %>% 
   filter(NumberofEggMasses > 0) %>% 
   arrange(BRDYEAR, LocationID, dayOfWY) %>% 
