@@ -23,7 +23,7 @@ unique(cover_multi_df$LocationID)
 m.cover.bin <- glmmTMB(cbind(OpenWater_percent, 100) ~ year_numeric + (1|LocationID), 
                  family = binomial, 
                  data = cover_multi_df)
-m.cover.gaussian <- glmmTMB(OpenWater_percent ~ year_numeric + (1|LocationID), 
+m.cover.gaussian <- lmer(OpenWater_percent ~ year_numeric + (1|LocationID), 
                    data = cover_multi_df)
 
 summary(m.cover.gaussian)
