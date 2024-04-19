@@ -30,14 +30,7 @@ fit.watershed.rw <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_f, dat
 
 
 fit.depth <- survfit(Surv(MaxD, status) ~ 1, data = onset_of_breeding_surv)
-
-<<<<<<< HEAD
-fit.depth_proportion
-=======
 fit.watertemp <- survfit(Surv(WaterTemp, status) ~ 1, data = onset_of_breeding_surv)
-
-
->>>>>>> 10d423cf79515086c6ac4e28f427c4fa7f2faa27
 
 #pick one to inspect/plot
 fit <- fit.null
