@@ -305,7 +305,7 @@ d4CC <- d3CC %>%
   rename(interpolated_canopy = TreeCover_percent)
 
 # check data
-ggplot(d4cc, aes(year_numeric, interpolated_canopy)) +
+ggplot(d4CC, aes(year_numeric, interpolated_canopy)) +
   geom_point() +
   geom_line() +
   facet_wrap(.~LocationID)
