@@ -26,16 +26,25 @@ fit.watershed <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_f, data =
 
 fit.watershed.rw <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_f, data = d.rw)
 
+fit.watershed.rw <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_f, data = d.rw)
+
 
 fit.depth <- survfit(Surv(MaxD, status) ~ 1, data = onset_of_breeding_surv)
 
+<<<<<<< HEAD
 fit.depth_proportion
+=======
+fit.watertemp <- survfit(Surv(WaterTemp, status) ~ 1, data = onset_of_breeding_surv)
+
+
+>>>>>>> 10d423cf79515086c6ac4e28f427c4fa7f2faa27
 
 #pick one to inspect/plot
 fit <- fit.null
 fit <- fit.watershed
 fit <- fit.depth
 fit <- fit.watershed.rw
+fit <- fit.watertemp
 
 print(fit)
 # Summary of survival curves
@@ -61,9 +70,9 @@ ggsurvplot(
   risk.table = TRUE,       # Add risk table
   risk.table.col = "strata",
   conf.int.style = "step", #or ribbon
-  xlab = "Depth",   # customize X axis label.
+  xlab = "Temp",   # customize X axis label.
   ylab = "p(breeding)",
-  break.time.by = 0.25,      # break X axis in time intervals by 200.
+  break.time.by = 1,      # break X axis in time intervals by 200.
   ggtheme = theme_light(), # customize plot and risk table with a theme.
   surv.median.line = "hv",  # add the median survival pointer.
   fun = "event"             #flips plot to culumative probability
