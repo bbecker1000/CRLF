@@ -76,7 +76,7 @@ between_year_data <- data %>%
   select(LocationID, BRDYEAR, Watershed, NumberofEggMasses, AirTemp, WaterTemp, MaxD, WaterSalinity, CoastalSite, yearly_rain, mean_percent_sub, 
          mean_percent_emerg, mean_percent_water, ground_sub, ground_emerg, ground_open_water, interpolated_submerg, interpolated_emerg, interpolated_openwater) %>% 
   group_by(LocationID, BRDYEAR) %>% 
-  summarize(avg_max_depth_per_year = mean(MaxD),
+  summarize(avg_max_depth_per_year = mean(MaxD, na.rm = TRUE),
          max_max_depth_per_year = max(MaxD),
          avg_salinity_per_year = mean(WaterSalinity, na.rm = TRUE),
          max_salinity_per_year = ifelse(all(is.na(WaterSalinity)), NA, max(WaterSalinity, na.rm = TRUE)),
