@@ -53,7 +53,7 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
   mutate(
     mean_percent_sub = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_sub", "interpolated_submerg")))), ground_sub), interpolated_submerg),
     mean_percent_emerg = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_emerg", "interpolated_emerg")))), ground_emerg), interpolated_emerg),
-    mean_percent_water = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_open_water", "interpolated_openwater")))), ground_open_water), interpolated_openwater)
+    mean_percent_water = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_open_water", "interpolated_open_water")))), ground_open_water), interpolated_openwater)
   )
 
 ### ~~~ *** DATA FILTERING *** ~~~ ###
@@ -89,7 +89,7 @@ between_year_data <- data %>%
          mean_ground_open_water = mean(ground_open_water),
          mean_interpolated_submerg = mean(interpolated_submerg),
          mean_interpolated_emerg = mean(interpolated_emerg),
-         mean_interpolated_openwater = mean(interpolated_openwater),
+         mean_interpolated_open_water = mean(interpolated_openwater),
          across(everything(), ~first(.))) %>% 
   select(-MaxD, -WaterSalinity, -NumberofEggMasses, -ground_sub, -ground_emerg, -ground_open_water, -interpolated_submerg, -interpolated_emerg, -interpolated_openwater) %>% 
   ungroup()
