@@ -265,7 +265,8 @@ d4SV <- d3SV %>%
   group_by(LocationID) %>% 
   fill(SubmergentVegetation_percent, .direction = 'downup') %>% 
   ungroup() %>% 
-  filter(year_numeric >2009)
+  filter(year_numeric >2009) %>% 
+  rename(interpolated_submerg = SubmergentVegetation_percent)
 
 # check data
 ggplot(d4SV, aes(year_numeric, SubmergentVegetation_percent)) +
@@ -298,7 +299,8 @@ d4CC <- d3CC %>%
   group_by(LocationID) %>% 
   fill(TreeCover_percent, .direction='downup') %>% 
   ungroup() %>% 
-  filter(year_numeric > 2009)
+  filter(year_numeric > 2009) %>% 
+  rename(interpolated_canopy = TreeCover_percent)
 
 # check data
 ggplot(d4cc, aes(year_numeric, TreeCover_percent)) +
@@ -324,8 +326,8 @@ cover_colors <- c('OpenWater_percent'='navy', 'EmergentVegetation_percent'="#00a
 cover_estimate_plot <- ggplot(cover_estimates, aes(x=year_numeric)) +
   geom_line(aes(y=OpenWater_percent), color="navy")+
   geom_line(aes(y=EmergentVegetation_percent), color="#00a2ad") +
-  geom_line(aes(y=SubmergentVegetation_percent), color='#65a300')+
-  geom_line(aes(y=TreeCover_percent), color='#b86500')+
+  geom_line(aes(y=interpolated_submerg), color='#65a300')+
+  geom_line(aes(y=interpolated_canopy), color='#b86500')+
   facet_wrap(.~LocationID)+
   labs(y="Percent Cover",
      x= "Year",
