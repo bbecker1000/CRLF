@@ -9,17 +9,20 @@ DAG_FROG <- dagitty("dag{
   Rain -> Vegetation -> FROG ;
   Rain -> Depth -> FROG ;
   Rain -> Site -> FROG;
-  Bullfrog -> FROG ;
   Salinity -> FROG ; 
   Rain -> Salinity ;
+  Canopy -> Temp -> FROG
+  Temp -> FROG
   
   
   Year [exposure] ;
   Site [exposure] ;
   Rain [exposure] ;
   Vegetation [exposure] ;
-  Bullfrog [exposure] ;
   Salinity [exposure] ;
+  Canopy [exposure] ;
+  Temp [exposure] ;
+  FROG [outcome] ;
 }")
 
 plot(DAG_FROG)
@@ -30,17 +33,21 @@ coordinates(DAG_FROG) <- list(x=c(Year=2,
                                    Site=3,
                                    Vegetation=2,
                                    Depth=2.75,
-                                   Bullfrog=2,
+                                 
                                    Salinity=3,
-                                  FROG=2.5),
+                                  FROG=2.5,
+                                  Canopy=2.25,
+                                    Temp=2.25),
                                y=c(Year=-1,
                                    Rain=-4,
                                    Site=-4,
                                    Depth=-2,
                                    Vegetation=-4,
-                                   Bullfrog=-2,
+                                
                                    Salinity=-2,
-                                   FROG=2))
+                                   FROG=2,
+                                   Canopy=-3,
+                                     Temp=-2))
 plot(DAG_FROG)
 
 # frog model using ggdag
