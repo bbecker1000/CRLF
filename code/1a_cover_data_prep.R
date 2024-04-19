@@ -319,14 +319,20 @@ cover_estimates <- d4EV %>%
 write_csv(cover_estimates, here::here("data", "cover_estimates.csv"))
 
 # combined plot
+cover_colors <- c('OpenWater_percent'='navy', 'EmergentVegetation_percent'="#00a2ad", 'SubmergentVegetation_percent'= '#65a300', 'TreeCover_percent'='#b86500')
+
 cover_estimate_plot <- ggplot(cover_estimates, aes(x=year_numeric)) +
-  geom_line(aes(y=EmergentVegetation_percent), color="#00a2ad") +
   geom_line(aes(y=OpenWater_percent), color="navy")+
+  geom_line(aes(y=EmergentVegetation_percent), color="#00a2ad") +
   geom_line(aes(y=SubmergentVegetation_percent), color='#65a300')+
   geom_line(aes(y=TreeCover_percent), color='#b86500')+
   facet_wrap(.~LocationID)+
-  ylab("Percent Cover") +
-  xlab("Year")
+  labs(y="Percent Cover",
+     x= "Year",
+     color = "Legend") +
+  scale_color_manual(labels = c("Open Water", "Emergent", "Submergent", 'Canopy'), 
+                     values = c("navy", "#00a2ad", "#65a300", "#b86500"))
 
+cover_estimate_plot
 
 
