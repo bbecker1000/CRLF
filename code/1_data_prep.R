@@ -114,6 +114,7 @@ onset_of_breeding <- cbind(temp_daily_rain_table, rain_to_date_col) %>% select(-
   select(LocationID, BRDYEAR, Watershed, dayOfWY, rain_to_date, MaxD, NumberofEggMasses, yearly_rain, AirTemp, WaterTemp) %>% 
   group_by(BRDYEAR, LocationID) %>% 
   filter(NumberofEggMasses > 0) %>% 
+  mutate(maxD_yearly = mean(MaxD, na.rm = TRUE)) %>% 
   arrange(BRDYEAR, LocationID, dayOfWY) %>% 
   slice(1) %>% 
   rename(first_breeding = dayOfWY)
