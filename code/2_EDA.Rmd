@@ -57,7 +57,7 @@ Comparing cover data: ground vs. interpolated
 # plots for data comparisons across all sites
 ggplot(data = between_year_data) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_sub), color = "salmon", se = FALSE) +
-  geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_sub), color = "turquoise3")
+  geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_submerg), color = "turquoise3")
 
 ggplot(data = between_year_data) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_emerg), color = "salmon", se = FALSE) +
@@ -70,7 +70,7 @@ ggplot(data = between_year_data) +
 # facet wrap by site
 ggplot(data = between_year_data) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_sub), color = "salmon", se = FALSE) +
-  geom_line(aes(x = BRDYEAR, y = mean_interpolated_sub), color = "turquoise3") +
+  geom_line(aes(x = BRDYEAR, y = mean_interpolated_submerg), color = "turquoise3") +
   facet_wrap(~LocationID)
 
 ggplot(data = between_year_data) + 
