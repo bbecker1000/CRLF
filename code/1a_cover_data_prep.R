@@ -329,9 +329,11 @@ cover_estimate_plot <- ggplot(cover_estimates, aes(x=year_numeric)) +
   facet_wrap(.~LocationID)+
   labs(y="Percent Cover",
      x= "Year",
-     color = "Legend") +
-  scale_color_manual(labels = c("Open Water", "Emergent", "Submergent", 'Canopy'), 
-                     values = c("navy", "#00a2ad", "#65a300", "#b86500"))
+     color = "Legend") 
+  # + scale_color_manual(labels = c("Open Water", "Emergent", "Submergent", 'Canopy'), 
+  #                    values = c("navy", "#00a2ad", "#65a300", "#b86500"))
+
+#TODO: add legend to this plot
 
 cover_estimate_plot
 
