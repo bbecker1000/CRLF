@@ -83,18 +83,18 @@ ggplot(cover_data_TV02_long,aes(x=year_numeric,y=proportion,fill=component)) + g
 cover_data$GoogleEarthPhotoDate <- as.Date(cover_data$GoogleEarthPhotoDate)
 cover_data$year_numeric <- as.numeric(format(cover_data$GoogleEarthPhotoDate, "%Y"))
 
-#  linear models for 5 sites
-summary(lm(OpenWater_percent~year_numeric, data = cover_data_LS01))
-plot(lm(OpenWater_percent~year_numeric, data = cover_data_LS01))
-
-summary(lm(OpenWater_percent~year_numeric, data = cover_data_RC07))
-plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC07))
-
-summary(lm(OpenWater_percent~year_numeric, data = cover_data_RC10))
-plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC10))  
-
-summary(lm(OpenWater_percent~year_numeric, data = cover_data_RL02))
-plot(lm(OpenWater_percent~year_numeric, data = cover_data_RL02))
+# #  linear models for 5 sites
+# summary(lm(OpenWater_percent~year_numeric, data = cover_data_LS01))
+# plot(lm(OpenWater_percent~year_numeric, data = cover_data_LS01))
+# 
+# summary(lm(OpenWater_percent~year_numeric, data = cover_data_RC07))
+# plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC07))
+# 
+# summary(lm(OpenWater_percent~year_numeric, data = cover_data_RC10))
+# plot(lm(OpenWater_percent~year_numeric, data = cover_data_RC10))  
+# 
+# summary(lm(OpenWater_percent~year_numeric, data = cover_data_RL02))
+# plot(lm(OpenWater_percent~year_numeric, data = cover_data_RL02))
 
 ### ~~~ *** LINEAR INTERPOLATION (all sites) *** ~~~ ###
 # 1.INITIAL MANUAL CODE (see below for automated process)
@@ -204,14 +204,14 @@ d1 <- expand.grid(
 
 ## OPEN WATER
 #select columns wanted from cover_data
-d2 <- cover_data %>%
+d2OW <- cover_data %>%
   select(LocationID, year_numeric, OpenWater_percent)
 
 #join using unique combinations of locationID and year
-d3 <- as_tibble(left_join(d1, d2, by = c('LocationID'='LocationID', 'year_numeric'='year_numeric')))
+d3OW <- as_tibble(left_join(d1, d2OW, by = c('LocationID'='LocationID', 'year_numeric'='year_numeric')))
 
 library(zoo) #for na.approx function
-d4 <- d3 %>%
+d4OW <- d3OW %>%
   group_by(LocationID) %>%
   mutate(OpenWater_percent = na.approx(OpenWater_percent, na.rm=FALSE)) %>%  #interpolate NA by LocationID
   group_by(LocationID) %>%
@@ -220,10 +220,11 @@ d4 <- d3 %>%
   filter(year_numeric > 2009)                                                #remove pre 2010 data
 
 #check data
-ggplot(d4, aes(year_numeric, OpenWater_percent)) +
+ggplot(d4OW, aes(year_numeric, OpenWater_percent)) +
   geom_point() +
   geom_line() +
   facet_wrap(.~LocationID)
+
 
 ## EMERGENT VEGETATION
 #select columns wanted from cover_data
@@ -248,6 +249,7 @@ ggplot(d4EV, aes(year_numeric, EmergentVegetation_percent)) +
   geom_line() +
   facet_wrap(.~LocationID)
 
+
 # SUBMERGENT VEGETATION
 # select columns from cover_data
 d2SV <- cover_data %>% 
@@ -271,7 +273,8 @@ ggplot(d4SV, aes(year_numeric, SubmergentVegetation_percent)) +
   geom_line() +
   facet_wrap(.~LocationID)
 
-# CANOPY COVER
+
+# CANOPY (TREE) COVER
 ## canopy cover boolean
 canopy_boolean <- cover_data %>% 
   mutate(canopy = if_else(TreeCover_percent > 0, TRUE, FALSE)) %>% 
@@ -281,24 +284,46 @@ canopy_boolean <- cover_data %>%
   distinct(LocationID, .keep_all = TRUE)
 
 ## canopy cover linear interpolation
+# select columns from cover_data
+d2CC <- cover_data %>% 
+  select(LocationID, year_numeric, TreeCover_percent)
 
+# join using unique combinations of LocationID and year
+d3CC <- as_tibble(left_join(d1, d2CC, by=c('LocationID'='LocationID', 'year_numeric'='year_numeric')))
 
+## BB process from above: interpolating & filling in NAs
+d4CC <- d3CC %>% 
+  group_by(LocationID) %>% 
+  mutate(TreeCover_percent = na.approx(TreeCover_percent, na.rm = FALSE)) %>% 
+  group_by(LocationID) %>% 
+  fill(TreeCover_percent, .direction='downup') %>% 
+  ungroup() %>% 
+  filter(year_numeric > 2009)
+
+# check data
+ggplot(d4cc, aes(year_numeric, TreeCover_percent)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(.~LocationID)
 
 
 
 ## COMBINING ALL  COVER DATA
 cover_estimates <- d4EV %>% 
-  merge(d4) %>% 
-  mutate(SubmergentVegetation_percent = 100 - (EmergentVegetation_percent + OpenWater_percent)) %>%  #approximating submergent vegetation
-  merge(canopy_boolean)
+  merge(d4OW) %>% # open water
+  merge(canopy_boolean) %>% # canopy cover (boolean)
+  merge(d4SV) %>%  # submergent veg
+  merge(d4CC) # canopy cover (data)
 
 # converting into csv
 write_csv(cover_estimates, here::here("data", "cover_estimates.csv"))
 
 # combined plot
 cover_estimate_plot <- ggplot(cover_estimates, aes(x=year_numeric)) +
-  geom_line(aes(y=EmergentVegetation_percent), color="darkolivegreen4") +
-  geom_line(aes(y=OpenWater_percent), color="cornflowerblue")+
+  geom_line(aes(y=EmergentVegetation_percent), color="#00a2ad") +
+  geom_line(aes(y=OpenWater_percent), color="navy")+
+  geom_line(aes(y=SubmergentVegetation_percent), color='#65a300')+
+  geom_line(aes(y=TreeCover_percent), color='#b86500')+
   facet_wrap(.~LocationID)+
   ylab("Percent Cover") +
   xlab("Year")
