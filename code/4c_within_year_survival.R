@@ -29,7 +29,7 @@ fit.watershed.rw <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_f, dat
 
 fit.depth <- survfit(Surv(MaxD, status) ~ 1, data = onset_of_breeding_surv)
 
-
+fit.depth_proportion
 
 #pick one to inspect/plot
 fit <- fit.null
@@ -70,7 +70,13 @@ ggsurvplot(
   
 )
 
+# trying to use cox proportional hazards model to see how multiple covariates affect breeding date
+cox_model <- coxph(Surv(rain_to_date, status) ~ MaxD_proportion + Watershed, data = onset_of_breeding_surv)
+cox_model
 
+# to use the cox model, results of test_assumptions must not be significant, but they are for MaxD_proportion
+test_assumptions <- cox.zph(cox_model)
+test_assumptions
 
-
-
+ggsurvplot(survfit(cox_model), color = "#2E9FDF",
+           ggtheme = theme_minimal())
