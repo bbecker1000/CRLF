@@ -73,7 +73,7 @@ ggsurvplot(
 )
 
 # trying to use cox proportional hazards model to see how multiple covariates affect breeding date
-cox_model <- coxph(Surv(rain_to_date, status) ~ MaxD_proportion + Watershed, data = onset_of_breeding_surv)
+cox_model <- coxph(Surv(rain_to_date, status) ~ MaxD, data = onset_of_breeding_surv)
 cox_model
 
 # to use the cox model, results of test_assumptions must not be significant, but they are for MaxD_proportion
