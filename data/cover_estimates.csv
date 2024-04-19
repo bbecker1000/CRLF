@@ -1,4 +1,4 @@
-LocationID,year_numeric,EmergentVegetation_percent,OpenWater_percent,canopy,SubmergentVegetation_percent,TreeCover_percent
+LocationID,year_numeric,interpolated_emerg,interpolated_openwater,canopy,interpolated_submerg,interpolated_canopy
 KC01,2010,31.25,50,FALSE,0,0
 KC01,2011,31.25,50,FALSE,0,0
 KC01,2012,31.25,50,FALSE,0,0

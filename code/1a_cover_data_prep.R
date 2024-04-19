@@ -217,10 +217,11 @@ d4OW <- d3OW %>%
   group_by(LocationID) %>%
   fill(OpenWater_percent, .direction = "downup") %>%                         #fill in leading and trailing NAs
   ungroup() %>%
-  filter(year_numeric > 2009)                                                #remove pre 2010 data
+  filter(year_numeric > 2009) %>%                                                 #remove pre 2010 data
+  rename(interpolated_openwater=OpenWater_percent)
 
 #check data
-ggplot(d4OW, aes(year_numeric, OpenWater_percent)) +
+ggplot(d4OW, aes(year_numeric, interpolated_openwater)) +
   geom_point() +
   geom_line() +
   facet_wrap(.~LocationID)
@@ -241,10 +242,11 @@ d4EV <- d3EV %>%
   group_by(LocationID) %>% 
   fill(EmergentVegetation_percent, .direction="downup") %>% 
   ungroup() %>% 
-  filter(year_numeric > 2009)
+  filter(year_numeric > 2009) %>% 
+  rename(interpolated_emerg = EmergentVegetation_percent)
 
 # check data
-ggplot(d4EV, aes(year_numeric, EmergentVegetation_percent)) +
+ggplot(d4EV, aes(year_numeric, interpolated_emerg)) +
   geom_point() +
   geom_line() +
   facet_wrap(.~LocationID)
@@ -269,7 +271,7 @@ d4SV <- d3SV %>%
   rename(interpolated_submerg = SubmergentVegetation_percent)
 
 # check data
-ggplot(d4SV, aes(year_numeric, SubmergentVegetation_percent)) +
+ggplot(d4SV, aes(year_numeric, interpolated_submerg)) +
   geom_point() +
   geom_line() +
   facet_wrap(.~LocationID)
@@ -303,7 +305,7 @@ d4CC <- d3CC %>%
   rename(interpolated_canopy = TreeCover_percent)
 
 # check data
-ggplot(d4cc, aes(year_numeric, TreeCover_percent)) +
+ggplot(d4cc, aes(year_numeric, interpolated_canopy)) +
   geom_point() +
   geom_line() +
   facet_wrap(.~LocationID)
@@ -321,11 +323,11 @@ cover_estimates <- d4EV %>%
 write_csv(cover_estimates, here::here("data", "cover_estimates.csv"))
 
 # combined plot
-cover_colors <- c('OpenWater_percent'='navy', 'EmergentVegetation_percent'="#00a2ad", 'SubmergentVegetation_percent'= '#65a300', 'TreeCover_percent'='#b86500')
+cover_colors <- c('interpolated_openwater'='navy', 'interpolated_emerg'="#00a2ad", 'interpolated_submerg'= '#65a300', 'interpolated_canopy'='#b86500')
 
 cover_estimate_plot <- ggplot(cover_estimates, aes(x=year_numeric)) +
-  geom_line(aes(y=OpenWater_percent), color="navy")+
-  geom_line(aes(y=EmergentVegetation_percent), color="#00a2ad") +
+  geom_line(aes(y=interpolated_openwater), color="navy")+
+  geom_line(aes(y=interpolated_emerg), color="#00a2ad") +
   geom_line(aes(y=interpolated_submerg), color='#65a300')+
   geom_line(aes(y=interpolated_canopy), color='#b86500')+
   facet_wrap(.~LocationID)+
