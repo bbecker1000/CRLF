@@ -15,9 +15,9 @@ land_cover <- read_csv(here::here("data", "cover_estimates.csv"))
 # the DATA variable that this pipe generates has all validated rows and has not been filtered
 
 # filtered data is denoted below this, and uses DATA as a starting point
-data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -SEASON, -SvyLength, -SvyWidth, -tblEvents.Comments, 
+data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -SEASON, -SvyLength, -SvyWidth, -tblEvents_Comments, 
                             -DateEntered, -EventID, -SpeciesID, -WaterDepth, -EggDepth, -Distance, -EggMassStageID, -AS_UTMSOURCE, -AS_UTMZONE, 
-                            -GPS_ID, -tblEggCount_CRLF.Comments, -RangeofEggMasses, -AttachType) %>% 
+                            -GPS_ID, -tblEggCount_CRLF_Comments, -AttachType) %>% 
   filter(Validation == 'TRUE') %>%
   filter(OldMass == "FALSE") %>%
   mutate(Date = strptime(Date, format = "%m/%d/%Y")) %>%
@@ -30,7 +30,6 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
       month(Date) > 9 ~ floor_date(Date, unit = "year") + months(9),
       TRUE ~ floor_date(Date, unit = "year") - months(3) # gets the beginning of the water year for each date 
     ) # might be relevant to add that day of water year is zero-indexed, so October 1st is the 0th day of the water year. 
-      # I think this makes the most sense, as computers like zero-indexed things, but humans often don't so we can reconsider if y'all want
   ) %>%
   mutate(dayOfWY = as.numeric(Date - beginningWY)) %>% # adds column for number of days after the beginning of the water year
   mutate(CoastalSite = if_else((LocationID == "LS01" | LocationID == "LS02" | LocationID == "LS03" | LocationID == "LS04" | LocationID == "LS08" | LocationID == "LS11" | 
@@ -48,12 +47,12 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
     ground_open_water = PercentOpenWater
   ) %>% 
   mutate(ground_percent_cover_validation = if_else(ground_sub + ground_emerg + ground_open_water == 100 & !is.na(ground_sub) & !is.na(ground_emerg) & !is.na(ground_open_water), TRUE, FALSE),
-         interpolated_percent_cover_validation = !is.na(interpolated_submerg)) %>% 
+         interpolated_percent_cover_validation = !is.na(interpolated_sub)) %>% 
   rowwise() %>% 
   mutate(
-    mean_percent_sub = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_sub", "interpolated_submerg")))), ground_sub), interpolated_submerg),
-    mean_percent_emerg = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_emerg", "interpolated_emerg")))), ground_emerg), interpolated_emerg),
-    mean_percent_water = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_open_water", "interpolated_openwater")))), ground_open_water), interpolated_openwater)
+    mean_percent_sub = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_sub", "interpolated_sub"))), na.rm = TRUE), ground_sub), interpolated_sub),
+    mean_percent_emerg = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_emerg", "interpolated_emerg"))), na.rm = TRUE), ground_emerg), interpolated_emerg),
+    mean_percent_water = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_open_water", "interpolated_openwater"))), na.rm = TRUE), ground_open_water), interpolated_openwater)
   )
 
 ### ~~~ *** DATA FILTERING *** ~~~ ###
@@ -69,30 +68,62 @@ data <- data %>%
            Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
            Watershed == "Wilkins Gulch")
 
+# codes LS02 and LS03 as LS11
+data <- data %>% 
+  mutate(
+    LocationID = case_when(
+      LocationID == "LS02" | LocationID == "LS03" ~ "LS11",
+      TRUE ~ LocationID
+    )
+  )
+
 ### ~~~ *** BETWEEN YEAR DATA *** ~~~ ###
-### this is complete besides BULLFROG and COVER DATA ###
 
 between_year_data <- data %>% 
   select(LocationID, BRDYEAR, Watershed, NumberofEggMasses, AirTemp, WaterTemp, MaxD, WaterSalinity, CoastalSite, yearly_rain, mean_percent_sub, 
-         mean_percent_emerg, mean_percent_water, ground_sub, ground_emerg, ground_open_water, interpolated_submerg, interpolated_emerg, interpolated_openwater) %>% 
+         mean_percent_emerg, mean_percent_water, ground_sub, ground_emerg, ground_open_water, interpolated_sub, interpolated_emerg, interpolated_openwater) %>% 
   group_by(LocationID, BRDYEAR) %>% 
-  summarize(avg_max_depth_per_year = mean(MaxD, na.rm = TRUE),
-         max_max_depth_per_year = max(MaxD),
-         avg_salinity_per_year = mean(WaterSalinity, na.rm = TRUE),
-         max_salinity_per_year = ifelse(all(is.na(WaterSalinity)), NA, max(WaterSalinity, na.rm = TRUE)),
-         egg_masses_per_year = sum(NumberofEggMasses), 
-         mean_percent_sub = mean(mean_percent_sub),
-         mean_percent_emerg = mean(mean_percent_emerg),
-         mean_percent_water = mean(mean_percent_water),
-         mean_ground_sub = mean(ground_sub),
-         mean_ground_emerg = mean(ground_emerg),
-         mean_ground_open_water = mean(ground_open_water),
-         mean_interpolated_submerg = mean(interpolated_submerg),
-         mean_interpolated_emerg = mean(interpolated_emerg),
-         mean_interpolated_open_water = mean(interpolated_openwater),
+  summarize(
+         mean_max_depth = ifelse(all(is.na(MaxD)), NA, mean(MaxD, na.rm = TRUE)),
+         max_depth = ifelse(all(is.na(MaxD)), NA, max(MaxD, na.rm = TRUE)),
+         mean_salinity = ifelse(all(is.na(WaterSalinity)), NA, mean(WaterSalinity, na.rm = TRUE)),
+         max_salinity = ifelse(all(is.na(WaterSalinity)), NA, max(WaterSalinity, na.rm = TRUE)),
+         AirTemp = ifelse(all(is.na(AirTemp)), NA, mean(AirTemp, na.rm = TRUE)),
+         WaterTemp = ifelse(all(is.na(WaterTemp)), NA, mean(WaterTemp, na.rm = TRUE)),
+         num_egg_masses = sum(NumberofEggMasses, na.rm = TRUE), 
+         mean_percent_sub = ifelse(all(is.na(mean_percent_sub)), NA, mean(mean_percent_sub, na.rm = TRUE)),
+         mean_percent_emerg = ifelse(all(is.na(mean_percent_emerg)), NA, mean(mean_percent_emerg, na.rm = TRUE)),
+         mean_percent_water = ifelse(all(is.na(mean_percent_water)), NA, mean(mean_percent_water, na.rm = TRUE)),
          across(everything(), ~first(.))) %>% 
-  select(-MaxD, -WaterSalinity, -NumberofEggMasses, -ground_sub, -ground_emerg, -ground_open_water, -interpolated_submerg, -interpolated_emerg, -interpolated_openwater) %>% 
+  select(-MaxD, -WaterSalinity, -NumberofEggMasses, -ground_sub, -ground_emerg, -ground_open_water, -interpolated_sub, -interpolated_emerg, -interpolated_openwater) %>% 
   ungroup()
+
+between_year_data_for_cover_comparison <- data %>% 
+  select(LocationID, BRDYEAR, Watershed, NumberofEggMasses, AirTemp, WaterTemp, MaxD, WaterSalinity, CoastalSite, yearly_rain, mean_percent_sub, 
+         mean_percent_emerg, mean_percent_water, ground_sub, ground_emerg, ground_open_water, interpolated_sub, interpolated_emerg, interpolated_openwater) %>% 
+  group_by(LocationID, BRDYEAR) %>% 
+  summarize(
+    mean_max_depth = ifelse(all(is.na(MaxD)), NA, mean(MaxD, na.rm = TRUE)),
+    max_depth = ifelse(all(is.na(MaxD)), NA, max(MaxD, na.rm = TRUE)),
+    mean_salinity = ifelse(all(is.na(WaterSalinity)), NA, mean(WaterSalinity, na.rm = TRUE)),
+    max_salinity = ifelse(all(is.na(WaterSalinity)), NA, max(WaterSalinity, na.rm = TRUE)),
+    AirTemp = ifelse(all(is.na(AirTemp)), NA, mean(AirTemp, na.rm = TRUE)),
+    WaterTemp = ifelse(all(is.na(WaterTemp)), NA, mean(WaterTemp, na.rm = TRUE)),
+    num_egg_masses = sum(NumberofEggMasses, na.rm = TRUE), 
+    mean_percent_sub = ifelse(all(is.na(mean_percent_sub)), NA, mean(mean_percent_sub, na.rm = TRUE)),
+    mean_percent_emerg = ifelse(all(is.na(mean_percent_emerg)), NA, mean(mean_percent_emerg, na.rm = TRUE)),
+    mean_percent_water = ifelse(all(is.na(mean_percent_water)), NA, mean(mean_percent_water, na.rm = TRUE)),
+    mean_ground_sub = ifelse(all(is.na(ground_sub)), NA, mean(ground_sub, na.rm = TRUE)),
+    mean_ground_emerg = ifelse(all(is.na(ground_emerg)), NA, mean(ground_emerg, na.rm = TRUE)),
+    mean_ground_open_water = ifelse(all(is.na(ground_open_water)), NA, mean(ground_open_water, na.rm = TRUE)),
+    mean_interpolated_sub = ifelse(all(is.na(interpolated_sub)), NA, mean(interpolated_sub, na.rm = TRUE)),
+    mean_interpolated_emerg = ifelse(all(is.na(interpolated_emerg)), NA, mean(interpolated_emerg, na.rm = TRUE)),
+    mean_interpolated_open_water = ifelse(all(is.na(interpolated_openwater)), NA, mean(interpolated_openwater, na.rm = TRUE)),
+    across(everything(), ~first(.))) %>% 
+  select(-MaxD, -WaterSalinity, -NumberofEggMasses, -ground_sub, -ground_emerg, -ground_open_water, -interpolated_sub, -interpolated_emerg, -interpolated_openwater) %>% 
+  ungroup()
+
+
 
 ### ~~~ *** WITHIN YEAR DATA *** ~~~ ###
 

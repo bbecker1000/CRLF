@@ -268,10 +268,10 @@ d4SV <- d3SV %>%
   fill(SubmergentVegetation_percent, .direction = 'downup') %>% 
   ungroup() %>% 
   filter(year_numeric >2009) %>% 
-  rename(interpolated_submerg = SubmergentVegetation_percent)
+  rename(interpolated_sub = SubmergentVegetation_percent)
 
 # check data
-ggplot(d4SV, aes(year_numeric, interpolated_submerg)) +
+ggplot(d4SV, aes(year_numeric, interpolated_sub)) +
   geom_point() +
   geom_line() +
   facet_wrap(.~LocationID)

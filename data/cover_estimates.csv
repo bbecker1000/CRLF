@@ -1,4 +1,4 @@
-LocationID,year_numeric,interpolated_emerg,interpolated_openwater,canopy,interpolated_submerg,interpolated_canopy
+LocationID,year_numeric,interpolated_emerg,interpolated_openwater,canopy,interpolated_sub,interpolated_canopy
 KC01,2010,31.25,50,FALSE,0,0
 KC01,2011,31.25,50,FALSE,0,0
 KC01,2012,31.25,50,FALSE,0,0

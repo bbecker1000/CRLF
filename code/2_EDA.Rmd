@@ -55,34 +55,33 @@ Comparing cover data: ground vs. interpolated
 
 ```{r}
 # plots for data comparisons across all sites
-ggplot(data = between_year_data) + 
-  geom_smooth(aes(x = BRDYEAR, y = mean_ground_sub), color = "salmon", se = FALSE) +
-<<<<<<< HEAD
-  geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_sub), color = "turquoise3", se = FALSE)
-=======
-  geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_submerg), color = "turquoise3")
->>>>>>> c9ee606569bfb5f2813901bdb9d78ac635275a91
+cover_comparisons = between_year_data_for_cover_comparison
 
-ggplot(data = between_year_data) + 
+ggplot(data = cover_comparisons) + 
+  geom_smooth(aes(x = BRDYEAR, y = mean_ground_sub), color = "salmon", se = FALSE) +
+  geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_sub), color = "turquoise3", se = FALSE)
+  geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_submerg), color = "turquoise3")
+
+ggplot(data = cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_emerg), color = "salmon", se = FALSE) +
   geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_emerg), color = "turquoise3", se = FALSE)
 
-ggplot(data = between_year_data) + 
+ggplot(data = cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_open_water), color = "salmon", se = FALSE) +
   geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_open_water), color = "turquoise3")
 
 # facet wrap by site
-ggplot(data = between_year_data) + 
+ggplot(data = cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_sub), color = "salmon", se = FALSE) +
   geom_line(aes(x = BRDYEAR, y = mean_interpolated_submerg), color = "turquoise3") +
   facet_wrap(~LocationID)
 
-ggplot(data = between_year_data) + 
+ggplot(data = cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_emerg), color = "salmon", se = FALSE) +
   geom_line(aes(x = BRDYEAR, y = mean_interpolated_emerg), color = "turquoise3", se = FALSE) +
   facet_wrap(~LocationID)
 
-ggplot(data = between_year_data) + 
+ggplot(data = cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_open_water), color = "salmon", se = FALSE) +
   geom_line(aes(x = BRDYEAR, y = mean_interpolated_open_water), color= "turquoise3", se = FALSE) +
   facet_wrap(~LocationID)

@@ -8,8 +8,6 @@ library("survminer")
 #rename file
 onset_of_breeding_surv <- onset_of_breeding
 
-onset_of_breeding_surv$MaxD
-
 onset_of_breeding_surv$MaxD_f <- as.factor(ifelse(onset_of_breeding_surv$MaxD <0.5, "L", 
                                                   ifelse(onset_of_breeding_surv$MaxD >=0.5 & onset_of_breeding_surv$MaxD < 1, "ML",      
                                                          ifelse(onset_of_breeding_surv$MaxD >=1 & onset_of_breeding_surv$MaxD < 1.5, "MH",
