@@ -8,6 +8,7 @@ library("survminer")
 #rename file
 onset_of_breeding_surv <- onset_of_breeding
 
+
 onset_of_breeding_surv$MaxD_f <- as.factor(ifelse(onset_of_breeding_surv$MaxD <0.5, "L", 
                                                   ifelse(onset_of_breeding_surv$MaxD >=0.5 & onset_of_breeding_surv$MaxD < 1, "ML",      
                                                          ifelse(onset_of_breeding_surv$MaxD >=1 & onset_of_breeding_surv$MaxD < 1.5, "MH",
@@ -78,8 +79,8 @@ ggsurvplot(
 MaxD.cox <- coxph(Surv(rain_to_date, status) ~ Watershed, data = onset_of_breeding_surv)
 summary(MaxD.cox)
 
-
-covariates <- c("MaxD_proportion", "AirTemp", "WaterTemp")
+# univariate cox models for continuous variables
+covariates <- c("MaxD_proportion", "AirTemp", "WaterTemp", "BRDYEAR")
 univ_formulas <- sapply(covariates, function(x) as.formula(paste('Surv(rain_to_date, status) ~', x)))
 univ_models <- lapply(univ_formulas, function(x){coxph(x, data = onset_of_breeding_surv)})
 
@@ -105,8 +106,8 @@ as.data.frame(res)
 
 
 # to use the cox model, results of test_assumptions must not be significant, but they are for MaxD_proportion
-test_assumptions <- cox.zph(cox_model)
-test_assumptions
-
-ggsurvplot(survfit(cox_model), color = "#2E9FDF",
-           ggtheme = theme_minimal())
+# test_assumptions <- cox.zph(cox_model)
+# test_assumptions
+# 
+# ggsurvplot(survfit(cox_model), color = "#2E9FDF",
+#            ggtheme = theme_minimal())

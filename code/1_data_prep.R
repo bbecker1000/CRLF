@@ -17,8 +17,8 @@ raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA_no_city_data.csv"))
 # removing unnecessary columns, making new column for total vegetation (to make sure it adds to 100), making data types more accurate/easier to use
 # the DATA variable that this pipe generates has all validated rows and has not been filtered
 
-# filtered data is denoted below this, and uses DATA as a starting point
-data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -SEASON, -SvyLength, -SvyWidth, -tblEvents.Comments, 
+# filtered data is denoted below this, and uses unfiltered_data as a starting point
+unfiltered_data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -SEASON, -SvyLength, -SvyWidth, -tblEvents.Comments, 
                             -DateEntered, -EventID, -SpeciesID, -WaterDepth, -EggDepth, -Distance, -EggMassStageID, -AS_UTMSOURCE, -AS_UTMZONE, 
                             -GPS_ID, -tblEggCount_CRLF.Comments, -AttachType) %>% 
   filter(Validation == 'TRUE') %>%
@@ -36,8 +36,7 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
   ) %>%
   mutate(dayOfWY = as.numeric(Date - beginningWY)) %>% # adds column for number of days after the beginning of the water year
   mutate(CoastalSite = if_else((LocationID == "LS01" | LocationID == "LS02" | LocationID == "LS03" | LocationID == "LS04" | LocationID == "LS08" | LocationID == "LS11" | 
-                                  LocationID == "RC14" | LocationID == "RC20" | LocationID == "RC21" | LocationID == "RL04" | LocationID == "RL05" | LocationID == "TV06" | LocationID == "WG01"), TRUE, FALSE),
-         LocationID = as.factor(LocationID)) %>% 
+                                  LocationID == "RC14" | LocationID == "RC20" | LocationID == "RC21" | LocationID == "RL04" | LocationID == "RL05" | LocationID == "TV06" | LocationID == "WG01"), TRUE, FALSE)) %>% 
   mutate(WaterSalinity = if_else(!CoastalSite & is.na(WaterSalinity), 0, WaterSalinity)) %>% 
   group_by(EggCountGUID) %>% 
   mutate(obsv_total = sum(!is.na(Obsv1), !is.na(Obsv2), !is.na(Obsv3))) %>% 
@@ -56,21 +55,26 @@ data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -
   mutate(
     mean_percent_sub = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_sub", "interpolated_sub"))), na.rm = TRUE), ground_sub), interpolated_sub),
     mean_percent_emerg = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_emerg", "interpolated_emerg"))), na.rm = TRUE), ground_emerg), interpolated_emerg),
-    mean_percent_water = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_open_water", "interpolated_openwater"))), na.rm = TRUE), ground_open_water), interpolated_openwater)
+    mean_percent_water = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_open_water", "interpolated_openwater"))), na.rm = TRUE), ground_open_water), interpolated_openwater),
+    LocationID = as.factor(LocationID)
   )
 
 ### ~~~ *** DATA FILTERING *** ~~~ ###
 
 # filter to only include the 7 watersheds that Darren said had the most data and only sites that had at least 2 surveys in a given year
-data <- data %>% 
+data <- unfiltered_data %>% 
   group_by(LocationID, BRDYEAR) %>% 
   summarize(survey_count_site_yr = n_distinct(EventGUID), .groups = "drop") %>% 
   ungroup() %>% 
-  full_join(data, by = c("LocationID" = "LocationID", "BRDYEAR" = "BRDYEAR")) %>% 
+  full_join(unfiltered_data, by = c("LocationID" = "LocationID", "BRDYEAR" = "BRDYEAR")) %>% 
   filter(survey_count_site_yr > 1) %>% 
   filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
            Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
-           Watershed == "Wilkins Gulch")
+           Watershed == "Wilkins Gulch") %>% 
+  mutate(
+    Watershed = droplevels(Watershed),
+    LocationID = droplevels(LocationID)
+  )
 
 # codes LS02 and LS03 as LS11
 # data <- data %>% 
