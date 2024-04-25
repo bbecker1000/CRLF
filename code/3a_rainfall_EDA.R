@@ -31,8 +31,8 @@ merged_df_new <- merged_df_new
 
 ggplot(data = merged_df_new, aes(x = day_of_year, y = cum_rain)) + 
   geom_line()+facet_wrap(~Water_Year)+
-  geom_vline(aes(xintercept = merged_df$firstEgg),color = "darkolivegreen3")+
-  geom_vline(aes(xintercept = merged_df$lastEgg), color = "cornflowerblue")
+  geom_vline(aes(xintercept = merged_df_new$firstEgg),color = "darkolivegreen3")+
+  geom_vline(aes(xintercept = merged_df_new$lastEgg), color = "cornflowerblue")
 
 
 # plot: day of water year vs. cumulative rainfall
