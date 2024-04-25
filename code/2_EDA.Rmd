@@ -67,8 +67,11 @@ ggplot(data = cover_comparisons) +
 
 ggplot(data = cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_open_water), color = "salmon", se = FALSE) +
-  geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_open_water), color = "turquoise3")
+  geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_open_water), color = "turquoise3",se = FALSE)
 
+```
+
+```{r}
 # facet wrap by site
 ggplot(data = cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_sub), color = "salmon", se = FALSE) +
@@ -85,6 +88,9 @@ ggplot(data = cover_comparisons) +
   geom_line(aes(x = BRDYEAR, y = mean_interpolated_open_water), color= "turquoise3", se = FALSE) +
   facet_wrap(~LocationID)
 
+```
+
+```{r}
 # run correlations for open water and vegetation
 correlations <- cover_comparisons %>% 
   na.omit() %>% 
@@ -103,17 +109,21 @@ overall_cor <- cover_comparisons %>%
 open_water_model <- lm(mean_ground_open_water ~ mean_interpolated_open_water + as.factor(LocationID), data = cover_comparisons)
 summary(open_water_model)
 
-# plotting on-the-ground data on X axis, interpolated on Y axis
-ggplot(data = cover_comparisons, aes(x = mean_ground_open_water, y = mean_interpolated_open_water)) + 
-  geom_smooth(se = FALSE) + 
-  facet_wrap(~LocationID)
-
 sub_veg_model <- lm(mean_ground_sub ~ mean_interpolated_sub, data = cover_comparisons)
 summary(sub_veg_model)
 
 emerg_veg_model <- lm(mean_ground_emerg ~ mean_interpolated_emerg, data = cover_comparisons)
 summary(emerg_veg_model)
 ```
+
+```{r}
+# plotting on-the-ground data on X axis, interpolated on Y axis
+ggplot(data = cover_comparisons, aes(x = mean_ground_open_water, y = mean_interpolated_open_water)) + 
+  geom_smooth(se = FALSE) + 
+  facet_wrap(~LocationID)
+```
+
+
 
 #### eggs
 
