@@ -60,7 +60,6 @@ cover_comparisons = between_year_data_for_cover_comparison
 ggplot(data = cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_sub), color = "salmon", se = FALSE) +
   geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_sub), color = "turquoise3", se = FALSE)
-  geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_submerg), color = "turquoise3")
 
 ggplot(data = cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_emerg), color = "salmon", se = FALSE) +
@@ -73,7 +72,7 @@ ggplot(data = cover_comparisons) +
 # facet wrap by site
 ggplot(data = cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_sub), color = "salmon", se = FALSE) +
-  geom_line(aes(x = BRDYEAR, y = mean_interpolated_submerg), color = "turquoise3") +
+  geom_line(aes(x = BRDYEAR, y = mean_interpolated_sub), color = "turquoise3") +
   facet_wrap(~LocationID)
 
 ggplot(data = cover_comparisons) + 
