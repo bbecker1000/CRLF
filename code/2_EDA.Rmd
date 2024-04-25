@@ -87,7 +87,33 @@ ggplot(data = cover_comparisons) +
   facet_wrap(~LocationID)
 
 # run correlations for open water and vegetation
+correlations <- cover_comparisons %>% 
+  na.omit() %>% 
+  group_by(LocationID) %>% 
+  summarize(open_water_cor = cor(mean_ground_open_water, mean_interpolated_open_water),
+            sub_cor = cor(mean_ground_sub, mean_interpolated_sub),
+            emerg_cor = cor(mean_ground_emerg, mean_interpolated_emerg))
 
+overall_cor <- cover_comparisons %>% 
+  na.omit() %>% 
+  summarize(open_water_cor = cor(mean_ground_open_water, mean_interpolated_open_water),
+            sub_cor = cor(mean_ground_sub, mean_interpolated_sub),
+            emerg_cor = cor(mean_ground_emerg, mean_interpolated_emerg))
+
+# lm's for correlation
+open_water_model <- lm(mean_ground_open_water ~ mean_interpolated_open_water + as.factor(LocationID), data = cover_comparisons)
+summary(open_water_model)
+
+# plotting on-the-ground data on X axis, interpolated on Y axis
+ggplot(data = cover_comparisons, aes(x = mean_ground_open_water, y = mean_interpolated_open_water)) + 
+  geom_smooth(se = FALSE) + 
+  facet_wrap(~LocationID)
+
+sub_veg_model <- lm(mean_ground_sub ~ mean_interpolated_sub, data = cover_comparisons)
+summary(sub_veg_model)
+
+emerg_veg_model <- lm(mean_ground_emerg ~ mean_interpolated_emerg, data = cover_comparisons)
+summary(emerg_veg_model)
 ```
 
 #### eggs
