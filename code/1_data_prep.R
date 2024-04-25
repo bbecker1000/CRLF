@@ -73,13 +73,13 @@ data <- data %>%
            Watershed == "Wilkins Gulch")
 
 # codes LS02 and LS03 as LS11
-data <- data %>% 
-  mutate(
-    LocationID = case_when(
-      LocationID == "LS02" | LocationID == "LS03" ~ "LS11",
-      TRUE ~ LocationID
-    )
-  )
+# data <- data %>% 
+#   mutate(
+#     LocationID = case_when(
+#       LocationID == "LS02" | LocationID == "LS03" ~ "LS11",
+#       TRUE ~ LocationID
+#     )
+#   )
 
 ### ~~~ *** BETWEEN YEAR DATA *** ~~~ ###
 

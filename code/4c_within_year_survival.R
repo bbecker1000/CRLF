@@ -30,8 +30,8 @@ fit.watershed.rw <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_f, dat
 fit.depth <- survfit(Surv(MaxD, status) ~ 1, data = onset_of_breeding_surv)
 fit.watertemp <- survfit(Surv(WaterTemp, status) ~ 1, data = onset_of_breeding_surv)
 
-model_depth_temp <- coxph(Surv(rain_to_date, status) ~ MaxD_proportion + AirTemp + WaterTemp, data = onset_of_breeding_surv)
-ggsurvplot(survfit(model_depth_temp))
+# model_depth_temp <- coxph(Surv(rain_to_date, status) ~ MaxD_proportion, data = onset_of_breeding_surv)
+# ggsurvplot(survfit(model_depth_temp, newdata = list(MaxD_proportion = median(onset_of_breeding_surv$MaxD_proportion))), data = onset_of_breeding_surv, risk.table = TRUE)
 
 
 #pick one to inspect/plot
@@ -74,9 +74,35 @@ ggsurvplot(
   
 )
 
-# trying to use cox proportional hazards model to see how multiple covariates affect breeding date
-cox_model <- coxph(Surv(rain_to_date, status) ~ MaxD, data = onset_of_breeding_surv)
-cox_model
+# cox model: univariate
+MaxD.cox <- coxph(Surv(rain_to_date, status) ~ Watershed, data = onset_of_breeding_surv)
+summary(MaxD.cox)
+
+
+covariates <- c("MaxD_proportion", "AirTemp", "WaterTemp")
+univ_formulas <- sapply(covariates, function(x) as.formula(paste('Surv(rain_to_date, status) ~', x)))
+univ_models <- lapply(univ_formulas, function(x){coxph(x, data = onset_of_breeding_surv)})
+
+univ_results <- lapply(univ_models, function(x) {
+  if (!is.null(x)) {
+    x <- summary(x)
+    p.value <- signif(x$wald["pvalue"], digits = 2)
+    wald.test <- signif(x$wald["test"], digits = 2)
+    beta <- signif(x$coef[1], digits = 2)
+    HR <- signif(x$coef[2], digits = 2)
+    HR.confint.lower <- signif(x$conf.int[,"lower .95"], 2)
+    HR.confint.upper <- signif(x$conf.int[,"upper .95"], 2)
+    HR <- paste0(HR, " (", HR.confint.lower, "-", HR.confint.upper, ")")
+    res <- c(beta, HR, wald.test, p.value)
+    names(res) <- c("beta", "HR (95% CI for HR)", "wald.test", "p.value")
+    return(res)
+  } else {
+    return(rep(NA, 4))  # Return NA for missing models
+  }
+})
+res <- t(as.data.frame(univ_results, check.names = FALSE))
+as.data.frame(res)
+
 
 # to use the cox model, results of test_assumptions must not be significant, but they are for MaxD_proportion
 test_assumptions <- cox.zph(cox_model)
