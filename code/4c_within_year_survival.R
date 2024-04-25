@@ -30,6 +30,10 @@ fit.watershed.rw <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_f, dat
 fit.depth <- survfit(Surv(MaxD, status) ~ 1, data = onset_of_breeding_surv)
 fit.watertemp <- survfit(Surv(WaterTemp, status) ~ 1, data = onset_of_breeding_surv)
 
+model_depth_temp <- coxph(Surv(rain_to_date, status) ~ MaxD_proportion + AirTemp + WaterTemp, data = onset_of_breeding_surv)
+ggsurvplot(survfit(model_depth_temp))
+
+
 #pick one to inspect/plot
 fit <- fit.null
 fit <- fit.watershed

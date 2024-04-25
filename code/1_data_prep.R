@@ -6,18 +6,21 @@ library(reshape2)
 
 # reading in data from spreadsheets
 setwd(here::here("code"))
-raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA.csv"))
+# raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA.csv"))
 rainfall_daily <- read_csv(here::here("data", "cm_daily_rain.csv"))
 rainfall_yearly <- read_csv(here::here("data", "cm_yearly_rain.csv"))
 land_cover <- read_csv(here::here("data", "cover_estimates.csv"))
+
+# temporarily changing raw data to v3 because in v4, some dates are not present in CSV
+raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA_no_city_data.csv"))
 
 # removing unnecessary columns, making new column for total vegetation (to make sure it adds to 100), making data types more accurate/easier to use
 # the DATA variable that this pipe generates has all validated rows and has not been filtered
 
 # filtered data is denoted below this, and uses DATA as a starting point
-data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -SEASON, -SvyLength, -SvyWidth, -tblEvents_Comments, 
+data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, -USGS_ID, -SEASON, -SvyLength, -SvyWidth, -tblEvents.Comments, 
                             -DateEntered, -EventID, -SpeciesID, -WaterDepth, -EggDepth, -Distance, -EggMassStageID, -AS_UTMSOURCE, -AS_UTMZONE, 
-                            -GPS_ID, -tblEggCount_CRLF_Comments, -AttachType) %>% 
+                            -GPS_ID, -tblEggCount_CRLF.Comments, -AttachType) %>% 
   filter(Validation == 'TRUE') %>%
   filter(OldMass == "FALSE") %>%
   mutate(Date = strptime(Date, format = "%m/%d/%Y")) %>%
