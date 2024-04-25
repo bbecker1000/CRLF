@@ -184,12 +184,14 @@ ggplot(data = within_year_data, aes(x = dayOfWY, y = NumberofEggMasses)) + geom_
 ```{r breeding_length}
 # timing (days since october 1) of egg laying by year and watershed
 
-eggTiming <- data %>%
-  filter(NumberofEggMasses > 0) %>%
-  group_by(Watershed, LocationID, BRDYEAR) %>%
+eggTiming<-data|>
+  filter(NumberofEggMasses > 0)|>
+  group_by(Watershed, LocationID, BRDYEAR)|>
   summarize(firstEgg = min(dayOfWY), 
             lastEgg = max(dayOfWY), 
             breedingLength = max(dayOfWY) - min(dayOfWY))
+eggTiming
+
 
 ## plot timing v.1
 ggplot(data = eggTiming, aes(x = BRDYEAR, y = breedingLength, color = Watershed)) + geom_line()
