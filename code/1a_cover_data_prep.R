@@ -328,7 +328,7 @@ cover_colors <- c('interpolated_openwater'='navy', 'interpolated_emerg'="#00a2ad
 cover_estimate_plot <- ggplot(cover_estimates, aes(x=year_numeric)) +
   geom_line(aes(y=interpolated_openwater), color="navy")+
   geom_line(aes(y=interpolated_emerg), color="#00a2ad") +
-  geom_line(aes(y=interpolated_submerg), color='#65a300')+
+  geom_line(aes(y=interpolated_sub), color='#65a300')+
   geom_line(aes(y=interpolated_canopy), color='#b86500')+
   facet_wrap(.~LocationID)+
   labs(y="Percent Cover",
