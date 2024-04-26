@@ -17,17 +17,25 @@ onset_of_breeding_surv$MaxD_f <- as.factor(ifelse(onset_of_breeding_surv$MaxD <0
 onset_of_breeding_surv$status <- 2 
 
 fit1_k6 <- gam(first_breeding~s(rain_to_date, k = 6), data = onset_of_breeding_surv)
+summary(fit1_k6)
 plot(fit1_k6)
 fit1_k7 <- gam(first_breeding~s(WaterTemp, k = 6), data = onset_of_breeding_surv)
 plot(fit1_k7)
-par(mfrow = c(2, 3))
 
 fit_interaction <- gam(first_breeding ~ te(rain_to_date, WaterTemp, k = c(6, 6)), data = onset_of_breeding_surv)
 vis.gam(fit_interaction, view = c("rain_to_date", "WaterTemp"), theta = 30, phi = 30, color = "topo")
+vis.gam(fit_interaction, color = 'cm', plot.type = 'contour')
+points(onset_of_breeding_surv$rain_to_date, onset_of_breeding_surv$WaterTemp, pch = 16)
 
-vis.gam(fit_interaction, view = c("rain_to_date", "WaterTemp"), plot.type = "contour", color = "topo")
+# par(mar = c(5, 5, 4, 2) + 0.1) 
+# vis.gam(fit_interaction, view = c("rain_to_date", "WaterTemp"), plot.type = "contour", color = "topo")
 
-
+fit2_test <- gam(first_breeding ~ s(rain_to_date, k = 10) + s(WaterTemp, k = 10) + s(MaxD, k = 6), data = onset_of_breeding_surv)
+summary(fit2_test)
+plot(fit2_test, select = 1, pch = 20, se = TRUE, rug = TRUE, residuals = TRUE)
+plot(fit2_test, select = 2, pch = 20, se = TRUE, rug = TRUE, residuals = TRUE)
+plot(fit2_test, select = 3, pch = 20, se = TRUE, rug = TRUE, residuals = TRUE)
+vis.gam(fit2_test, view = c("rain_to_date", "WaterTemp"), theta = 30, phi = 30, color = "heat")
 
 
 d.rw <- onset_of_breeding_surv %>% filter(Watershed=="Redwood Creek")
