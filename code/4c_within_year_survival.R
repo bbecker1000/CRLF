@@ -4,7 +4,7 @@
 
 library("survival")
 library("survminer")
-
+library("mgcv")
 #rename file
 onset_of_breeding_surv <- onset_of_breeding
 
@@ -15,6 +15,20 @@ onset_of_breeding_surv$MaxD_f <- as.factor(ifelse(onset_of_breeding_surv$MaxD <0
                                                                 "H"))))
 #assign "dead" to all known breeders.  no censoring.
 onset_of_breeding_surv$status <- 2 
+
+fit1_k6 <- gam(first_breeding~s(rain_to_date, k = 6), data = onset_of_breeding_surv)
+plot(fit1_k6)
+fit1_k7 <- gam(first_breeding~s(WaterTemp, k = 6), data = onset_of_breeding_surv)
+plot(fit1_k7)
+par(mfrow = c(2, 3))
+
+fit_interaction <- gam(first_breeding ~ te(rain_to_date, WaterTemp, k = c(6, 6)), data = onset_of_breeding_surv)
+vis.gam(fit_interaction, view = c("rain_to_date", "WaterTemp"), theta = 30, phi = 30, color = "topo")
+
+vis.gam(fit_interaction, view = c("rain_to_date", "WaterTemp"), plot.type = "contour", color = "topo")
+
+
+
 
 d.rw <- onset_of_breeding_surv %>% filter(Watershed=="Redwood Creek")
 
