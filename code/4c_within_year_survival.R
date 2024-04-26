@@ -20,6 +20,7 @@ fit1_k6 <- gam(first_breeding~s(rain_to_date, k = 6), data = onset_of_breeding_s
 summary(fit1_k6)
 plot(fit1_k6)
 fit1_k7 <- gam(first_breeding~s(WaterTemp, k = 6), data = onset_of_breeding_surv)
+summary(fit1_k7)
 plot(fit1_k7)
 
 fit_interaction <- gam(first_breeding ~ te(rain_to_date, WaterTemp, k = c(6, 6)), data = onset_of_breeding_surv)
