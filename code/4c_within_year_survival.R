@@ -25,9 +25,6 @@ fit.watershed <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_f, data =
 
 fit.watershed.rw <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_f, data = d.rw)
 
-fit.watershed.rw <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_f, data = d.rw)
-
-
 fit.depth <- survfit(Surv(MaxD, status) ~ 1, data = onset_of_breeding_surv)
 fit.watertemp <- survfit(Surv(WaterTemp, status) ~ 1, data = onset_of_breeding_surv)
 
