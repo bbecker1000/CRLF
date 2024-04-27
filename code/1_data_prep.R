@@ -88,8 +88,8 @@ data <- unfiltered_data %>%
 ### ~~~ *** BETWEEN YEAR DATA *** ~~~ ###
 
 between_year_data <- data %>% 
-  select(LocationID, BRDYEAR, Watershed, NumberofEggMasses, AirTemp, WaterTemp, MaxD, WaterSalinity, CoastalSite, yearly_rain, mean_percent_sub, 
-         mean_percent_emerg, mean_percent_water, ground_sub, ground_emerg, ground_open_water, interpolated_sub, interpolated_emerg, interpolated_openwater) %>% 
+  select(LocationID, BRDYEAR, Watershed, NumberofEggMasses, AirTemp, WaterTemp, MaxD, WaterSalinity, CoastalSite, yearly_rain, 
+         ground_sub, ground_emerg, ground_open_water,) %>% 
   group_by(LocationID, BRDYEAR) %>% 
   summarize(
          mean_max_depth = ifelse(all(is.na(MaxD)), NA, mean(MaxD, na.rm = TRUE)),
@@ -99,11 +99,11 @@ between_year_data <- data %>%
          AirTemp = ifelse(all(is.na(AirTemp)), NA, mean(AirTemp, na.rm = TRUE)),
          WaterTemp = ifelse(all(is.na(WaterTemp)), NA, mean(WaterTemp, na.rm = TRUE)),
          num_egg_masses = sum(NumberofEggMasses, na.rm = TRUE), 
-         mean_percent_sub = ifelse(all(is.na(mean_percent_sub)), NA, mean(mean_percent_sub, na.rm = TRUE)),
-         mean_percent_emerg = ifelse(all(is.na(mean_percent_emerg)), NA, mean(mean_percent_emerg, na.rm = TRUE)),
-         mean_percent_water = ifelse(all(is.na(mean_percent_water)), NA, mean(mean_percent_water, na.rm = TRUE)),
+         mean_percent_sub = ifelse(all(is.na(ground_sub)), NA, mean(ground_sub, na.rm = TRUE)),
+         mean_percent_emerg = ifelse(all(is.na(ground_emerg)), NA, mean(ground_emerg, na.rm = TRUE)),
+         mean_percent_water = ifelse(all(is.na(ground_open_water)), NA, mean(ground_open_water, na.rm = TRUE)),
          across(everything(), ~first(.))) %>% 
-  select(-MaxD, -WaterSalinity, -NumberofEggMasses, -ground_sub, -ground_emerg, -ground_open_water, -interpolated_sub, -interpolated_emerg, -interpolated_openwater) %>% 
+  select(-MaxD, -WaterSalinity, -NumberofEggMasses, -ground_sub, -ground_emerg, -ground_open_water) %>% 
   ungroup()
 
 between_year_data_for_cover_comparison <- data %>% 
