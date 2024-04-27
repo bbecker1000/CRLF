@@ -16,6 +16,8 @@ onset_of_breeding_surv$MaxD_f <- as.factor(ifelse(onset_of_breeding_surv$MaxD <0
 #assign "dead" to all known breeders.  no censoring.
 onset_of_breeding_surv$status <- 2 
 
+#Generative additive model: first look at onset of breeding with fixed variables
+#respectively, and plot to see is the line looks linear or curve.
 fit1_k6 <- gam(first_breeding~s(rain_to_date, k = 6), data = onset_of_breeding_surv)
 summary(fit1_k6)
 plot(fit1_k6)
@@ -23,15 +25,38 @@ fit1_k7 <- gam(first_breeding~s(WaterTemp, k = 6), data = onset_of_breeding_surv
 summary(fit1_k7)
 plot(fit1_k7)
 
+#install this package called "gam.hp", it tells the R2 for each fixed variable.
+#somehow this results shows water temperature is not significant? very low R2
+library(gam.hp)
+fit3_test <- gam(first_breeding ~ s(rain_to_date, k = 10) + s(WaterTemp, k = 10), data = onset_of_breeding_surv)
+gam.hp(mod=fit3_test,type="dev")
+permu.gamhp(fit3_test,permutations=100)
+plot(gam.hp(mod=fit3_test,type="dev"))
+
+
+#the 2D and 3D plots for GAM (cumulative rain $ water temp)
 fit_interaction <- gam(first_breeding ~ te(rain_to_date, WaterTemp, k = c(6, 6)), data = onset_of_breeding_surv)
 vis.gam(fit_interaction, view = c("rain_to_date", "WaterTemp"), theta = 30, phi = 30, color = "topo")
 vis.gam(fit_interaction, color = 'cm', plot.type = 'contour')
 points(onset_of_breeding_surv$rain_to_date, onset_of_breeding_surv$WaterTemp, pch = 16)
 
-# par(mar = c(5, 5, 4, 2) + 0.1) 
-# vis.gam(fit_interaction, view = c("rain_to_date", "WaterTemp"), plot.type = "contour", color = "topo")
 
-fit2_test <- gam(first_breeding ~ s(rain_to_date, k = 10) + s(WaterTemp, k = 10) + s(MaxD, k = 6), data = onset_of_breeding_surv)
+#I tried this method using gamm() to include Watershed as random variable, and it gives
+#two summary, one for fixed one for random, still trying to interpret.
+library(nlme) 
+fit_interaction_gamm <- gamm(
+  first_breeding ~ te(rain_to_date, WaterTemp, k = c(10, 10)),
+  random = list(Watershed = ~1),  # Adding random effect for watershed
+  data = onset_of_breeding_surv,
+  method = "REML"  # Using REML for estimating random effects
+)
+summary(fit_interaction_gamm$lme)
+summary(fit_interaction_gamm$gam)
+
+
+#gam model with 3 variables, and MaxD turns out to be insignifant, so we probably
+#don't need to include that in later analysis.
+fit2_test <- gam(first_breeding ~ s(rain_to_date, k = 10) + s(WaterTemp, k = 10) + s(MaxD, k = 10), data = onset_of_breeding_surv)
 summary(fit2_test)
 plot(fit2_test, select = 1, pch = 20, se = TRUE, rug = TRUE, residuals = TRUE)
 plot(fit2_test, select = 2, pch = 20, se = TRUE, rug = TRUE, residuals = TRUE)
