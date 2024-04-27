@@ -29,6 +29,7 @@ plot(fit1_k7)
 #somehow this results shows water temperature is not significant? very low R2
 library(gam.hp)
 fit3_test <- gam(first_breeding ~ s(rain_to_date, k = 10) + s(WaterTemp, k = 10), data = onset_of_breeding_surv)
+gam.hp(fit3_test)
 gam.hp(mod=fit3_test,type="dev")
 permu.gamhp(fit3_test,permutations=100)
 plot(gam.hp(mod=fit3_test,type="dev"))
