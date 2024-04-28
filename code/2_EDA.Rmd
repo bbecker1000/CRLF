@@ -55,7 +55,7 @@ statistics
 
 #### ground vs. interpolated
 
-```{r}
+```{r all_site_cover_comparison}
 # plots for data comparisons across all sites
 cover_comparisons = between_year_data_for_cover_comparison
 
@@ -73,7 +73,7 @@ ggplot(data = cover_comparisons) +
 
 ```
 
-```{r}
+```{r site_cover_comparison}
 # facet wrap by site
 ggplot(data = cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_sub), color = "salmon", se = FALSE) +
@@ -91,7 +91,7 @@ ggplot(data = cover_comparisons) +
   facet_wrap(~LocationID)
 ```
 
-```{r}
+```{r correlations}
 # run correlations for open water and vegetation
 correlations <- cover_comparisons %>% 
   na.omit() %>% 
@@ -169,20 +169,53 @@ ggplot(data = complete_cover_comparisons) +
 
 ```{r}
 # facet wrap by site
+## submergent
 ggplot(data = complete_cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_sub), color = "darkolivegreen3", se = FALSE) +
   geom_line(aes(x = BRDYEAR, y = mean_interpolated_sub), color = "cornflowerblue") +
   facet_wrap(~LocationID)
 
+## emergent
 ggplot(data = complete_cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_emerg), color = "darkolivegreen3", se = FALSE) +
   geom_line(aes(x = BRDYEAR, y = mean_interpolated_emerg), color = "cornflowerblue", se = FALSE) +
   facet_wrap(~LocationID)
 
+## open water
 ggplot(data = complete_cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_open_water), color = "darkolivegreen3", se = FALSE) +
   geom_line(aes(x = BRDYEAR, y = mean_interpolated_open_water), color= "cornflowerblue", se = FALSE) +
   facet_wrap(~LocationID)
+```
+
+```{r}
+# run correlations for open water and vegetation
+
+## by site
+correlations <- complete_cover_comparisons %>% 
+  na.omit() %>% 
+  group_by(LocationID) %>% 
+  summarize(open_water_cor = cor(mean_ground_open_water, mean_interpolated_open_water),
+            sub_cor = cor(mean_ground_sub, mean_interpolated_sub),
+            emerg_cor = cor(mean_ground_emerg, mean_interpolated_emerg))
+
+## overall
+overall_cor <- complete_cover_comparisons %>% 
+  na.omit() %>% 
+  summarize(open_water_cor = cor(mean_ground_open_water, mean_interpolated_open_water),
+            sub_cor = cor(mean_ground_sub, mean_interpolated_sub),
+            emerg_cor = cor(mean_ground_emerg, mean_interpolated_emerg))
+
+
+# lm's for correlation
+open_water_model <- lm(mean_ground_open_water ~ mean_interpolated_open_water + as.factor(LocationID), data = complete_cover_comparisons)
+summary(open_water_model)
+
+sub_veg_model <- lm(mean_ground_sub ~ mean_interpolated_sub, data = complete_cover_comparisons)
+summary(sub_veg_model)
+
+emerg_veg_model <- lm(mean_ground_emerg ~ mean_interpolated_emerg, data = complete_cover_comparisons)
+summary(emerg_veg_model)
 ```
 
 ## eggs
