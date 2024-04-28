@@ -5,16 +5,10 @@
 library("survival")
 library("survminer")
 library("mgcv")
+library(coxme)
+
 #rename file
-onset_of_breeding_surv <- onset_of_breeding
-
-
-onset_of_breeding_surv$MaxD_f <- as.factor(ifelse(onset_of_breeding_surv$MaxD <0.5, "L", 
-                                                  ifelse(onset_of_breeding_surv$MaxD >=0.5 & onset_of_breeding_surv$MaxD < 1, "ML",      
-                                                         ifelse(onset_of_breeding_surv$MaxD >=1 & onset_of_breeding_surv$MaxD < 1.5, "MH",
-                                                                "H"))))
-#assign "dead" to all known breeders.  no censoring.
-onset_of_breeding_surv$status <- 2 
+onset_of_breeding_surv <- read_csv(here::here("data", "onset_of_breeding.csv"))
 
 #Generative additive model: first look at onset of breeding with fixed variables
 #respectively, and plot to see is the line looks linear or curve.
@@ -64,15 +58,19 @@ plot(fit2_test, select = 2, pch = 20, se = TRUE, rug = TRUE, residuals = TRUE)
 plot(fit2_test, select = 3, pch = 20, se = TRUE, rug = TRUE, residuals = TRUE)
 vis.gam(fit2_test, view = c("rain_to_date", "WaterTemp"), theta = 30, phi = 30, color = "heat")
 
+### ~~~ *** SURVIVAL MODELS *** ~~~ ###
+
+#assign "dead" to all known breeders.  no censoring.
+onset_of_breeding_surv$status <- 2 
 
 d.rw <- onset_of_breeding_surv %>% filter(Watershed=="Redwood Creek")
 
 #intercept model of the mean
 fit.null <- survfit(Surv(rain_to_date, status) ~ 1, data = onset_of_breeding_surv)
 #survival (breeding probability) curves by watershed
-fit.watershed <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_f, data = onset_of_breeding_surv)
+fit.watershed <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_proportion, data = onset_of_breeding_surv)
 
-fit.watershed.rw <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_f, data = d.rw)
+fit.watershed.rw <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_proportion, data = d.rw)
 
 fit.depth <- survfit(Surv(MaxD, status) ~ 1, data = onset_of_breeding_surv)
 fit.watertemp <- survfit(Surv(WaterTemp, status) ~ 1, data = onset_of_breeding_surv)
@@ -121,7 +119,15 @@ ggsurvplot(
   
 )
 
-# cox model: univariate
+### ~~~ *** COX MODELS *** ~~~ ###
+# preparation: for logarithmic models, square temperature
+onset_of_breeding_surv <- onset_of_breeding_surv %>% 
+  mutate(
+    AirTemp_log = AirTemp * AirTemp,
+    WaterTemp_log = WaterTemp * WaterTemp
+  )
+
+# cox model: univariate (Watershed)
 MaxD.cox <- coxph(Surv(rain_to_date, status) ~ Watershed, data = onset_of_breeding_surv)
 summary(MaxD.cox)
 
@@ -150,6 +156,17 @@ univ_results <- lapply(univ_models, function(x) {
 res <- t(as.data.frame(univ_results, check.names = FALSE))
 as.data.frame(res)
 
+# multivariate cox
+multi.cox <- coxph(Surv(rain_to_date, status) ~ MaxD_proportion + AirTemp + WaterTemp + BRDYEAR, data = onset_of_breeding_surv) 
+summary(multi.cox)
+
+# multivariate cox with random effects
+multi.cox <- coxme(Surv(rain_to_date, status) ~ MaxD_proportion + AirTemp + WaterTemp + BRDYEAR + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv) 
+summary(multi.cox)
+
+# multivariate cox with random effects -- log temperatures
+multi.cox <- coxme(Surv(rain_to_date, status) ~ MaxD_proportion + AirTemp_log + WaterTemp_log + BRDYEAR + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv) 
+summary(multi.cox)
 
 # to use the cox model, results of test_assumptions must not be significant, but they are for MaxD_proportion
 # test_assumptions <- cox.zph(cox_model)

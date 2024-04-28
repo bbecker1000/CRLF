@@ -106,6 +106,9 @@ between_year_data <- data %>%
   select(-MaxD, -WaterSalinity, -NumberofEggMasses, -ground_sub, -ground_emerg, -ground_open_water) %>% 
   ungroup()
 
+# write to CSV
+write_csv(between_year_data, here::here("data", "between_year_data.csv"))
+
 between_year_data_for_cover_comparison <- data %>% 
   select(LocationID, BRDYEAR, Watershed, NumberofEggMasses, AirTemp, WaterTemp, MaxD, WaterSalinity, CoastalSite, yearly_rain, mean_percent_sub, 
          mean_percent_emerg, mean_percent_water, ground_sub, ground_emerg, ground_open_water, interpolated_sub, interpolated_emerg, interpolated_openwater) %>% 
@@ -156,3 +159,5 @@ onset_of_breeding <- cbind(temp_daily_rain_table, rain_to_date_col) %>% select(-
   slice(1) %>% 
   rename(first_breeding = dayOfWY)
 
+# write to CSV
+write_csv(onset_of_breeding, here::here("data", "onset_of_breeding.csv"))
