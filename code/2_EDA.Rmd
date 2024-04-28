@@ -125,15 +125,17 @@ ggplot(data = cover_comparisons, aes(x = mean_ground_open_water, y = mean_interp
   facet_wrap(~LocationID)
 ```
 
-##### complete cases
+#### complete cases
 
-```{r}
+```{r complete_case}
+cover_comparisons = between_year_data_for_cover_comparison
+
 # creating a "complete case" column
-complete_cover_cases <- complete.cases(cover_comparisons) %>% 
-  tibble() %>% 
-  rename("complete case" = ".") %>% 
-  merge(complete_cover_cases)  %>% 
-  filter(`complete case`==TRUE)
+cover_comparisons$complete_case <- complete.cases(cover_comparisons)
+view(cover_comparisons)
+
+# 161 complete cases
+cover_comparisons %>% filter(complete_case == TRUE)
 ```
 
 ## eggs
