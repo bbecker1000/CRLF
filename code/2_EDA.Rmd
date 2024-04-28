@@ -51,7 +51,9 @@ statistics
 
 # plots
 
-Comparing cover data: ground vs. interpolated
+## cover data
+
+#### ground vs. interpolated
 
 ```{r}
 # plots for data comparisons across all sites
@@ -123,9 +125,18 @@ ggplot(data = cover_comparisons, aes(x = mean_ground_open_water, y = mean_interp
   facet_wrap(~LocationID)
 ```
 
+##### complete cases
 
+```{r}
+# creating a "complete case" column
+complete_cover_cases <- complete.cases(cover_comparisons) %>% 
+  tibble() %>% 
+  rename("complete case" = ".") %>% 
+  merge(complete_cover_cases)  %>% 
+  filter(`complete case`==TRUE)
+```
 
-#### eggs
+## eggs
 
 ```{r mean_NEW_eggs}
 #I made a new "data_after2009"data set and plot the trend line using is, instead of the full "data". (since 2000-2005 all have 0 egg masses, and there are no records from 2009 to 2009)
@@ -311,7 +322,7 @@ ggplot(data = statistics, mapping = aes(x = total_egg_num)) +
 ggplot(data = data, aes(x = obsv_total)) + geom_histogram()
 ```
 
-#### environmental covariates
+## environmental covariates
 
 ```{r}
 #counting the number of non-NA values for the environmental variables we are looking at
