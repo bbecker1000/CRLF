@@ -156,21 +156,21 @@ univ_results <- lapply(univ_models, function(x) {
 res <- t(as.data.frame(univ_results, check.names = FALSE))
 as.data.frame(res)
 
-# multivariate cox
+# choose a model!!
+# multivariate cox, no random effects (don't use)
 multi.cox <- coxph(Surv(rain_to_date, status) ~ MaxD_proportion + AirTemp + WaterTemp + BRDYEAR, data = onset_of_breeding_surv) 
-summary(multi.cox)
-
 # multivariate cox with random effects
 multi.cox <- coxme(Surv(rain_to_date, status) ~ MaxD_proportion + AirTemp + WaterTemp + BRDYEAR + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv) 
-summary(multi.cox)
-
 # multivariate cox with random effects -- log temperatures
 multi.cox <- coxme(Surv(rain_to_date, status) ~ MaxD_proportion + AirTemp_log + WaterTemp_log + BRDYEAR + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv) 
+
+# see summary of the model:
 summary(multi.cox)
 
-# to use the cox model, results of test_assumptions must not be significant, but they are for MaxD_proportion
-# test_assumptions <- cox.zph(cox_model)
-# test_assumptions
-# 
-# ggsurvplot(survfit(cox_model), color = "#2E9FDF",
-#            ggtheme = theme_minimal())
+# to use the cox model, results of test_assumptions must not be significant, but they are for WaterTemp...
+test_assumptions <- cox.zph(multi.cox)
+test_assumptions
+
+# plot model (doesn't work yet)
+ggsurvplot(survfit(multi.cox), color = "#2E9FDF",
+           ggtheme = theme_minimal())
