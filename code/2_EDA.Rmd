@@ -146,6 +146,12 @@ previous_site_number <- between_year_data_for_cover_comparison %>%
   group_by_("LocationID") %>% 
   count()
 
+# TODO: join with previous_site LocationID column to understand missing sites
+complete_with_missing_sites <- previous_site_number %>% 
+  select(LocationID) %>% 
+  full_join(complete_sites)
+
+summary(complete.cases(complete_with_missing_sites)) # lose 23 sites (complete=FALSE), 24 remain
 ```
 
 ##### ground vs. interpolated comparisons (with ONLY complete cases)
