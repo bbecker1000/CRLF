@@ -315,7 +315,6 @@ ggplot(d4CC, aes(year_numeric, interpolated_canopy)) +
 ## COMBINING ALL  COVER DATA
 cover_estimates <- d4EV %>% 
   merge(d4OW) %>% # open water
-  merge(canopy_boolean) %>% # canopy cover (boolean)
   merge(d4SV) %>%  # submergent veg
   merge(d4CC) # canopy cover (data)
 
