@@ -1,12 +1,14 @@
 #survival analysis of first eggs detected
-
 #install.packages(c("survival", "survminer"))
 
+library(tidyverse)
 library("survival")
 library("survminer")
 library("mgcv")
 library(coxme)
+library(here)
 
+setwd(here::here("code"))
 #rename file
 onset_of_breeding_surv <- read_csv(here::here("data", "onset_of_breeding.csv"))
 
@@ -66,7 +68,7 @@ onset_of_breeding_surv$status <- 2
 d.rw <- onset_of_breeding_surv %>% filter(Watershed=="Redwood Creek")
 
 #intercept model of the mean
-fit.null <- survfit(Surv(rain_to_date, status) ~ 1, data = onset_of_breeding_surv)
+fit.null <- survfit(Surv(first_breeding, status) ~ 1, data = onset_of_breeding_surv)
 #survival (breeding probability) curves by watershed
 fit.watershed <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_proportion, data = onset_of_breeding_surv)
 
@@ -123,13 +125,17 @@ ggsurvplot(
 # preparation: for logarithmic models, square temperature
 onset_of_breeding_surv <- onset_of_breeding_surv %>% 
   mutate(
-    AirTemp_log = AirTemp * AirTemp,
-    WaterTemp_log = WaterTemp * WaterTemp
+    AirTemp_squared = AirTemp * AirTemp,
+    WaterTemp_squared = WaterTemp * WaterTemp
   )
 
 # cox model: univariate (Watershed)
-MaxD.cox <- coxph(Surv(rain_to_date, status) ~ Watershed, data = onset_of_breeding_surv)
-summary(MaxD.cox)
+Watershed.cox <- coxph(Surv(rain_to_date, status) ~ Watershed, data = onset_of_breeding_surv)
+summary(Watershed.cox)
+
+# cox model: univariate (Site)
+Site.cox <- coxph(Surv(rain_to_date, status) ~ LocationID, data = onset_of_breeding_surv)
+summary(Site.cox)
 
 # univariate cox models for continuous variables
 covariates <- c("MaxD_proportion", "AirTemp", "WaterTemp", "BRDYEAR")
@@ -158,11 +164,11 @@ as.data.frame(res)
 
 # choose a model!!
 # multivariate cox, no random effects (don't use)
-multi.cox <- coxph(Surv(rain_to_date, status) ~ MaxD_proportion + AirTemp + WaterTemp + BRDYEAR, data = onset_of_breeding_surv) 
+multi.cox <- coxph(Surv(first_breeding, status) ~ MaxD_proportion + AirTemp + WaterTemp + BRDYEAR + rain_to_date, data = onset_of_breeding_surv) 
 # multivariate cox with random effects
-multi.cox <- coxme(Surv(rain_to_date, status) ~ MaxD_proportion + AirTemp + WaterTemp + BRDYEAR + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv) 
+multi.cox <- coxme(Surv(first_breeding, status) ~ MaxD_proportion + AirTemp + AirTemp_squared + WaterTemp + WaterTemp_squared + BRDYEAR + rain_to_date + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv) 
 # multivariate cox with random effects -- log temperatures
-multi.cox <- coxme(Surv(rain_to_date, status) ~ MaxD_proportion + AirTemp_log + WaterTemp_log + BRDYEAR + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv) 
+multi.cox <- coxme(Surv(first_breeding, status) ~ MaxD_proportion + AirTemp_squared + WaterTemp_squared + BRDYEAR + rain_to_date + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv) 
 
 # see summary of the model:
 summary(multi.cox)
@@ -172,5 +178,21 @@ test_assumptions <- cox.zph(multi.cox)
 test_assumptions
 
 # plot model (doesn't work yet)
-ggsurvplot(survfit(multi.cox), color = "#2E9FDF",
-           ggtheme = theme_minimal())
+coefficients <- as.data.frame(summary(multi.cox)$coefficients) %>% 
+  rename(
+    `estimate` = `exp(coef)`,
+    `se` = `se(coef)`
+  )
+plot_data <- data.frame(
+  covariate = rownames(coefficients),
+  hazard_ratio = coefficients$estimate,
+  lower_CI = coefficients$estimate - (1.96 * coefficients$se),
+  upper_CI = coefficients$estimate + (1.96 * coefficients$se)
+)
+
+ggplot(plot_data, aes(x = hazard_ratio, y = covariate)) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "red") +
+  geom_errorbarh(aes(xmin = lower_CI, xmax = upper_CI), height = 0) +
+  geom_point() +
+  labs(x = "Hazard Ratio", y = "Covariate", title = "Coefficient Estimates") +
+  theme_minimal()
