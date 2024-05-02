@@ -75,17 +75,17 @@ ggplot(data = cover_comparisons) +
 
 ```{r site_cover_comparison}
 # facet wrap by site
-ggplot(data = cover_comparisons) + 
+site_sub <- ggplot(data = cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_sub), color = "salmon", se = FALSE) +
   geom_line(aes(x = BRDYEAR, y = mean_interpolated_sub), color = "turquoise3") +
   facet_wrap(~LocationID)
 
-ggplot(data = cover_comparisons) + 
+site_emerg <- ggplot(data = cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_emerg), color = "salmon", se = FALSE) +
   geom_line(aes(x = BRDYEAR, y = mean_interpolated_emerg), color = "turquoise3", se = FALSE) +
   facet_wrap(~LocationID)
 
-ggplot(data = cover_comparisons) + 
+site_open <- ggplot(data = cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_open_water), color = "salmon", se = FALSE) +
   geom_line(aes(x = BRDYEAR, y = mean_interpolated_open_water), color= "turquoise3", se = FALSE) +
   facet_wrap(~LocationID)
@@ -146,7 +146,7 @@ previous_site_number <- between_year_data_for_cover_comparison %>%
   group_by_("LocationID") %>% 
   count()
 
-# TODO: join with previous_site LocationID column to understand missing sites
+# join with previous_site LocationID column to get NAs for missing sites
 complete_with_missing_sites <- previous_site_number %>% 
   select(LocationID) %>% 
   full_join(complete_sites)
@@ -158,17 +158,17 @@ summary(complete.cases(complete_with_missing_sites)) # lose 23 sites (complete=F
 
 ```{r}
 # submergent
-ggplot(data = complete_cover_comparisons) + 
+complete_submergent <- ggplot(data = complete_cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_sub), color = "darkolivegreen3", se = FALSE) +
   geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_sub), color = "cornflowerblue", se = FALSE)
 
 #emergent
-ggplot(data = complete_cover_comparisons) + 
+complete_emergent <- ggplot(data = complete_cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_emerg), color = "darkolivegreen3", se = FALSE) +
   geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_emerg), color = "cornflowerblue", se = FALSE)
 
 #open water
-ggplot(data = complete_cover_comparisons) + 
+complete_open <- ggplot(data = complete_cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_open_water), color = "darkolivegreen3", se = FALSE) +
   geom_smooth(aes(x = BRDYEAR, y = mean_interpolated_open_water), color = "cornflowerblue",se = FALSE)
 ```
@@ -176,19 +176,19 @@ ggplot(data = complete_cover_comparisons) +
 ```{r}
 # facet wrap by site
 ## submergent
-ggplot(data = complete_cover_comparisons) + 
+complete_site_sub <- ggplot(data = complete_cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_sub), color = "darkolivegreen3", se = FALSE) +
   geom_line(aes(x = BRDYEAR, y = mean_interpolated_sub), color = "cornflowerblue") +
   facet_wrap(~LocationID)
 
 ## emergent
-ggplot(data = complete_cover_comparisons) + 
+complete_site_emerg <- ggplot(data = complete_cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_emerg), color = "darkolivegreen3", se = FALSE) +
   geom_line(aes(x = BRDYEAR, y = mean_interpolated_emerg), color = "cornflowerblue", se = FALSE) +
   facet_wrap(~LocationID)
 
 ## open water
-ggplot(data = complete_cover_comparisons) + 
+complete_site_open <- ggplot(data = complete_cover_comparisons) + 
   geom_smooth(aes(x = BRDYEAR, y = mean_ground_open_water), color = "darkolivegreen3", se = FALSE) +
   geom_line(aes(x = BRDYEAR, y = mean_interpolated_open_water), color= "cornflowerblue", se = FALSE) +
   facet_wrap(~LocationID)
