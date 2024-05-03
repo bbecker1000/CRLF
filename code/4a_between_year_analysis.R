@@ -9,7 +9,7 @@ between_year_data <- read_csv(here::here("data", "between_year_data.csv"))
 
 # lmer or glmmTMB model to plot this
 
-## defining covarites from between year data
+## defining covariates from between year data
 egg_mass <- between_year_data$num_egg_masses
 year <- between_year_data$BRDYEAR
 
