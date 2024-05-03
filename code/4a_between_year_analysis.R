@@ -4,8 +4,6 @@ library(here)
 library("bbmle") 
 setwd(here::here("code"))
 
-source("1_data_prep.R")
-
 between_year_data <- read_csv(here::here("data", "between_year_data.csv"))
 
 # lmer or glmmTMB model to plot this
@@ -32,7 +30,7 @@ between_year_data <- read_csv(here::here("data", "between_year_data.csv"))
 # alternatively: dplyr pipe so that all these variables can be in the same data frame
 
 
-# initial model -- MISSING SALINITY
+#### initial model -- MISSING SALINITY ####
 model1 <- glmmTMB(num_egg_masses ~ BRDYEAR + 
                     mean_percent_emerg + 
                     mean_percent_sub +
@@ -77,3 +75,4 @@ model2 <- glmmTMB(num_egg_masses ~ BRDYEAR +
                   ziformula = ~1,
                   family = poisson) 
 summary(model2)
+
