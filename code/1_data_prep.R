@@ -71,6 +71,7 @@ data <- unfiltered_data %>%
   filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
            Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
            Watershed == "Wilkins Gulch") %>% 
+  filter(BRDYEAR > 2009) %>% 
   mutate(
     Watershed = droplevels(Watershed),
     LocationID = droplevels(LocationID)
