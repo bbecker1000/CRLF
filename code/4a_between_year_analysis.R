@@ -45,7 +45,9 @@ model1 <- glmmTMB(num_egg_masses ~ BRDYEAR +
                     WaterTemp +
                     mean_salinity:CoastalSite +
                     max_salinity:CoastalSite +
-                    (1|Watershed/LocationID),
+                    (1 | Watershed) +
+                    (1 | LocationID),
                   data = between_year_data,
+                  ziformula = ~1,
                   family = poisson) 
 summary(model1)
