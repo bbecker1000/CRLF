@@ -1,8 +1,11 @@
-setwd(here::here("code"))
-source("1_data_prep.R")
 library("glmmTMB")
+library(tidyverse)
+library(here)
+setwd(here::here("code"))
 
-between_year_data <- read_xlsx(here::here("data", "between_year_data.csv"))
+source("1_data_prep.R")
+
+between_year_data <- read_csv(here::here("data", "between_year_data.csv"))
 
 # lmer or glmmTMB model to plot this
 
@@ -24,6 +27,9 @@ temp_water <- between_year_data$WaterTemp
 
 watershed <- between_year_data$Watershed
 site <- between_year_data$LocationID
+
+# alternatively: dplyr pipe so that all these variables can be in the same data frame
+
 
 # initial model -- MISSING SALINITY
 model1 <- glmmTMB(egg_mass ~ year + 

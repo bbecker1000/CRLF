@@ -164,11 +164,9 @@ res <- t(as.data.frame(univ_results, check.names = FALSE))
 as.data.frame(res)
 
 # choose a model!!
-# multivariate cox, no random effects (don't use)
-multi.cox <- coxph(Surv(first_breeding, status) ~ MaxD_proportion + AirTemp + WaterTemp + BRDYEAR + rain_to_date, data = onset_of_breeding_surv) 
 # multivariate cox with random effects
 multi.cox <- coxme(Surv(first_breeding, status) ~ MaxD_proportion + AirTemp + AirTemp_squared + WaterTemp + WaterTemp_squared + BRDYEAR + rain_to_date + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv)
-# multivariate with scaled variables
+# multivariate with random effects -- scaled variables
 multi.cox <- coxme(Surv(first_breeding, status) ~ scale(MaxD_proportion) + scale(AirTemp) + scale(AirTemp_squared) + scale(WaterTemp) + scale(WaterTemp_squared) + scale(BRDYEAR) + scale(rain_to_date) + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv)
 
 # see summary of the model:
