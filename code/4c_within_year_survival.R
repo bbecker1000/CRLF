@@ -12,6 +12,7 @@ setwd(here::here("code"))
 #rename file
 onset_of_breeding_surv <- read_csv(here::here("data", "onset_of_breeding.csv"))
 
+### ~~~ *** GAM MODELS *** ~~~ ###
 #Generative additive model: first look at onset of breeding with fixed variables
 #respectively, and plot to see is the line looks linear or curve.
 fit1_k6 <- gam(first_breeding~s(rain_to_date, k = 6), data = onset_of_breeding_surv)
@@ -166,9 +167,9 @@ as.data.frame(res)
 # multivariate cox, no random effects (don't use)
 multi.cox <- coxph(Surv(first_breeding, status) ~ MaxD_proportion + AirTemp + WaterTemp + BRDYEAR + rain_to_date, data = onset_of_breeding_surv) 
 # multivariate cox with random effects
-multi.cox <- coxme(Surv(first_breeding, status) ~ MaxD_proportion + AirTemp + AirTemp_squared + WaterTemp + WaterTemp_squared + BRDYEAR + rain_to_date + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv) 
-# multivariate cox with random effects -- log temperatures
-multi.cox <- coxme(Surv(first_breeding, status) ~ MaxD_proportion + AirTemp_squared + WaterTemp_squared + BRDYEAR + rain_to_date + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv) 
+multi.cox <- coxme(Surv(first_breeding, status) ~ MaxD_proportion + AirTemp + AirTemp_squared + WaterTemp + WaterTemp_squared + BRDYEAR + rain_to_date + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv)
+# multivariate with scaled variables
+multi.cox <- coxme(Surv(first_breeding, status) ~ scale(MaxD_proportion) + scale(AirTemp) + scale(AirTemp_squared) + scale(WaterTemp) + scale(WaterTemp_squared) + scale(BRDYEAR) + scale(rain_to_date) + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv)
 
 # see summary of the model:
 summary(multi.cox)
@@ -177,7 +178,7 @@ summary(multi.cox)
 test_assumptions <- cox.zph(multi.cox)
 test_assumptions
 
-# plot model (doesn't work yet)
+# plot model
 coefficients <- as.data.frame(summary(multi.cox)$coefficients) %>% 
   rename(
     `estimate` = `exp(coef)`,

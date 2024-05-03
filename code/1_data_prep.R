@@ -89,7 +89,7 @@ data <- unfiltered_data %>%
 
 between_year_data <- data %>% 
   select(LocationID, BRDYEAR, Watershed, NumberofEggMasses, AirTemp, WaterTemp, MaxD, WaterSalinity, CoastalSite, yearly_rain, 
-         ground_sub, ground_emerg, ground_open_water,) %>% 
+         ground_sub, ground_emerg, ground_open_water, interpolated_canopy) %>% 
   group_by(LocationID, BRDYEAR) %>% 
   summarize(
          mean_max_depth = ifelse(all(is.na(MaxD)), NA, mean(MaxD, na.rm = TRUE)),
