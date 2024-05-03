@@ -51,3 +51,29 @@ model1 <- glmmTMB(num_egg_masses ~ BRDYEAR +
                   ziformula = ~1,
                   family = poisson) 
 summary(model1)
+
+#### COMPLETE CASES ####
+# creating a "complete case" column
+between_year_data$complete_case <- complete.cases(between_year_data)
+
+# 161 complete cases 
+complete_btw_data <- between_year_data %>% filter(complete_case == TRUE)
+
+model2 <- glmmTMB(num_egg_masses ~ BRDYEAR + 
+                    mean_percent_emerg + 
+                    mean_percent_sub +
+                    mean_percent_water +
+                    interpolated_canopy +
+                    yearly_rain + #total annual rainfall
+                    mean_max_depth +
+                    max_depth +
+                    AirTemp +
+                    WaterTemp +
+                    mean_salinity:CoastalSite +
+                    max_salinity:CoastalSite +
+                    (1 | Watershed) +
+                    (1 | LocationID),
+                  data = complete_btw_data,
+                  ziformula = ~1,
+                  family = poisson) 
+summary(model2)
