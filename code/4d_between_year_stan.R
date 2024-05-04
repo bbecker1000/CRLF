@@ -14,21 +14,21 @@ hist(between_year_data$BRDYEAR)
 
 #setup variables
 EggMasses = between_year_data$num_egg_masses 
-Year = between_year_data$BRDYEAR-2009
-Year_2 = (between_year_data$BRDYEAR-2009)^2
+Year = scale(between_year_data$BRDYEAR-2009)
+Year_2 = scale((between_year_data$BRDYEAR-2009)^2)
   # mean_percent_emerg + 
   # mean_percent_sub +
-Water = between_year_data$mean_percent_water 
-Canopy = between_year_data$interpolated_canopy 
-Rain = between_year_data$yearly_rain 
-mean_max_depth = between_year_data$mean_max_depth 
-max_depth = between_year_data$max_depth
-AirTemp = between_year_data$AirTemp
-AirTemp_2 = (between_year_data$AirTemp)^2
-WaterTemp = between_year_data$WaterTemp
-WaterTemp_2 = (between_year_data$WaterTemp)^2
+Water = scale(between_year_data$mean_percent_water)
+Canopy = scale(between_year_data$interpolated_canopy)
+Rain = scale(between_year_data$yearly_rain)
+mean_max_depth = scale(between_year_data$mean_max_depth)
+max_depth = scale(between_year_data$max_depth)
+AirTemp = scale(between_year_data$AirTemp)
+AirTemp_2 = scale((between_year_data$AirTemp)^2)
+WaterTemp = scale(between_year_data$WaterTemp)
+WaterTemp_2 = scale((between_year_data$WaterTemp)^2)
 CoastalSite = between_year_data$CoastalSite
-Mean_salinity = between_year_data$mean_salinity
+Mean_salinity = scale(between_year_data$mean_salinity)
 Watershed = between_year_data$Watershed #RE
 Location = between_year_data$LocationID #RE
 
@@ -48,7 +48,7 @@ dat=data.frame(
   #  AirTemp_2,
   WaterTemp,  #leave NAs
   #  WaterTemp_2, 
-  #  CoastalSite,
+  CoastalSite,
   #  Mean_salinity,
   #  Watershed,
   Location
@@ -122,9 +122,9 @@ m1.ulam <-  ulam(
       #max_depth,
     # beta_AirTemp*AirTemp +
       #AirTemp_2,
-      beta_WaterTemp*WaterTemp,
+      beta_WaterTemp*WaterTemp +
       #WaterTemp_2, 
-      #CoastalSite,
+      beta_CoastalSite*CoastalSite,
       #Mean_salinity,
       #Watershed,
       
@@ -151,7 +151,8 @@ m1.ulam <-  ulam(
       a_mean_max_depth, 
       beta_Year,
       beta_Year_2,
-      beta_mean_max_depth
+      beta_mean_max_depth,
+      beta_CoastalSite
   )  
   ~ normal( 0 , 0.5 ),      # uninformed
   
@@ -179,7 +180,8 @@ plot(m1.ulam,
               "beta_Rain",
               "beta_WaterTemp",
               "beta_mean_max_depth",
-              "beta_Canopy"),
+              "beta_Canopy",
+              "beta_CoastalSite"),
      xlab = "Beta Coefficient", 
      main = "Stan Model")
 
