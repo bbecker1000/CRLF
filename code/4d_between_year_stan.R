@@ -108,7 +108,7 @@ dat$CoastalSite <- as.integer(ifelse(dat$CoastalSite == "TRUE", 1, 2))
 #run model with missing data and joint probabilities
 t0 <- Sys.time()
 
-m1.ulam <-  ulam(
+m1.ulam.cmdstan.F <-  ulam(
   alist(
     #Egg model
     EggMasses ~ dgampois( mu, exp( phi )),
@@ -172,7 +172,7 @@ t1 <- Sys.time()
 runtime <- t1-t0
 runtime
 
-
+m1.ulam <- m1.ulam.cmdstan.F
 precis(m1.ulam)
 plot(m1.ulam,
      pars = c("beta_Year", 

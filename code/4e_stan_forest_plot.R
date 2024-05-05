@@ -1,12 +1,15 @@
 #causal plots
 library(ggthemes)
 
+rstan::extract(fit)
+
 post <- extract.samples(fit)
 PROBS = c(0.05, 0.5, 0.95) ##80 % CIs
 #Effect of Rain --> Breach --> DO --> Goby
 Rain_MaxDepth <- as_tibble(quantile( with(post, beta_Rain*beta_mean_max_depth), probs = PROBS)) 
 Canopy_WaterTemp <- as_tibble(quantile( with(post, beta_Canopy*beta_WaterTemp), probs = PROBS)) 
 Year <- as_tibble(quantile( with(post, beta_Year), probs = PROBS)) 
+Year_2 <- as_tibble(quantile( with(post, beta_Year_2), probs = PROBS)) 
 Rain <- as_tibble(quantile( with(post, beta_Rain), probs = PROBS)) 
 MaxDepth <- as_tibble(quantile( with(post, beta_mean_max_depth), probs = PROBS)) 
 Canopy <- as_tibble(quantile( with(post, beta_Canopy), probs = PROBS)) 
@@ -14,9 +17,9 @@ Coastal <- as_tibble(quantile( with(post, beta_CoastalSite), probs = PROBS))
 WaterTemp <- as_tibble(quantile( with(post, beta_WaterTemp), probs = PROBS))
 
 
-names<- c("Rain -> MaxDepth","Canopy -> WaterTemp", "Year", "Rain", "MaxDepth", 
+names<- c("Rain -> MaxDepth","Canopy -> WaterTemp", "Year", "Year_2", "Rain", "MaxDepth", 
           "Canopy", "Coastal","WaterTemp")
-plot.posteriors<-rbind(Rain_MaxDepth,Canopy_WaterTemp, Year, Rain, MaxDepth, 
+plot.posteriors<-rbind(Rain_MaxDepth,Canopy_WaterTemp, Year, Year_2, Rain, MaxDepth, 
                        Canopy, Coastal,WaterTemp)
 
 
@@ -24,7 +27,7 @@ plot.posteriors$names <- rep(names, each=3)
 #add probabilities names
 plot.posteriors$probability <- rep(c("lower", "median", "upper"), times = length(names))
 
-plot.posteriors$row <- rep(1:8, each = 3) #make more general later
+plot.posteriors$row <- rep(1:9, each = 3) #make more general later
 
 plot.posteriors.wide <- plot.posteriors %>% 
   group_by(probability) %>%
@@ -42,6 +45,8 @@ plot.posteriors.wide$effect <- ifelse(
                        plot.posteriors.wide$upper >0, 
                      "positive",
                      "neutral"))
+
+
 
 
 print(plot.posteriors.wide)
