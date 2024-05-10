@@ -1,13 +1,11 @@
-library("glmmTMB")
+library(glmmTMB)
 library(tidyverse)
 library(here)
-library("bbmle") 
+library(bbmle) 
 library(lme4)
 setwd(here::here("code"))
 
 between_year_data <- read_csv(here::here("data", "between_year_data.csv"))
-
-# lmer or glmmTMB model to plot this
 
 # ## defining covariates from between year data
 # egg_mass <- between_year_data$num_egg_masses

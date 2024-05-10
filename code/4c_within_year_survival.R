@@ -172,10 +172,6 @@ multi.cox <- coxme(Surv(first_breeding, status) ~ scale(MaxD_proportion) + scale
 # see summary of the model:
 summary(multi.cox)
 
-# to use the cox model, results of test_assumptions must not be significant, but they are for WaterTemp...
-test_assumptions <- cox.zph(multi.cox)
-test_assumptions
-
 # plot model
 coefficients <- as.data.frame(summary(multi.cox)$coefficients) %>% 
   rename(
@@ -194,4 +190,43 @@ ggplot(plot_data, aes(x = hazard_ratio, y = covariate)) +
   geom_errorbarh(aes(xmin = lower_CI, xmax = upper_CI), height = 0) +
   geom_point() +
   labs(x = "Hazard Ratio", y = "Covariate", title = "Coefficient Estimates") +
+  theme_minimal()
+
+ggplot()
+
+# to use the cox model, results of test_assumptions must not be significant, but they are for WaterTemp...
+test_assumptions <- cox.zph(multi.cox)
+test_assumptions
+
+# survfit() won't run with coxme model, so calculating survival probability manually...
+# this does not work yet but i am trying to fix it!!
+coefficients <- fixef(multi.cox)
+
+rain_to_date_values <- seq(min(onset_of_breeding_surv$rain_to_date), max(onset_of_breeding_surv$rain_to_date), length.out = 100)
+BRDYEAR_values <- seq(min(onset_of_breeding_surv$BRDYEAR), max(onset_of_breeding_surv$BRDYEAR), length.out = 100)
+
+survival_data <- expand.grid(rain_to_date = rain_to_date_values, BRDYEAR = BRDYEAR_values)
+survival_data$time = NA
+survival_data$surv = NA
+
+for (i in 1:nrow(survival_data)) {
+  # Create design matrix for the current combination of covariate values
+  X <- model.matrix(~ rain_to_date + BRDYEAR, data = survival_data[i, ])
+  X <- cbind(1, X)
+  
+  # Calculate linear predictor
+  lp <- X %*% coefficients
+  
+  # Calculate survival probabilities
+  survival_prob <- exp(-exp(lp))
+  
+  # Store results
+  survival_data$time[i] <- survival_prob$time
+  survival_data$surv[i] <- survival_prob$surv
+}
+
+# Plot Kaplan-Meier curves
+ggplot(survival_data, aes(x = time, y = surv, group = interaction(rain_to_date, BRDYEAR, WaterTemp))) +
+  geom_line() +
+  labs(x = "Time", y = "Survival Probability", title = "Kaplan-Meier Curves by Covariates") +
   theme_minimal()
