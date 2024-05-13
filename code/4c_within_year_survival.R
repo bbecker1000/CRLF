@@ -12,7 +12,7 @@ setwd(here::here("code"))
 #rename file
 onset_of_breeding_surv <- read_csv(here::here("data", "onset_of_breeding.csv"))
 
-### ~~~ *** GAM MODELS *** ~~~ ###
+#### *** GAM MODELS *** ####
 #Generative additive model: first look at onset of breeding with fixed variables
 #respectively, and plot to see is the line looks linear or curve.
 fit1_k6 <- gam(first_breeding~s(rain_to_date, k = 6), data = onset_of_breeding_surv)
@@ -61,7 +61,7 @@ plot(fit2_test, select = 2, pch = 20, se = TRUE, rug = TRUE, residuals = TRUE)
 plot(fit2_test, select = 3, pch = 20, se = TRUE, rug = TRUE, residuals = TRUE)
 vis.gam(fit2_test, view = c("rain_to_date", "WaterTemp"), theta = 30, phi = 30, color = "heat")
 
-### ~~~ *** SURVIVAL MODELS *** ~~~ ###
+#### *** SURVIVAL MODELS *** ####
 
 #assign "dead" to all known breeders.  no censoring.
 onset_of_breeding_surv$status <- 2 
@@ -122,7 +122,7 @@ ggsurvplot(
   
 )
 
-### ~~~ *** COX MODELS *** ~~~ ###
+#### *** COX MODELS *** ####
 # preparation: for logarithmic models, square temperature
 onset_of_breeding_surv <- onset_of_breeding_surv %>% 
   mutate(
@@ -139,8 +139,8 @@ Site.cox <- coxph(Surv(rain_to_date, status) ~ LocationID, data = onset_of_breed
 summary(Site.cox)
 
 # univariate cox models for continuous variables
-covariates <- c("MaxD_proportion", "AirTemp", "WaterTemp", "BRDYEAR")
-univ_formulas <- sapply(covariates, function(x) as.formula(paste('Surv(rain_to_date, status) ~', x)))
+covariates <- c("MaxD_proportion", "AirTemp", "WaterTemp", "BRDYEAR", "rain_to_date")
+univ_formulas <- sapply(covariates, function(x) as.formula(paste('Surv(first_breeding, status) ~', x)))
 univ_models <- lapply(univ_formulas, function(x){coxph(x, data = onset_of_breeding_surv)})
 
 univ_results <- lapply(univ_models, function(x) {
@@ -169,10 +169,12 @@ multi.cox <- coxme(Surv(first_breeding, status) ~ MaxD_proportion + AirTemp + Ai
 # multivariate with random effects -- scaled variables
 multi.cox <- coxme(Surv(first_breeding, status) ~ scale(MaxD_proportion) + scale(AirTemp) + scale(AirTemp_squared) + scale(WaterTemp) + scale(WaterTemp_squared) + scale(BRDYEAR) + scale(rain_to_date) + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv)
 
+multi.cox <- coxme(Surv(first_breeding, status) ~ scale(AirTemp) + scale(AirTemp_squared) + scale(WaterTemp) + scale(WaterTemp_squared) + scale(rain_to_date) + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv)
+
 # see summary of the model:
 summary(multi.cox)
 
-# plot model
+#### plot model -- forest plot (this one works!) ####
 coefficients <- as.data.frame(summary(multi.cox)$coefficients) %>% 
   rename(
     `estimate` = `exp(coef)`,
@@ -192,11 +194,13 @@ ggplot(plot_data, aes(x = hazard_ratio, y = covariate)) +
   labs(x = "Hazard Ratio", y = "Covariate", title = "Coefficient Estimates") +
   theme_minimal()
 
-ggplot()
-
+#### testing assumptions (this is a mess right now) ####
 # to use the cox model, results of test_assumptions must not be significant, but they are for WaterTemp...
 test_assumptions <- cox.zph(multi.cox)
 test_assumptions
+print(test_assumptions)
+plot(test_assumptions)
+
 
 # survfit() won't run with coxme model, so calculating survival probability manually...
 # this does not work yet but i am trying to fix it!!

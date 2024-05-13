@@ -3,32 +3,11 @@ library(tidyverse)
 library(here)
 library(bbmle) 
 library(lme4)
+library(sjPlot)
 setwd(here::here("code"))
 
 between_year_data <- read_csv(here::here("data", "between_year_data.csv"))
 
-# ## defining covariates from between year data
-# egg_mass <- between_year_data$num_egg_masses
-# year <- between_year_data$BRDYEAR
-# 
-# emerg_veg <- between_year_data$mean_percent_emerg
-# sub_veg <- between_year_data$mean_percent_sub
-# water <- between_year_data$mean_percent_water
-# canopy <- between_year_data$interpolated_canopy
-# 
-# rain <- between_year_data$yearly_rain
-# mean_max_depth <- between_year_data$mean_max_depth
-# max_depth <- between_year_data$max_depth
-# 
-# temp_air <- between_year_data$AirTemp
-# temp_water <- between_year_data$WaterTemp
-# 
-# watershed <- between_year_data$Watershed
-# site <- between_year_data$LocationID
-
-# alternatively: dplyr pipe so that all these variables can be in the same data frame
-
-hist(complete_btw_data$num_egg_masses, n = 150)
 #### initial model -- MISSING SALINITY ####
 model1 <- glmmTMB(num_egg_masses ~ BRDYEAR + 
                     # mean_percent_emerg + 
@@ -49,6 +28,7 @@ model1 <- glmmTMB(num_egg_masses ~ BRDYEAR +
                   family = nbinom2) 
 summary(model1)
 
+#### lme4 model ####
 model1 <- glmer(num_egg_masses ~ I(BRDYEAR - 2009) + 
                     # mean_percent_emerg + 
                     # mean_percent_sub +
@@ -67,29 +47,54 @@ model1 <- glmer(num_egg_masses ~ I(BRDYEAR - 2009) +
                   # ziformula = ~1,
                   family = negative.binomial(1)) 
 summary(model1)
-#### COMPLETE CASES ####
+
+#### complete case model with scaled covariates ####
 # creating a "complete case" column
 between_year_data$complete_case <- complete.cases(between_year_data)
-
-# 161 complete cases 
 complete_btw_data <- between_year_data %>% filter(complete_case == TRUE)
 
-model2 <- glmmTMB(num_egg_masses ~ BRDYEAR + 
-                    mean_percent_emerg + 
-                    mean_percent_sub +
-                    mean_percent_water +
-                    interpolated_canopy +
-                    yearly_rain + #total annual rainfall
-                    mean_max_depth +
-                    max_depth +
-                    AirTemp +
-                    WaterTemp +
-                    mean_salinity:CoastalSite +
-                    max_salinity:CoastalSite +
-                    (1 | Watershed) +
-                    (1 | LocationID),
-                  data = complete_btw_data,
-                  ziformula = ~1,
-                  family = poisson) 
-summary(model2)
+# scaling covariates
+scaled_between_year <- complete_btw_data %>% 
+  mutate(
+    BRDYEAR = scale(BRDYEAR),
+    mean_percent_sub = scale(mean_percent_sub),
+    mean_percent_emerg = scale(mean_percent_emerg),
+    mean_percent_water = scale(mean_percent_water),
+    interpolated_canopy = scale(interpolated_canopy),
+    yearly_rain = scale(yearly_rain),
+    mean_max_depth = scale(mean_max_depth),
+    max_depth = scale(max_depth),
+    AirTemp = scale(AirTemp),
+    WaterTemp = scale(WaterTemp),
+    mean_salinity = scale(mean_salinity),
+    max_salinity = scale(max_salinity)
+  )
+
+complete_case_model <- glmmTMB(num_egg_masses ~ BRDYEAR + 
+                                 mean_percent_emerg + 
+                                 mean_percent_sub +
+                                 mean_percent_water +
+                                 interpolated_canopy +
+                                 yearly_rain + 
+                                 mean_max_depth +
+                                 max_depth +
+                                 AirTemp +
+                                 WaterTemp +
+                                 mean_salinity:CoastalSite +
+                                 max_salinity:CoastalSite +
+                                 (1 | Watershed) +
+                                 (1 | LocationID),
+                               data = scaled_between_year,
+                               ziformula = ~1,
+                               family = poisson) 
+summary(complete_case_model)
+
+
+
+#### plotting complete case model ####
+# plot_model(complete_case_model, type = ("est"), terms = c("BRDYEAR", "yearly_rain", "mean_percent_emerg") )
+
+
+
+
 
