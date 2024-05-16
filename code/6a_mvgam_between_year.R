@@ -33,9 +33,69 @@ model_data %>%
   # Create a 'year_fac' factor version of 'year'
   dplyr::mutate(year_fac = factor(year)) -> model_data
 
-attach(rstan)
+
 model1 <- mvgam(count ~ s(year_fac, bs = 're') - 1,
                 family = poisson(),
                 data = model_data)
 
-searchsummary(model1)
+summary(model1)
+code(model1)
+plot(model1, type = 're')
+mcmc_plot(object = model1,
+          variable = 'betas',
+          type = 'areas')
+pp_check(object = model1)
+plot(model1, type = 'forecast')
+
+model_data %>% 
+  dplyr::filter(time <= 160) -> data_train 
+model_data %>% 
+  dplyr::filter(time > 160) -> data_test
+model1b <- mvgam(count ~ s(year_fac, bs = 're') - 1,
+                 family = poisson(),
+                 data = data_train,
+                 newdata = data_test)
+plot(model1b, type = 'forecast', newdata = data_test)
+
+
+
+model2 <- mvgam(count ~ s(year_fac, bs = 're') + 
+                  ndvi - 1,
+                family = poisson(),
+                data = data_train,
+                newdata = data_test)
+
+summary(model2)
+
+beta_post <- as.data.frame(model2, variable = 'betas')
+hist(beta_post$ndvi,
+     xlim = c(-1 * max(abs(beta_post$ndvi)),
+              max(abs(beta_post$ndvi))),
+     col = 'darkred',
+     border = 'white',
+     xlab = expression(beta[NDVI]),
+     ylab = '',
+     yaxt = 'n',
+     main = '',
+     lwd = 2)
+abline(v = 0, lwd = 2.5)
+
+conditional_effects(model2)
+
+model3 <- mvgam(count ~ s(time, bs = 'bs', k = 15) + 
+                  ndvi,
+                family = poisson(),
+                data = data_train,
+                newdata = data_test)
+summary(model3)
+conditional_effects(model3, type = 'link')
+plot(model3, type = 'forecast', newdata = data_test)
+
+model4 <- mvgam(count ~ s(ndvi, k = 6),
+                family = poisson(),
+                data = data_train,
+                newdata = data_test,
+                trend_model = 'AR1')
+plot(model4, type = 'forecast', newdata = data_test)
+plot(model4, type = 'trend', newdata = data_test)
+loo_compare(model3, model4)
