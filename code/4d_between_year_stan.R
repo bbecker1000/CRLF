@@ -184,7 +184,7 @@ plot(m1.ulam,
               "beta_CoastalSite"),
      xlab = "Beta Coefficient", 
      main = "Stan Model")
-
+plot(m1.ulam, depth=2)
 
 save(m1.ulam, file = "Output/m1.ulam.RData")
 #load(file = "Output/m1.ulam.RData")
@@ -196,7 +196,8 @@ fit <- m1.ulam
 
 plot(fit)
 
+trankplot(fit@stanfit)
+traceplot(fit@stanfit)
 
-
-
-
+pairs(fit@stanfit)
+par(mfrow=c(1,1))

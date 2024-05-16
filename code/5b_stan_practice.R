@@ -78,6 +78,11 @@ m %>%
 m %<>% recover_types(dat)
 
 
+m %>%
+  spread_draws(beta_Year, beta_Year_2, beta_CoastalSite, beta_WaterTemp, beta_Rain)
+
+
+
 dat %>%
   #group_by(cyl) %>%
   #data_grid(hp = seq_range(hp, n = 101)) %>%
@@ -88,3 +93,16 @@ dat %>%
   scale_color_brewer(palette = "Dark2")
 
 plot(m, depth=2)
+
+
+
+
+dat %>%
+  #group_by(cyl) %>%
+  #data_grid(hp = seq_range(hp, n = 101)) %>%
+  add_predicted_draws(m) %>%
+  ggplot(aes(x = hp, y = mpg)) +
+  stat_lineribbon(aes(y = .prediction), .width = c(.95, .8, .5), color = brewer.pal(5, "Blues")[[5]]) +
+  geom_point(data = mtcars_clean) +
+  scale_fill_brewer() +
+  facet_grid(. ~ cyl, space = "free_x", scales = "free_x")
