@@ -75,17 +75,13 @@ fit.watershed <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_proportio
 
 fit.watershed.rw <- survfit(Surv(rain_to_date, status) ~ Watershed + MaxD_proportion, data = d.rw)
 
-fit.depth <- survfit(Surv(MaxD, status) ~ 1, data = onset_of_breeding_surv)
+fit.rain <- survfit(Surv(first_breeding, status) ~ 1, data = onset_of_breeding_surv)
 fit.watertemp <- survfit(Surv(WaterTemp, status) ~ 1, data = onset_of_breeding_surv)
-
-# model_depth_temp <- coxph(Surv(rain_to_date, status) ~ MaxD_proportion, data = onset_of_breeding_surv)
-# ggsurvplot(survfit(model_depth_temp, newdata = list(MaxD_proportion = median(onset_of_breeding_surv$MaxD_proportion))), data = onset_of_breeding_surv, risk.table = TRUE)
-
 
 #pick one to inspect/plot
 fit <- fit.null
 fit <- fit.watershed
-fit <- fit.depth
+fit <- fit.rain
 fit <- fit.watershed.rw
 fit <- fit.watertemp
 
@@ -131,7 +127,7 @@ onset_of_breeding_surv <- onset_of_breeding_surv %>%
   )
 
 # cox model: univariate (Watershed)
-Watershed.cox <- coxph(Surv(rain_to_date, status) ~ Watershed, data = onset_of_breeding_surv)
+Watershed.cox <- coxph(Surv(first_breeding, status) ~ rain_to_date, data = onset_of_breeding_surv)
 summary(Watershed.cox)
 
 # cox model: univariate (Site)
@@ -169,7 +165,7 @@ multi.cox <- coxme(Surv(first_breeding, status) ~ MaxD_proportion + AirTemp + Ai
 # multivariate with random effects -- scaled variables
 multi.cox <- coxme(Surv(first_breeding, status) ~ scale(MaxD_proportion) + scale(AirTemp) + scale(AirTemp_squared) + scale(WaterTemp) + scale(WaterTemp_squared) + scale(BRDYEAR) + scale(rain_to_date) + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv)
 
-multi.cox <- coxme(Surv(first_breeding, status) ~ scale(AirTemp) + scale(AirTemp_squared) + scale(WaterTemp) + scale(WaterTemp_squared) + scale(rain_to_date) + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv)
+multi.cox <- coxme(Surv(first_breeding, status) ~ scale(MaxD_proportion) + scale(AirTemp) + scale(AirTemp_squared) + scale(WaterTemp) + scale(WaterTemp_squared) + scale(rain_to_date) + (1 | Watershed) + (1 | LocationID) + (1 | BRDYEAR), data = onset_of_breeding_surv)
 
 # see summary of the model:
 summary(multi.cox)
@@ -194,43 +190,9 @@ ggplot(plot_data, aes(x = hazard_ratio, y = covariate)) +
   labs(x = "Hazard Ratio", y = "Covariate", title = "Coefficient Estimates") +
   theme_minimal()
 
-#### testing assumptions (this is a mess right now) ####
-# to use the cox model, results of test_assumptions must not be significant, but they are for WaterTemp...
+#### testing assumptions ####
+# to use the cox model, results of test_assumptions must not be significant
 test_assumptions <- cox.zph(multi.cox)
 test_assumptions
 print(test_assumptions)
 plot(test_assumptions)
-
-
-# survfit() won't run with coxme model, so calculating survival probability manually...
-# this does not work yet but i am trying to fix it!!
-coefficients <- fixef(multi.cox)
-
-rain_to_date_values <- seq(min(onset_of_breeding_surv$rain_to_date), max(onset_of_breeding_surv$rain_to_date), length.out = 100)
-BRDYEAR_values <- seq(min(onset_of_breeding_surv$BRDYEAR), max(onset_of_breeding_surv$BRDYEAR), length.out = 100)
-
-survival_data <- expand.grid(rain_to_date = rain_to_date_values, BRDYEAR = BRDYEAR_values)
-survival_data$time = NA
-survival_data$surv = NA
-
-for (i in 1:nrow(survival_data)) {
-  # Create design matrix for the current combination of covariate values
-  X <- model.matrix(~ rain_to_date + BRDYEAR, data = survival_data[i, ])
-  X <- cbind(1, X)
-  
-  # Calculate linear predictor
-  lp <- X %*% coefficients
-  
-  # Calculate survival probabilities
-  survival_prob <- exp(-exp(lp))
-  
-  # Store results
-  survival_data$time[i] <- survival_prob$time
-  survival_data$surv[i] <- survival_prob$surv
-}
-
-# Plot Kaplan-Meier curves
-ggplot(survival_data, aes(x = time, y = surv, group = interaction(rain_to_date, BRDYEAR, WaterTemp))) +
-  geom_line() +
-  labs(x = "Time", y = "Survival Probability", title = "Kaplan-Meier Curves by Covariates") +
-  theme_minimal()

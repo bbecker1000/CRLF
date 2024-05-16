@@ -92,9 +92,19 @@ summary(complete_case_model)
 
 
 #### plotting complete case model ####
-# plot_model(complete_case_model, type = ("est"), terms = c("BRDYEAR", "yearly_rain", "mean_percent_emerg") )
 
+# forest plot (excluding salinity)
+plot_model(complete_case_model, terms = c("BRDYEAR", "mean_percent_emerg", "mean_percent_sub", "mean_percent_water", 
+                                          "interpolated_canopy", "yearly_rain", "mean_max_depth", "max_depth", "AirTemp", 
+                                          "WaterTemp"), vline.color = "slategrey", show.p = TRUE)
 
+# forest plot including salinity (not sure how to just take out the CoastalSiteFALSE variable)
+plot_model(complete_case_model, vline.color = "slategrey", show.p = TRUE)
 
+# plotting random effects
+plot_model(complete_case_model, type = "re", vline.color = "slategrey")
+
+# to test model assumptions
+plot_model(complete_case_model,  type = "diag", vline.color = "slategrey")
 
 
