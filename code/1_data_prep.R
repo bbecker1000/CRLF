@@ -69,10 +69,10 @@ data <- unfiltered_data %>%
   ungroup() %>% 
   full_join(unfiltered_data, by = c("LocationID" = "LocationID", "BRDYEAR" = "BRDYEAR")) %>% 
   filter(survey_count_site_yr > 1) %>% 
-  # filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
-  #          Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
-  #          Watershed == "Wilkins Gulch") %>% 
-  # filter(BRDYEAR > 2009) %>% 
+  filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
+           Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
+           Watershed == "Wilkins Gulch") %>%
+  filter(BRDYEAR > 2009) %>%
   mutate(
     Watershed = droplevels(Watershed),
     LocationID = droplevels(LocationID)
