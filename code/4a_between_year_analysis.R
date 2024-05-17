@@ -107,10 +107,10 @@ plot_model(complete_case_model, type = "re", vline.color = "slategrey")
 # to test model assumptions
 plot_model(complete_case_model,  type = "diag", vline.color = "slategrey")
 
-#### breeding site logistic regression
+#### breeding site logistic regression ####
 # create 0/1 binomial for breeding (where num_egg_masses == 0)
-between_year_data <- mutate(between_year_data, breeding = case_when(num_egg_masses > 0 ~ "1",
-                                               num_egg_masses == 0 ~ "0"))
+scaled_between_year <- scaled_between_year %>% 
+  mutate(breeding = if_else(num_egg_masses > 0, TRUE, FALSE))
 
 # logistic regression using glm
 BRD_model1 <- glmer(breeding ~ BRDYEAR + 
@@ -127,5 +127,7 @@ BRD_model1 <- glmer(breeding ~ BRDYEAR +
                     max_salinity:CoastalSite +
                     (1 | Watershed) +
                     (1 | LocationID),
-                  data = between_year_data,
+                  data = scaled_between_year,
                   family = binomial)
+
+summary(BRD_model1)
