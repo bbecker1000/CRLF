@@ -71,15 +71,10 @@ scaled_between_year <- complete_btw_data %>%
   )
 
 complete_case_model <- glmmTMB(num_egg_masses ~ BRDYEAR + 
-                                 mean_percent_emerg + 
-                                 mean_percent_sub +
-                                 mean_percent_water +
-                                 interpolated_canopy +
                                  yearly_rain + 
-                                 mean_max_depth +
-                                 max_depth +
                                  AirTemp +
-                                 WaterTemp,
+                                 WaterTemp +
+                                 interpolated_canopy,
                                  # (1 | Watershed) +
                                  # (1 | LocationID),
                                data = scaled_between_year,
@@ -87,11 +82,11 @@ complete_case_model <- glmmTMB(num_egg_masses ~ BRDYEAR +
                                  max_depth +
                                  AirTemp +
                                  WaterTemp +
-                                 mean_salinity:CoastalSite +
+                                 #mean_salinity:CoastalSite +
                                  max_salinity:CoastalSite +
-                                 mean_percent_emerg +
-                                 mean_percent_sub +
-                                 mean_percent_water +
+                                 # mean_percent_emerg +
+                                 # mean_percent_sub +
+                                 # mean_percent_water +
                                  interpolated_canopy +
                                  (1 | Watershed) +
                                  (1 | LocationID),
