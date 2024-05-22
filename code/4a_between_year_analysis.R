@@ -114,11 +114,13 @@ plot_model(complete_case_model, type = "re", vline.color = "slategrey")
 # to test model assumptions
 plot_model(complete_case_model,  type = "diag", vline.color = "slategrey")
 
-#### breeding site logistic regression ####
+#### active breeding site model ####
 active_breeding_sites <- between_year_data %>%
   mutate(breeding = if_else(num_egg_masses > 0, TRUE, FALSE)) %>% 
-  select(BRDYEAR, LocationID, breeding) %>% 
-  group_by()
+  filter(breeding == TRUE) %>% 
+  select(BRDYEAR, LocationID) %>% 
+  group_by(BRDYEAR) %>% 
+  summarise(active_BRD = length(LocationID))
 active_breeding_sites
 
 # create 0/1 binomial for breeding (where num_egg_masses == 0)
