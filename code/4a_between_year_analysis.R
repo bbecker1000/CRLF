@@ -115,6 +115,12 @@ plot_model(complete_case_model, type = "re", vline.color = "slategrey")
 plot_model(complete_case_model,  type = "diag", vline.color = "slategrey")
 
 #### breeding site logistic regression ####
+active_breeding_sites <- between_year_data %>%
+  mutate(breeding = if_else(num_egg_masses > 0, TRUE, FALSE)) %>% 
+  select(BRDYEAR, LocationID, breeding) %>% 
+  group_by()
+active_breeding_sites
+
 # create 0/1 binomial for breeding (where num_egg_masses == 0)
 scaled_between_year <- scaled_between_year %>% 
   mutate(breeding = if_else(num_egg_masses > 0, TRUE, FALSE))
