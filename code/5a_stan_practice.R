@@ -16,7 +16,7 @@ library(rstan)
 #library(tidybayes.rethinking)
 library(ggthemes)
 
-theme_set(theme_few())
+theme_set(theme_few(base_size = 20))
 
 names(as_tibble(link(fit))) #from 4e, can't extract b/c of missing values code
 
@@ -198,7 +198,7 @@ p.Rain2 <-  ggplot(data = d, aes(x = Rain_2, y = mu)) +
 #scale_x_continuous(breaks = c(2000, 2020)) 
 p.Rain2
 
-
+hist(d$EggMasses)
 
 
 
@@ -229,7 +229,7 @@ p.all.effects <- cowplot::plot_grid(p.Rain2,
                                     vjust = 3, hjust = -2.2
 )
 p.all.effects
-ggsave("Output/p.all.effects.jpg", width = 35, height = 20, units = "cm")
+ggsave("Output/p.all.effects.jpg", width = 20, height = 35, units = "cm")
 
 
 #random effects groups
