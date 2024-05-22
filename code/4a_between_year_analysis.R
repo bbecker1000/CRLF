@@ -71,24 +71,25 @@ scaled_between_year <- complete_btw_data %>%
   )
 
 complete_case_model <- glmmTMB(num_egg_masses ~ BRDYEAR + 
-                                 mean_percent_emerg + 
-                                 mean_percent_sub +
-                                 mean_percent_water +
-                                 interpolated_canopy +
+                                # mean_percent_emerg + 
+                                # mean_percent_sub +
+                                # mean_percent_water +
+                                # interpolated_canopy +
                                  yearly_rain + 
                                  mean_max_depth +
-                                 max_depth +
-                                 AirTemp +
+                                # max_depth +
+                                # AirTemp +
                                  WaterTemp +
-                                 mean_salinity:CoastalSite +
-                                 max_salinity:CoastalSite +
-                                 (1 | Watershed) +
+                                # mean_salinity:CoastalSite +
+                                # max_salinity:CoastalSite +
+                                # (1 | Watershed) +
                                  (1 | LocationID),
                                data = scaled_between_year,
-                               ziformula = ~1,
-                               family = poisson) 
+                               ziformula = ~yearly_rain,  #~1,
+                               family = nbinom2) 
 summary(complete_case_model)
 
+plot_model(complete_case_model)
 
 
 #### plotting complete case model ####
@@ -101,8 +102,16 @@ plot_model(complete_case_model, terms = c("BRDYEAR", "mean_percent_emerg", "mean
 # forest plot including salinity (not sure how to just take out the CoastalSiteFALSE variable)
 plot_model(complete_case_model, vline.color = "slategrey", show.p = TRUE)
 
+## BB look into whether we can fix the coefficient for coastal site = FALSE
+ ## PREFERRED data so no variation and slope = 0?  replace zeros with NAs
+ ## Robin will do this.
+## BB Need to figure out how to remove the coeffient for coastal site from plot.
+
 # plotting random effects
 plot_model(complete_case_model, type = "re", vline.color = "slategrey")
+
+
+
 
 # to test model assumptions
 plot_model(complete_case_model,  type = "diag", vline.color = "slategrey")

@@ -68,6 +68,7 @@ d.all.post <- bind_cols(d.mu, d.WaterTemp, d.Depth)
 d.all.post$Year <- rep(dat_complete$Year, nrow(d.all.post)/nrow(dat_complete))
 d.all.post$Year_2 <- rep(dat_complete$Year_2, nrow(d.all.post)/nrow(dat_complete))
 d.all.post$Rain <- rep(dat_complete$Rain, nrow(d.all.post)/nrow(dat_complete))
+d.all.post$Rain_2 <- rep(dat_complete$Rain_2, nrow(d.all.post)/nrow(dat_complete))
 d.all.post$CoastalSite <- rep(dat_complete$CoastalSite, nrow(d.all.post)/nrow(dat_complete))
 d.all.post$Location <- rep(dat_complete$Location, nrow(d.all.post)/nrow(dat_complete))
 d.all.post$Watershed <- rep(dat_complete$Watershed, nrow(d.all.post)/nrow(dat_complete))
@@ -121,9 +122,9 @@ d.all.post$SAMPLE <- rep(1:3000, each = nrow(dat_complete))
 
 #Subset data for the fit lines
 # grab random 100 samples near middle of the chain
-d <- d.all.post %>% filter(between(SAMPLE, 1950 , 2001) )
+d <- d.all.post %>% filter(between(SAMPLE, 1900 , 2001) )
 
-
+ 
 #Year^2 effects plot
 p.Year2 <-  ggplot(data = d, aes(x = Year_2, y = mu)) + 
   geom_point(alpha = 0.05, color = "gray") + #posterior data
@@ -142,13 +143,35 @@ p.Year2 <-  ggplot(data = d, aes(x = Year_2, y = mu)) +
 p.Year2
 
 
+hist(d$Year)
+
+#Year effects plot
+p.Year <-  ggplot(data = d, aes(x = Year+2009, y = mu)) + 
+  geom_point(alpha = 0.05, color = "gray") + #posterior data
+  geom_point(data = d, aes(x = Year+2009, y = EggMasses), alpha = 0.25, 
+             color = "blue") + #raw data
+  
+  stat_smooth(data = d, method = "lm", 
+              formula = y~poly(x,2),
+              geom="line", aes(group = SAMPLE), alpha=0.05, linewidth=0.75, color = "red") +
+  #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
+  ylim(0,200) + 
+  ylab(" ") +
+  xlab("Year")# +
+#guides(x = guide_axis(minor.ticks = TRUE)) #+
+#scale_x_continuous(breaks = c(2000, 2020)) 
+p.Year
+
+
+
+
 #Rain effects plot
 p.Rain <-  ggplot(data = d, aes(x = Rain, y = mu)) + 
   geom_jitter(alpha = 0.05, color = "gray") + #posterior data
   geom_jitter(data = d, aes(x = Rain, y = EggMasses), alpha = 0.25, 
              color = "blue") + #raw data
   stat_smooth(data = d, method = "lm", 
-             # formula = y~poly(x,2),
+             formula = y~poly(x,2),
               geom="line", aes(group = SAMPLE), alpha=0.05, linewidth=0.75, color = "red") +
   ylim(0,200) + 
   ylab(" ") +
@@ -160,12 +183,14 @@ p.Rain
 
 #Rain_2 effects plot
 p.Rain2 <-  ggplot(data = d, aes(x = Rain_2, y = mu)) + 
-  geom_jitter(alpha = 0.05, color = "gray") + #posterior data
-  geom_jitter(data = d, aes(x = Rain_2, y = EggMasses), alpha = 0.25, 
+  geom_point(alpha = 0.05, color = "gray") + #posterior data
+  geom_point(data = d, aes(x = Rain_2, y = EggMasses), alpha = 0.25, 
               color = "blue") + #raw data
+  
   stat_smooth(data = d, method = "lm", 
-              # formula = y~poly(x,2),
+              formula = y~poly(x,2),
               geom="line", aes(group = SAMPLE), alpha=0.05, linewidth=0.75, color = "red") +
+  #geom_smooth(method = "loess", se = FALSE, alpha = 0.25) +
   ylim(0,200) + 
   ylab(" ") +
   xlab("Rain")# +
@@ -178,7 +203,6 @@ p.Rain2
 
 
 
-#SC Effects plot
 #make sure run binary code before logistic model !
 p.CoastalSite <- ggplot(data = d, aes(x = as.factor(CoastalSite), y = mu)) + #, group = SAMPLE
   geom_jitter(alpha = 0.05, color = "gray", width = 0.05) + #posterior data
@@ -198,8 +222,8 @@ p.CoastalSite
 
 
 
-p.all.effects <- cowplot::plot_grid(p.Rain,
-                                    p.Year2,
+p.all.effects <- cowplot::plot_grid(p.Rain2,
+                                    p.Year,
                                     p.CoastalSite,
                                     ncol=1, labels="auto", scale = 0.9, 
                                     vjust = 3, hjust = -2.2
