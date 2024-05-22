@@ -116,43 +116,28 @@ plot_model(complete_case_model, type = "re", vline.color = "slategrey")
 plot_model(complete_case_model,  type = "diag", vline.color = "slategrey")
 
 #### active breeding (actBRD) site model ####
-yearly_active <- between_year_data %>%
+
+# how many sites active per year?
+yearly_active_breeding <- between_year_data %>%
   mutate(breeding = if_else(num_egg_masses > 0, TRUE, FALSE)) %>% 
   filter(breeding == TRUE) %>% 
-  select(BRDYEAR, Watershed, LocationID, yearly_rain)
-yearly_active
-
-## by watershed
-watershed_active_sites <- yearly_active %>% 
-  group_by(BRDYEAR, Watershed) %>% 
-  summarise(actBRD_sites = n())
-watershed_active_sites
-
-## total active sites per year
-yearly_active_sites <- yearly_active %>% 
-  group_by(BRDYEAR) %>% 
-  summarise(actBRD_sites = n())
-yearly_active_sites
-
-# TODO: plotting active breeding with rainfall
-active_breeding <- yearly_active %>% 
+  select(BRDYEAR, Watershed, LocationID, yearly_rain) %>% 
   group_by(BRDYEAR)%>% 
   summarise(
-    actBRD_sites = n(),
+    actBRD_sites = n(), # active breeding sites each year
     yearly_rain = sum(yearly_rain)
   )
-active_breeding <- as.data.frame(active_breeding)
+yearly_active_breeding <- as.data.frame(active_breeding)
 
-plot1 <- active_breeding %>% ggplot(aes(x=BRDYEAR))+
-  geom_line(y=actBRD_sites)
-#   geom_line(y=active_breeding$yearly_rain) + 
-#   scale_y_continuous(
-#   name = "Number of Sites",
-#   sec.axis = sec_axis(~.+1200, name="Yearly Rain")
-# )
+## plot
+plot_active_sites <- yearly_active_breeding %>% ggplot(aes(x=BRDYEAR, y=actBRD_sites))+
+  geom_line()+
+  geom_point()+
+  ylab("number of active breeding sites")
+plot_active_sites
+
+## TODO: plotting active breeding with rainfall
   
-
-
 # create 0/1 binomial for breeding (where num_egg_masses == 0)
 scaled_between_year <- scaled_between_year %>% 
   mutate(breeding = if_else(num_egg_masses > 0, TRUE, FALSE))
