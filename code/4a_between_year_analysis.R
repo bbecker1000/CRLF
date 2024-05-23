@@ -84,25 +84,49 @@ complete_case_model <- glmmTMB(num_egg_masses ~ BRDYEAR +
                                  # mean_salinity:CoastalSite +
                                  # max_salinity:CoastalSite +
                                  interpolated_canopy +
-                                 (1 | Watershed) +
-                                 (1 | LocationID),
+                                 (1 | LocationID),# +
+                                 #(1 | LocationID),
                                data = scaled_between_year,
-                               ziformula = ~ yearly_rain +
-                                 max_depth +
-                                 AirTemp +
-                                 WaterTemp +
-                                 mean_percent_water +
-                                 mean_salinity:CoastalSite +
+                               #ziformula = ~ yearly_rain + 
+                               #  Watershed,# +# +
+                                 #max_depth +
+                                 #AirTemp +
+                                 #WaterTemp +
+                                 #mean_percent_water +
+                                 #mean_salinity:CoastalSite +
                                  # max_salinity:CoastalSite +
                                  # mean_percent_emerg +
                                  # mean_percent_sub +
-                                 interpolated_canopy +
-                                 (1 | Watershed) +
-                                 (1 | LocationID),
-                               data = scaled_between_year,
-                               ziformula = ~yearly_rain,  #~1,
+                                 #interpolated_canopy +
+                                 #(1 | LocationID),
+                
                                family = nbinom2) 
 summary(complete_case_model)
+
+complete_case_model_glmer <- glmer(num_egg_masses ~ BRDYEAR + 
+                                I(BRDYEAR^2) +
+                                 # mean_percent_emerg + 
+                                 # mean_percent_sub +
+                                 # mean_percent_water +
+                                 # interpolated_canopy +
+                                 yearly_rain + 
+                                 mean_max_depth +
+                                 # max_depth +
+                                 # AirTemp +
+                                 WaterTemp +
+                                 # mean_percent_water +
+                                 # mean_salinity:CoastalSite +
+                                 # max_salinity:CoastalSite +
+                                 interpolated_canopy +
+                                 (1 | LocationID),# +
+                               #(1 | LocationID),
+                               data = scaled_between_year,
+                               family = negative.binomial(0.88)) 
+summary(complete_case_model_glmer)
+
+plot_model(complete_case_model_glmer)
+
+
 
 plot_model(complete_case_model)
 
