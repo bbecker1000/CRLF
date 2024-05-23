@@ -15,8 +15,8 @@ hist(between_year_data$BRDYEAR)
 
 #setup variables
 EggMasses = between_year_data$num_egg_masses 
-Year = scale(between_year_data$BRDYEAR-2009)
-Year_2 = scale((between_year_data$BRDYEAR-2009)^2)
+Year = (between_year_data$BRDYEAR-2009)
+Year_2 = ((between_year_data$BRDYEAR-2009)^2)
   # mean_percent_emerg + 
   # mean_percent_sub +
 Water = scale(between_year_data$mean_percent_water)
@@ -238,6 +238,7 @@ m1.ulam.complete.case <-  ulam(
       beta_Year_2+Year_2 +
       #beta_Water*Water,
       beta_Rain*Rain +
+      beta_Rain_2*Rain_2 +
       beta_mean_max_depth*mean_max_depth +
       #max_depth,
       # beta_AirTemp*AirTemp +
@@ -272,7 +273,8 @@ m1.ulam.complete.case <-  ulam(
       beta_Year,
       beta_Year_2,
       beta_mean_max_depth,
-      beta_CoastalSite
+      beta_CoastalSite,
+      beta_Rain_2
     )  
     ~ normal( 0 , 0.5 ),      # uninformed
     
@@ -299,6 +301,7 @@ plot(fit,
      pars = c("beta_Year", 
               "beta_Year_2",
               "beta_Rain",
+              "beta_Rain_2",
               "beta_WaterTemp",
               "beta_mean_max_depth",
               "beta_Canopy",

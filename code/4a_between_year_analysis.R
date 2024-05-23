@@ -71,15 +71,21 @@ scaled_between_year <- complete_btw_data %>%
   )
 
 complete_case_model <- glmmTMB(num_egg_masses ~ BRDYEAR + 
+                                # mean_percent_emerg + 
+                                # mean_percent_sub +
+                                # mean_percent_water +
+                                # interpolated_canopy +
                                  yearly_rain + 
-                                 AirTemp +
+                                 mean_max_depth +
+                                # max_depth +
+                                # AirTemp +
                                  WaterTemp +
                                  # mean_percent_water +
                                  # mean_salinity:CoastalSite +
                                  # max_salinity:CoastalSite +
-                                 interpolated_canopy,
-                                 # (1 | Watershed) +
-                                 # (1 | LocationID),
+                                 interpolated_canopy +
+                                 (1 | Watershed) +
+                                 (1 | LocationID),
                                data = scaled_between_year,
                                ziformula = ~ yearly_rain +
                                  max_depth +
@@ -93,9 +99,12 @@ complete_case_model <- glmmTMB(num_egg_masses ~ BRDYEAR +
                                  interpolated_canopy +
                                  (1 | Watershed) +
                                  (1 | LocationID),
+                               data = scaled_between_year,
+                               ziformula = ~yearly_rain,  #~1,
                                family = nbinom2) 
 summary(complete_case_model)
 
+plot_model(complete_case_model)
 
 
 #### plotting complete case model ####
@@ -108,13 +117,43 @@ plot_model(complete_case_model, terms = c("BRDYEAR", "mean_percent_emerg", "mean
 # forest plot including salinity (not sure how to just take out the CoastalSiteFALSE variable)
 plot_model(complete_case_model, vline.color = "slategrey", show.p = TRUE)
 
+## BB look into whether we can fix the coefficient for coastal site = FALSE
+ ## PREFERRED data so no variation and slope = 0?  replace zeros with NAs
+ ## Robin will do this.
+## BB Need to figure out how to remove the coeffient for coastal site from plot.
+
 # plotting random effects
 plot_model(complete_case_model, type = "re", vline.color = "slategrey")
+
+
+
 
 # to test model assumptions
 plot_model(complete_case_model,  type = "diag", vline.color = "slategrey")
 
-#### breeding site logistic regression ####
+#### active breeding (actBRD) site model ####
+
+# how many sites active per year?
+yearly_active_breeding <- between_year_data %>%
+  mutate(breeding = if_else(num_egg_masses > 0, TRUE, FALSE)) %>% 
+  filter(breeding == TRUE) %>% 
+  select(BRDYEAR, Watershed, LocationID, yearly_rain) %>% 
+  group_by(BRDYEAR)%>% 
+  summarise(
+    actBRD_sites = n(), # active breeding sites each year
+    yearly_rain = sum(yearly_rain)
+  )
+yearly_active_breeding <- as.data.frame(active_breeding)
+
+## plot
+plot_active_sites <- yearly_active_breeding %>% ggplot(aes(x=BRDYEAR, y=actBRD_sites))+
+  geom_line()+
+  geom_point()+
+  ylab("number of active breeding sites")
+plot_active_sites
+
+## TODO: plotting active breeding with rainfall
+  
 # create 0/1 binomial for breeding (where num_egg_masses == 0)
 scaled_between_year <- scaled_between_year %>% 
   mutate(breeding = if_else(num_egg_masses > 0, TRUE, FALSE))
