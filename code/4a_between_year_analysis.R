@@ -1,15 +1,15 @@
 library(glmmTMB)
 library(tidyverse)
 library(here)
-library(bbmle) 
+#library(bbmle) 
 library(lme4)
 library(sjPlot)
-setwd(here::here("code"))
+
 
 between_year_data <- read_csv(here::here("data", "between_year_data.csv"))
 
 #### initial model -- MISSING SALINITY ####
-model1 <- glmmTMB(num_egg_masses ~ BRDYEAR + 
+model1 <- glmmTMB(num_egg_masses ~ BRDYEAR +
                     # mean_percent_emerg + 
                     # mean_percent_sub +
                     # mean_percent_water +
@@ -21,10 +21,10 @@ model1 <- glmmTMB(num_egg_masses ~ BRDYEAR +
                      WaterTemp +
                     # mean_salinity:CoastalSite +
                     # max_salinity:CoastalSite +
-                    (1 | Watershed) +
-                    (1 | LocationID),
+                    (1 | LocationID)
+                    ,
                   data = between_year_data,
-                  ziformula = ~1,
+                  ziformula = ~0,
                   family = nbinom2) 
 summary(model1)
 
@@ -35,18 +35,55 @@ model1 <- glmer(num_egg_masses ~ I(BRDYEAR - 2009) +
                     mean_percent_water +
                     # interpolated_canopy +
                     yearly_rain + #total annual rainfall
-                    mean_max_depth +
+                    #mean_max_depth +
                     # max_depth +
-                    AirTemp +
+                    #AirTemp +
                     WaterTemp +
                     # mean_salinity:CoastalSite +
                     # max_salinity:CoastalSite +
-                    (1 | Watershed) +
-                    (1 | LocationID),
+                    (1 | Watershed/LocationID),
                   data = between_year_data,
-                  # ziformula = ~1,
-                  family = negative.binomial(1)) 
+                  family = negative.binomial(0.88) )
 summary(model1)
+
+
+#some gams to deal with non-linearity
+#need groups to be factors
+
+between_year_data$Watershed <- factor(between_year_data$Watershed)
+between_year_data$LocationID <- factor(between_year_data$LocationID)
+between_year_data$CoastalSite <- factor(between_year_data$CoastalSite)
+
+
+
+## maybe a gam?
+library(mgcv)
+model1.gam <- gam(num_egg_masses ~ (BRDYEAR) + 
+                  # mean_percent_emerg + 
+                  # mean_percent_sub +
+                  (mean_percent_water) +
+                  # interpolated_canopy +
+                  (yearly_rain) + #total annual rainfall
+                  #mean_max_depth +
+                  # max_depth +
+                  #AirTemp +
+                  s(WaterTemp) +
+                  #Watershed +
+                  # mean_salinity:CoastalSite +
+                  # max_salinity:CoastalSite +
+                  s(LocationID, bs = 're'),  #random effect
+                data = between_year_data,
+                family = negbin(0.88))
+summary(model1.gam)
+
+
+plot_model(model1.gam, type = "std")
+
+plot_model(model1.gam, type = "pred", terms = c(#"yearly_rain"))#, 
+                                                "BRDYEAR"))#,
+                                                #"WaterTemp"))
+plot(model1.gam)
+
 
 #### complete case model with scaled covariates ####
 # creating a "complete case" column
