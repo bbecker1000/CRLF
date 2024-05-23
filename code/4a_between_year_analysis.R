@@ -21,8 +21,7 @@ model1 <- glmmTMB(num_egg_masses ~ BRDYEAR +
                      WaterTemp +
                     # mean_salinity:CoastalSite +
                     # max_salinity:CoastalSite +
-                    (1 | LocationID)
-                    ,
+                    (1 | LocationID),
                   data = between_year_data,
                   ziformula = ~0,
                   family = nbinom2) 
