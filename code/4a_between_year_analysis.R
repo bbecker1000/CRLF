@@ -58,12 +58,12 @@ between_year_data$CoastalSite <- factor(between_year_data$CoastalSite)
 
 ## maybe a gam?
 library(mgcv)
-model1.gam <- gam(num_egg_masses ~ (BRDYEAR) + 
+model1.gam <- gam(num_egg_masses ~ s(BRDYEAR) + 
                   # mean_percent_emerg + 
                   # mean_percent_sub +
-                  (mean_percent_water) +
+                  s(mean_percent_water) +
                   # interpolated_canopy +
-                  (yearly_rain) + #total annual rainfall
+                  s(yearly_rain) + #total annual rainfall
                   #mean_max_depth +
                   # max_depth +
                   #AirTemp +
