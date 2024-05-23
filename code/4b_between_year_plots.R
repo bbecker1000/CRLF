@@ -174,7 +174,7 @@ max_salinity_plot <- coastal_between_year_data %>%
 
 ## max_salinity vs. time
 max_salinity_BRD_plot <- coastal_between_year_data %>% 
-  ggplot(aes(x=BRDYEAR, y=max_salinity)) +
+  ggplot(aes(x=BRDYEAR, y=max_salinity), color = Watershed) +
   geom_point() +
   geom_smooth()
 
