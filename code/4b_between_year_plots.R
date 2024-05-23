@@ -10,8 +10,8 @@ between_year_data <- read_csv(here::here("data", "between_year_data.csv"))
 #### mean_percent_emerg ####
 # emergent vegetation vs. egg masses
 emergent_plot <- between_year_data %>% 
-  ggplot(aes(x=mean_percent_emerg, y=num_egg_masses)) +
-  geom_point(aes(color=Watershed)) +
+  ggplot(aes(x=mean_percent_emerg, y=num_egg_masses, color=Watershed)) +
+  geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Emergent Vegetation (%)") +
   ylab(NULL)
@@ -191,5 +191,5 @@ egg_BRD_plot <- coastal_between_year_data %>%
 
 #### combined output with egg masses####
 # saved in Ouput folder
-plot_grid(emergent_plot, submergent_plot, open_water_plot, canopy_plot, rain_plot, mean_max_depth_plot, max_depth_plot, AirTemp_plot, WaterTemp_plot, mean_salinity_plot, max_salinity_plot, nrow=4)
+plot_grid(emergent_plot, submergent_plot, open_water_plot, canopy_plot, rain_plot, mean_max_depth_plot, max_depth_plot, AirTemp_plot, WaterTemp_plot, mean_salinity_plot, max_salinity_plot, egg_BRD_plot, nrow=4)
 
