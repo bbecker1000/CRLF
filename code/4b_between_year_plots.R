@@ -177,5 +177,6 @@ max_salinity_BRD_plot <- coastal_between_year_data %>%
   geom_smooth()
 
 #### combined output with egg masses####
+# saved in Ouput folder
 plot_grid(emergent_plot, submergent_plot, open_water_plot, canopy_plot, rain_plot, mean_max_depth_plot, max_depth_plot, AirTemp_plot, WaterTemp_plot, mean_salinity_plot, max_salinity_plot, nrow=4)
 
