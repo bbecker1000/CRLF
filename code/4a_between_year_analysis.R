@@ -116,4 +116,49 @@ plot_model(complete_case_model, type = "re", vline.color = "slategrey")
 # to test model assumptions
 plot_model(complete_case_model,  type = "diag", vline.color = "slategrey")
 
+#### active breeding (actBRD) site model ####
 
+# how many sites active per year?
+yearly_active_breeding <- between_year_data %>%
+  mutate(breeding = if_else(num_egg_masses > 0, TRUE, FALSE)) %>% 
+  filter(breeding == TRUE) %>% 
+  select(BRDYEAR, Watershed, LocationID, yearly_rain) %>% 
+  group_by(BRDYEAR)%>% 
+  summarise(
+    actBRD_sites = n(), # active breeding sites each year
+    yearly_rain = sum(yearly_rain)
+  )
+yearly_active_breeding <- as.data.frame(active_breeding)
+
+## plot
+plot_active_sites <- yearly_active_breeding %>% ggplot(aes(x=BRDYEAR, y=actBRD_sites))+
+  geom_line()+
+  geom_point()+
+  ylab("number of active breeding sites")
+plot_active_sites
+
+## TODO: plotting active breeding with rainfall
+  
+# create 0/1 binomial for breeding (where num_egg_masses == 0)
+scaled_between_year <- scaled_between_year %>% 
+  mutate(breeding = if_else(num_egg_masses > 0, TRUE, FALSE))
+
+# logistic regression using glm
+BRD_model1 <- glmer(breeding ~ BRDYEAR + 
+                    mean_percent_emerg +
+                    mean_percent_sub +
+                    mean_percent_water +
+                    interpolated_canopy +
+                    yearly_rain + #total annual rainfall
+                    mean_max_depth +
+                    max_depth +
+                    AirTemp +
+                    WaterTemp +
+                    mean_salinity:CoastalSite +
+                    max_salinity:CoastalSite +
+                    (1 | Watershed) +
+                    (1 | LocationID),
+                  data = scaled_between_year,
+                  family = binomial)
+
+summary(BRD_model1)

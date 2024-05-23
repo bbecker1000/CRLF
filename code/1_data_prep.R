@@ -71,8 +71,8 @@ data <- unfiltered_data %>%
   filter(survey_count_site_yr > 1) %>% 
   filter(Watershed == "Kanoff Creek" | Watershed == "Laguna Salada" | Watershed =="Milagra Creek"|
            Watershed == "Redwood Creek" | Watershed == "Rodeo Lagoon" | Watershed=="Tennessee Valley" |
-           Watershed == "Wilkins Gulch") %>% 
-  filter(BRDYEAR > 2009) %>% 
+           Watershed == "Wilkins Gulch") %>%
+  filter(BRDYEAR > 2009) %>%
   mutate(
     Watershed = droplevels(Watershed),
     LocationID = droplevels(LocationID)
@@ -106,6 +106,8 @@ between_year_data <- data %>%
          mean_percent_water = ifelse(all(is.na(ground_open_water)), NA, mean(ground_open_water, na.rm = TRUE)),
          across(everything(), ~first(.))) %>% 
   select(-MaxD, -WaterSalinity, -NumberofEggMasses, -ground_sub, -ground_emerg, -ground_open_water) %>% 
+  mutate(mean_salinity = if_else(CoastalSite, mean_salinity, 0),
+         max_salinity = if_else(CoastalSite, max_salinity, 0)) %>% 
   ungroup()
 
 # write to CSV
