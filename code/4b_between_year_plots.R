@@ -10,7 +10,7 @@ between_year_data <- read_csv(here::here("data", "between_year_data.csv"))
 #### mean_percent_emerg ####
 # emergent vegetation vs. egg masses
 emergent_plot <- between_year_data %>% 
-  ggplot(aes(x=mean_percent_emerg, y=num_egg_masses)) +
+  ggplot(aes(x=mean_percent_emerg, y=num_egg_masses, color=Watershed)) +
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Emergent Vegetation (%)") +
@@ -18,14 +18,14 @@ emergent_plot <- between_year_data %>%
 
 # emergent vs. time
 emergent_BRD_plot <- between_year_data %>% 
-  ggplot(aes(x=BRDYEAR, y=mean_percent_emerg)) +
+  ggplot(aes(x=BRDYEAR, y=mean_percent_emerg, color=Watershed)) +
   geom_point() +
   geom_smooth()
 
 #### mean_percent_sub ####
 # submerg vs. egg masses
 submergent_plot <- between_year_data %>% 
-  ggplot(aes(x=mean_percent_sub, y=num_egg_masses)) +
+  ggplot(aes(x=mean_percent_sub, y=num_egg_masses, color=Watershed)) +
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Submergent Vegetation (%)")  +
@@ -33,14 +33,14 @@ submergent_plot <- between_year_data %>%
 
 ## submerg vs. time
 subemergent_BRD_plot <- between_year_data %>% 
-  ggplot(aes(x=BRDYEAR, y=mean_percent_sub)) +
+  ggplot(aes(x=BRDYEAR, y=mean_percent_sub, color=Watershed)) +
   geom_point() +
   geom_smooth()
 
 #### mean_percent_water ####
 # open water vs. egg masses
 open_water_plot <- between_year_data %>% 
-  ggplot(aes(x=mean_percent_water, y=num_egg_masses)) +
+  ggplot(aes(x=mean_percent_water, y=num_egg_masses, color=Watershed)) +
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Open Water (%)") +
@@ -48,14 +48,14 @@ open_water_plot <- between_year_data %>%
 
 ## open water vs. time
 open_water_BRD_plot <- between_year_data %>% 
-  ggplot(aes(x=BRDYEAR, y=mean_percent_water)) +
+  ggplot(aes(x=BRDYEAR, y=mean_percent_water, color=Watershed)) +
   geom_point() +
   geom_smooth()
 
 #### interpolated_canopy ####
 # canopy vs. egg masses
 canopy_plot <- between_year_data %>% 
-  ggplot(aes(x=interpolated_canopy, y=num_egg_masses)) +
+  ggplot(aes(x=interpolated_canopy, y=num_egg_masses, color=Watershed)) +
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Canopy (%)") +
@@ -63,14 +63,14 @@ canopy_plot <- between_year_data %>%
 
 ## canopy vs. time
 canopy_BRD_plot <- between_year_data %>% 
-  ggplot(aes(x=BRDYEAR, y=interpolated_canopy)) +
+  ggplot(aes(x=BRDYEAR, y=interpolated_canopy, color=Watershed)) +
   geom_point() +
   geom_smooth()
 
 #### yearly_rain ####
 # yearly rain vs. egg masses
 rain_plot <- between_year_data %>% 
-  ggplot(aes(x=yearly_rain, y=num_egg_masses)) +
+  ggplot(aes(x=yearly_rain, y=num_egg_masses, color=Watershed)) +
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Rainfall") +
@@ -78,14 +78,14 @@ rain_plot <- between_year_data %>%
 
 ## yearly rain vs. time
 rain_BRD_plot <- between_year_data %>% 
-  ggplot(aes(x=BRDYEAR, y=yearly_rain)) +
+  ggplot(aes(x=BRDYEAR, y=yearly_rain, color=Watershed)) +
   geom_point() +
   geom_smooth()
 
 #### mean_max_depth ####
 # mean_max_depth vs. egg masses
 mean_max_depth_plot <- between_year_data %>% 
-  ggplot(aes(x=mean_max_depth, y=num_egg_masses)) +
+  ggplot(aes(x=mean_max_depth, y=num_egg_masses, color=Watershed)) +
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Mean Max Depth") +
@@ -93,14 +93,14 @@ mean_max_depth_plot <- between_year_data %>%
 
 ## mean_max_depth vs. time
 mean_max_depth_BRD_plot <- between_year_data %>% 
-  ggplot(aes(x=BRDYEAR, y=mean_max_depth)) +
+  ggplot(aes(x=BRDYEAR, y=mean_max_depth, color=Watershed)) +
   geom_point() +
   geom_smooth()
 
 #### max_depth ####
 # max_depth vs. egg masses
 max_depth_plot <- between_year_data %>% 
-  ggplot(aes(x=max_depth, y=num_egg_masses)) +
+  ggplot(aes(x=max_depth, y=num_egg_masses, color=Watershed)) +
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Max Depth") +
@@ -108,14 +108,14 @@ max_depth_plot <- between_year_data %>%
 
 ## max_depth vs. time
 max_depth_BRD_plot <- between_year_data %>% 
-  ggplot(aes(x=BRDYEAR, y=max_depth)) +
+  ggplot(aes(x=BRDYEAR, y=max_depth, color=Watershed)) +
   geom_point() +
   geom_smooth()
 
 #### AirTemp ####
 # AirTemp vs. egg masses
 AirTemp_plot <- between_year_data %>% 
-  ggplot(aes(x=AirTemp, y=num_egg_masses)) +
+  ggplot(aes(x=AirTemp, y=num_egg_masses, color=Watershed)) +
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Air Temperature") +
@@ -123,14 +123,14 @@ AirTemp_plot <- between_year_data %>%
 
 ## AirTemp vs. time
 AirTemp_BRD_plot <- between_year_data %>% 
-  ggplot(aes(x=BRDYEAR, y=AirTemp)) +
+  ggplot(aes(x=BRDYEAR, y=AirTemp, color=Watershed)) +
   geom_point() +
   geom_smooth()
 
 #### WaterTemp ####
 # WaterTemp vs. egg masses
 WaterTemp_plot <- between_year_data %>% 
-  ggplot(aes(x=WaterTemp, y=num_egg_masses)) +
+  ggplot(aes(x=WaterTemp, y=num_egg_masses, color=Watershed)) +
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Water Temperature") +
@@ -138,7 +138,7 @@ WaterTemp_plot <- between_year_data %>%
 
 ## WaterTemp vs. time
 WaterTemp_BRD_plot <- between_year_data %>% 
-  ggplot(aes(x=BRDYEAR, y=WaterTemp)) +
+  ggplot(aes(x=BRDYEAR, y=WaterTemp, color=Watershed)) +
   geom_point() +
   geom_smooth()
 
@@ -150,7 +150,7 @@ coastal_between_year_data <- between_year_data %>%
 # mean_salinity vs. egg masses
 mean_salinity_plot <- coastal_between_year_data %>% 
   ggplot(aes(x=mean_salinity, y=num_egg_masses)) +
-  geom_point() +
+  geom_point(aes(color=Watershed)) +
   geom_smooth(se=FALSE) +
   xlab("Mean Salinity (Coastal)") +
   ylab(NULL) +
@@ -158,7 +158,7 @@ mean_salinity_plot <- coastal_between_year_data %>%
 
 ## mean_salinity vs. time
 mean_salinity_BRD_plot <- coastal_between_year_data %>% 
-  ggplot(aes(x=BRDYEAR, y=mean_salinity)) +
+  ggplot(aes(x=BRDYEAR, y=mean_salinity, color=Watershed)) +
   geom_point() +
   geom_smooth()
 
@@ -166,7 +166,7 @@ mean_salinity_BRD_plot <- coastal_between_year_data %>%
 # max_salinity vs. egg masses
 max_salinity_plot <- coastal_between_year_data %>% 
   ggplot(aes(x=max_salinity, y=num_egg_masses)) +
-  geom_point() +
+  geom_point(aes(color=Watershed)) +
   geom_smooth(se=FALSE) +
   xlab("Max Salinity (Coastal)") +
   ylab(NULL) +
@@ -174,11 +174,22 @@ max_salinity_plot <- coastal_between_year_data %>%
 
 ## max_salinity vs. time
 max_salinity_BRD_plot <- coastal_between_year_data %>% 
-  ggplot(aes(x=BRDYEAR, y=max_salinity), color = Watershed) +
+  ggplot(aes(x=BRDYEAR, y=max_salinity, color=Watershed)) +
   geom_point() +
   geom_smooth()
 
+#### year ####
+# year vs. egg masses
+egg_BRD_plot <- between_year_data %>% 
+  ggplot(aes(x=BRDYEAR, y=num_egg_masses, color=Watershed)) +
+  geom_point() +
+  geom_smooth(se=FALSE) +
+  xlab("Year") +
+  ylab(NULL) +
+  ylim(0,150)
+
+
 #### combined output with egg masses####
 # saved in Ouput folder
-plot_grid(emergent_plot, submergent_plot, open_water_plot, canopy_plot, rain_plot, mean_max_depth_plot, max_depth_plot, AirTemp_plot, WaterTemp_plot, mean_salinity_plot, max_salinity_plot, nrow=4)
+plot_grid(emergent_plot, submergent_plot, open_water_plot, canopy_plot, rain_plot, mean_max_depth_plot, max_depth_plot, AirTemp_plot, WaterTemp_plot, mean_salinity_plot, max_salinity_plot, egg_BRD_plot, nrow=4)
 

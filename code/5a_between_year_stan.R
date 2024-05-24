@@ -200,7 +200,7 @@ plot(m1.ulam,
      main = "Stan Model")
 plot(m1.ulam, depth=2)
 
-save(m1.ulam, file = "Output/m1.ulam.RData")
+save(m1.ulam, file = "Code/Output/m1.ulam.RData")
 #load(file = "Output/m1.ulam.RData")
 
 
@@ -296,6 +296,10 @@ runtime
 
 fit <- m1.ulam.complete.case
 
+save(fit, file = "Code/Output/m1.ulam.complete.case.RData")
+#load(file = "Code/Output/m1.ulam.complete.case.RData")
+
+
 precis(fit)
 plot(fit,
      pars = c("beta_Year", 
@@ -309,9 +313,7 @@ plot(fit,
      xlab = "Beta Coefficient", 
      main = "Stan Model")
 plot(fit, depth=2)
-
-save(fit, file = "Output/fit.complete.case.RData")
-#load(file = "Output/fit.complete.case.RData")
+#dev.off()
 
 
 rethinking::stancode(fit)
