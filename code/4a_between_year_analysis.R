@@ -107,36 +107,24 @@ scaled_between_year <- complete_btw_data %>%
   )
 
 complete_case_model <- glmmTMB(num_egg_masses ~ BRDYEAR + 
-                                # mean_percent_emerg + 
-                                # mean_percent_sub +
-                                # mean_percent_water +
-                                # interpolated_canopy +
-                                 yearly_rain + 
-                                 mean_max_depth +
-                                # max_depth +
-                                # AirTemp +
-                                 WaterTemp +
-                                 # mean_percent_water +
-                                 # mean_salinity:CoastalSite +
-                                 # max_salinity:CoastalSite +
-                                 interpolated_canopy +
-                                 (1 | LocationID),# +
-                                 #(1 | LocationID),
+                                mean_percent_emerg +
+                                mean_percent_sub +
+                                mean_percent_water +
+                                interpolated_canopy +
+                                yearly_rain + 
+                                mean_max_depth +
+                                max_depth +
+                                WaterTemp +
+                                (1 | LocationID),
                                data = scaled_between_year,
-                               #ziformula = ~ yearly_rain + 
-                               #  Watershed,# +# +
-                                 #max_depth +
-                                 #AirTemp +
-                                 #WaterTemp +
-                                 #mean_percent_water +
-                                 #mean_salinity:CoastalSite +
-                                 # max_salinity:CoastalSite +
-                                 # mean_percent_emerg +
-                                 # mean_percent_sub +
-                                 #interpolated_canopy +
-                                 #(1 | LocationID),
-                
-                               family = nbinom2) 
+                               ziformula = ~ yearly_rain +
+                                max_depth +
+                                WaterTemp +
+                                mean_salinity:CoastalSite +
+                                max_salinity:CoastalSite +
+                                interpolated_canopy +
+                                (1 | LocationID),
+                               family = nbinom2)
 summary(complete_case_model)
 
 complete_case_model_glmer <- glmer(num_egg_masses ~ BRDYEAR + 
