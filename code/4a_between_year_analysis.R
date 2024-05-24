@@ -14,11 +14,11 @@ model1 <- glmmTMB(num_egg_masses ~ BRDYEAR +
                     # mean_percent_sub +
                     # mean_percent_water +
                     # interpolated_canopy +
-                    # yearly_rain + #total annual rainfall
+                     yearly_rain + #total annual rainfall
                     # mean_max_depth +
                     # max_depth +
                     # AirTemp +
-                     WaterTemp +
+                     # WaterTemp +
                     # mean_salinity:CoastalSite +
                     # max_salinity:CoastalSite +
                     (1 | LocationID),
@@ -31,13 +31,13 @@ summary(model1)
 model1 <- glmer(num_egg_masses ~ I(BRDYEAR - 2009) + 
                     # mean_percent_emerg + 
                     # mean_percent_sub +
-                    mean_percent_water +
+                    # mean_percent_water +
                     # interpolated_canopy +
                     yearly_rain + #total annual rainfall
                     #mean_max_depth +
                     # max_depth +
                     #AirTemp +
-                    WaterTemp +
+                    # WaterTemp +
                     # mean_salinity:CoastalSite +
                     # max_salinity:CoastalSite +
                     (1 | Watershed/LocationID),
@@ -60,13 +60,13 @@ library(mgcv)
 model1.gam <- gam(num_egg_masses ~ s(BRDYEAR) + 
                   # mean_percent_emerg + 
                   # mean_percent_sub +
-                  s(mean_percent_water) +
+                  #s(mean_percent_water) +
                   # interpolated_canopy +
                   s(yearly_rain) + #total annual rainfall
                   #mean_max_depth +
                   # max_depth +
                   #AirTemp +
-                  s(WaterTemp) +
+                  #s(WaterTemp) +
                   #Watershed +
                   # mean_salinity:CoastalSite +
                   # max_salinity:CoastalSite +
@@ -78,7 +78,7 @@ summary(model1.gam)
 
 plot_model(model1.gam, type = "std")
 
-plot_model(model1.gam, type = "pred", terms = c(#"yearly_rain"))#, 
+plot_model(model1.gam, type = "pred", terms = c("yearly_rain"))#, 
                                                 "BRDYEAR"))#,
                                                 #"WaterTemp"))
 plot(model1.gam)
