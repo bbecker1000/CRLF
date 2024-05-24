@@ -180,7 +180,7 @@ max_salinity_BRD_plot <- coastal_between_year_data %>%
 
 #### year ####
 # year vs. egg masses
-egg_BRD_plot <- coastal_between_year_data %>% 
+egg_BRD_plot <- between_year_data %>% 
   ggplot(aes(x=BRDYEAR, y=num_egg_masses, color=Watershed)) +
   geom_point() +
   geom_smooth(se=FALSE) +
