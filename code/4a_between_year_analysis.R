@@ -86,7 +86,7 @@ plot_model(complete_case_model)
 #### GAM model ####
 model1.gam <- gam(num_egg_masses ~ s(BRDYEAR) + 
                     s(mean_percent_emerg, k = 3) + # small k so that it doesn't get too wigggly for cover data
-                    s(mean_percent_sub, k = 3) +   # alternatively we could not smooth these terms
+                    s(mean_percent_sub, k = 3) +   # alternatively we could just not smooth these terms?
                     s(mean_percent_water, k = 3) +
                     s(interpolated_canopy, k = 3) +
                     s(yearly_rain) + 
@@ -124,8 +124,9 @@ model1.gamlss <- gamlss(num_egg_masses ~ pb(BRDYEAR) +
                           pb(WaterTemp) +
                           mean_salinity:CoastalSite +
                           max_salinity:CoastalSite +
-                          re(random = ~1 | Watershed) +
-                          re(random = ~1 | LocationID),
+                          # re(random = ~1 | Watershed) +
+                          # re(random = ~1 | LocationID),
+                          re(random = ~1 | LocationInWatershed),
                         data = complete_btw_data,
                         family = ZINBI,
                         control = gamlss.control(n.cyc = 20))
