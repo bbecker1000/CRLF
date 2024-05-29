@@ -6,6 +6,7 @@ library(lme4)
 library(sjPlot)
 library(mgcv)
 library(gamlss)
+library(gratia)
 
 
 between_year_data <- read_csv(here::here("data", "between_year_data.csv"))  %>% 
@@ -86,14 +87,14 @@ plot_model(complete_case_model)
 #### GAM model ####
 model1.gam <- gam(num_egg_masses ~ s(BRDYEAR) + 
                     s(mean_percent_emerg, k = 3) + # small k so that it doesn't get too wigggly for cover data
-                    s(mean_percent_sub, k = 3) +   # alternatively we could not smooth these terms
+                    s(mean_percent_sub, k = 3) +   # alternatively we could just not smooth these terms?
                     s(mean_percent_water, k = 3) +
                     s(interpolated_canopy, k = 3) +
                     s(yearly_rain) + 
                     mean_max_depth +
-                    max_depth +
-                    # AirTemp + # thinking of excluding because I'm not sure how biologically relevant it is...
-                    WaterTemp + # not sure if this should be a smooth variable or not
+                    max_depth + # is it ok to have 2 measures of max depth?
+                    # s(AirTemp) + # thinking of excluding because I'm not sure how biologically relevant it is...
+                    s(WaterTemp) + # not sure if this should be a smooth variable or not
                     mean_salinity:CoastalSite +
                     max_salinity:CoastalSite +
                     # s(Watershed, bs = 're') +
@@ -103,11 +104,21 @@ model1.gam <- gam(num_egg_masses ~ s(BRDYEAR) +
                   family = negbin(0.88))
 summary(model1.gam)
 
-plot(model1.gam)
+#### plotting GAM model ####
+# check assumptions
+appraise(model1.gam)
 
-plot_model(model1.gam, type = "std")
+# smooth terms
+draw(model1.gam)
 
-plot_model(model1.gam, type = "pred", terms = c("yearly_rain"))
+# all terms
+plot(model1.gam, pages = 1, all.terms = TRUE, rug = TRUE)
+
+# just over year
+draw(model1.gam, select = 1, rug = FALSE)
+
+# just for rainfall
+draw(model1.gam, select = 6)
 
 ### zero-inflated GAM model -- not working yet ####
 # gamlss uses pb() instead of s()
@@ -124,8 +135,9 @@ model1.gamlss <- gamlss(num_egg_masses ~ pb(BRDYEAR) +
                           pb(WaterTemp) +
                           mean_salinity:CoastalSite +
                           max_salinity:CoastalSite +
-                          re(random = ~1 | Watershed) +
-                          re(random = ~1 | LocationID),
+                          # re(random = ~1 | Watershed) +
+                          # re(random = ~1 | LocationID),
+                          re(random = ~1 | LocationInWatershed),
                         data = complete_btw_data,
                         family = ZINBI,
                         control = gamlss.control(n.cyc = 20))

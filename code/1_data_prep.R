@@ -87,6 +87,8 @@ data <- data %>%
     )
   )
 
+write_csv(data, here::here("data", "filtered_raw_data.csv"))
+
 ### ~~~ *** BETWEEN YEAR DATA *** ~~~ ###
 
 between_year_data <- data %>% 
