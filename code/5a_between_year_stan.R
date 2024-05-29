@@ -201,7 +201,7 @@ plot(m1.ulam,
 plot(m1.ulam, depth=2)
 
 save(m1.ulam, file = "Code/Output/m1.ulam.RData")
-#load(file = "Output/m1.ulam.RData")
+#load("C:/bbecker/Projects/CRLF/code/Output/m1.ulam.RData")
 
 
 rethinking::stancode(m1.ulam)
@@ -297,7 +297,8 @@ runtime
 fit <- m1.ulam.complete.case
 
 save(fit, file = "Code/Output/m1.ulam.complete.case.RData")
-#load(file = "Code/Output/m1.ulam.complete.case.RData")
+#load("C:/bbecker/Projects/CRLF/code/Output/m1.ulam.complete.case.RData")
+fit
 
 
 precis(fit)
