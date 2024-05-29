@@ -1,7 +1,7 @@
 ##DAGs for Frog models
 
 library(dagitty)
-
+#### most up to date model ####
 DAG_FROG <- dagitty("dag{ 
   Year -> FROG ;
   Rain -> FROG ;
@@ -50,7 +50,7 @@ coordinates(DAG_FROG) <- list(x=c(Year=2,
                                      Temp=-2))
 plot(DAG_FROG)
 
-# frog model using ggdag
+##### frog model using ggdag ####
 library(ggdag)
 
 coord_dag <- list(
