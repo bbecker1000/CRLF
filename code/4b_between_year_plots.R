@@ -6,6 +6,9 @@ library(cowplot)
 setwd(here::here("code"))
 between_year_data <- read_csv(here::here("data", "between_year_data.csv"))
 
+#### summary data table ####
+summary_table_data <- read_csv(here::here("data", "filtered_raw_data.csv"))
+
 
 #### mean_percent_emerg ####
 # emergent vegetation vs. egg masses
