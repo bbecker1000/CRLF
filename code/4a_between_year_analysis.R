@@ -7,6 +7,7 @@ library(sjPlot)
 library(mgcv)
 library(gamlss)
 library(gratia)
+library(gam.hp)
 
 
 between_year_data <- read_csv(here::here("data", "between_year_data.csv"))  %>% 
@@ -95,12 +96,12 @@ model1.gam <- gam(num_egg_masses ~ s(BRDYEAR) +
                     max_depth + # is it ok to have 2 measures of max depth?
                     # s(AirTemp) + # thinking of excluding because I'm not sure how biologically relevant it is...
                     s(WaterTemp) + # not sure if this should be a smooth variable or not
-                    mean_salinity:CoastalSite +
-                    max_salinity:CoastalSite +
-                    # s(Watershed, bs = 're') +
-                    # s(LocationID, bs = 're') +
-                    s(LocationInWatershed, bs = 're'),  # one random effect for sites in watersheds
-                  data = complete_btw_data,
+                    # mean_salinity:CoastalSite +
+                    max_salinity:as.factor(CoastalSite) +
+                    s(Watershed, LocationID, bs = 're'),
+                    #s(LocationID, bs = 're'),
+                    # s(LocationInWatershed, bs = 're'),  # one random effect for sites in watersheds
+                  data = scaled_between_year,
                   family = negbin(0.88))
 summary(model1.gam)
 
@@ -119,6 +120,10 @@ draw(model1.gam, select = 1, rug = FALSE)
 
 # just for rainfall
 draw(model1.gam, select = 6)
+
+plot_model(model1.gam, terms = c("CoastalSite","max_salinity"), type = "int")
+
+gam.hp(mod = model1.gam, type = "dev")
 
 ### zero-inflated GAM model -- not working yet ####
 # gamlss uses pb() instead of s()
