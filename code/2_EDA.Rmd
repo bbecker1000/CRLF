@@ -52,6 +52,14 @@ statistics <-data|>
 statistics
 ```
 
+```{r}
+# ranges of each variable for summary data table
+data_mins <- data.frame(sapply(data, min, na.rm = TRUE))
+data_maxs <- data.frame(sapply(data, max, na.rm = TRUE))
+data_means <- data.frame(sapply(data, mean, na.rm = TRUE))
+count(data, LocationID)
+```
+
 # plots
 
 ## cover data
