@@ -12,7 +12,9 @@ knitr::opts_chunk$set(warning = FALSE)
 ```{r}
 library(ggplot2)
 setwd(here::here("code"))
-source("1_data_prep.R")
+# source("1_data_prep.R")
+data <- read_csv(here::here("data", "filtered_raw_data.csv"))
+between_year_data <- read_csv(here::here("data", "between_year_data.csv"))
 ```
 
 # data manipulation
@@ -280,6 +282,12 @@ ggplot(data = statistics, mapping = aes(x = BRDYEAR, y = total_egg_num)) +
   geom_point(aes(alpha = survey_count)) + facet_wrap(~LocationID) +
   labs(x = "Year", y = "total new egg masses")
 
+# plot of presence or absence of eggs for each site/year
+between_year_data_plot <- between_year_data %>% 
+  mutate(
+    boolean_eggs = (num_egg_masses != 0)
+  )
+ggplot(between_year_data_plot, aes(x = BRDYEAR, y = LocationID, fill = boolean_eggs)) + geom_tile(color = "black") + coord_fixed()
 ```
 
 #### breeding season
