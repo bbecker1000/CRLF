@@ -11,6 +11,7 @@ knitr::opts_chunk$set(warning = FALSE)
 
 ```{r}
 library(ggplot2)
+library(tidyverse)
 setwd(here::here("code"))
 # source("1_data_prep.R")
 data <- read_csv(here::here("data", "filtered_raw_data.csv"))
@@ -287,7 +288,7 @@ between_year_data_plot <- between_year_data %>%
   mutate(
     boolean_eggs = (num_egg_masses != 0)
   )
-ggplot(between_year_data_plot, aes(x = BRDYEAR, y = LocationID, fill = boolean_eggs)) + geom_tile(color = "black") + coord_fixed()
+ggplot(between_year_data_plot, aes(x = BRDYEAR, y = LocationID, fill = boolean_eggs)) + geom_tile(color = "black") + coord_fixed() + scale_fill_manual(values = c("lavender", "purple4")) + theme_classic()
 ```
 
 #### breeding season
