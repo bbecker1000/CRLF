@@ -86,23 +86,10 @@ plot_model(complete_case_model_glmer)
 plot_model(complete_case_model)
 
 #### GAM model ####
-model1.gam <- gam(num_egg_masses ~ s(BRDYEAR) + 
-                    s(mean_percent_emerg, k = 3) + # small k so that it doesn't get too wigggly for cover data
-                    s(mean_percent_sub, k = 3) +   # alternatively we could just not smooth these terms?
-                    s(mean_percent_water, k = 3) +
-                    s(interpolated_canopy, k = 3) +
-                    s(yearly_rain) + 
-                    mean_max_depth +
-                    max_depth + # is it ok to have 2 measures of max depth?
-                    # s(AirTemp) + # thinking of excluding because I'm not sure how biologically relevant it is...
-                    s(WaterTemp) + # not sure if this should be a smooth variable or not
-                    # mean_salinity:CoastalSite +
-                    max_salinity:as.factor(CoastalSite) +
-                    s(Watershed, LocationID, bs = 're'),
-                    #s(LocationID, bs = 're'),
-                    # s(LocationInWatershed, bs = 're'),  # one random effect for sites in watersheds
-                  data = scaled_between_year,
-                  family = negbin(0.88))
+model1.gam <- gam(num_egg_masses ~ s(BRDYEAR) + s(mean_percent_emerg, k = 3) + s(mean_percent_sub, k = 3) + 
+                    s(mean_percent_water, k = 3) + s(interpolated_canopy, k = 3) + s(yearly_rain) + s(max_depth)+
+                    s(WaterTemp)+ s(max_salinity)+
+                    s(Watershed, LocationID, bs = 're'), data = scaled_between_year, family = negbin(0.88))
 summary(model1.gam)
 
 #### plotting GAM model ####
@@ -124,6 +111,8 @@ draw(model1.gam, select = 6)
 plot_model(model1.gam, terms = c("CoastalSite","max_salinity"), type = "int")
 
 gam.hp(mod = model1.gam, type = "dev")
+permu.gamhp(model1.gam,permutations=100)
+plot(gam.hp(mod=model1.gam,type="dev"))
 
 ### zero-inflated GAM model -- not working yet ####
 # gamlss uses pb() instead of s()
