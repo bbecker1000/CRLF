@@ -86,10 +86,18 @@ plot_model(complete_case_model_glmer)
 plot_model(complete_case_model)
 
 #### GAM model ####
-model1.gam <- gam(num_egg_masses ~ s(BRDYEAR) + s(mean_percent_emerg, k = 3) + s(mean_percent_sub, k = 3) + 
-                    s(mean_percent_water, k = 3) + s(interpolated_canopy, k = 3) + s(yearly_rain) + s(max_depth)+
-                    s(WaterTemp)+ s(max_salinity)+
-                    s(Watershed, LocationID, bs = 're'), data = scaled_between_year, family = negbin(0.88))
+model1.gam <- gam(num_egg_masses ~ s(BRDYEAR) + 
+                    s(mean_percent_emerg, k = 3) + # small k so that it doesn't get too wigggly for cover data
+                    s(mean_percent_sub, k = 3) +
+                    s(mean_percent_water, k = 3) +
+                    s(interpolated_canopy, k = 3) +
+                    s(yearly_rain) + 
+                    max_depth +
+                    s(WaterTemp) + # not sure if this should be a smooth variable or not
+                    max_salinity:as.factor(CoastalSite) +
+                    s(Watershed, LocationID, bs = 're'),
+                  data = scaled_between_year,
+                  family = negbin(0.88))
 summary(model1.gam)
 
 #### plotting GAM model ####
@@ -123,20 +131,22 @@ model1.gamlss <- gamlss(num_egg_masses ~ pb(BRDYEAR) +
                           pb(mean_percent_water) +
                           interpolated_canopy +
                           pb(yearly_rain) + 
-                          mean_max_depth +
+                          # mean_max_depth +
                           max_depth +
-                          AirTemp +
                           pb(WaterTemp) +
-                          mean_salinity:CoastalSite +
                           max_salinity:CoastalSite +
                           # re(random = ~1 | Watershed) +
                           # re(random = ~1 | LocationID),
                           re(random = ~1 | LocationInWatershed),
                         data = complete_btw_data,
                         family = ZINBI,
-                        control = gamlss.control(n.cyc = 20))
+                        control = gamlss.control(n.cyc = 200))
 
 summary(model1.gamlss)
+
+plot(model1.gamlss)
+
+term.plot(model1.gamlss, pages = 1)
 
 #### initial model -- ignore for now ####
 model1 <- glmmTMB(num_egg_masses ~ BRDYEAR +

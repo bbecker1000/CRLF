@@ -66,7 +66,10 @@ vis.gam(fit2_test, view = c("rain_to_date", "WaterTemp"), theta = 30, phi = 30, 
 #assign "dead" to all known breeders.  no censoring.
 onset_of_breeding_surv$status <- 2 
 
-d.rw <- onset_of_breeding_surv %>% filter(Watershed=="Redwood Creek")
+# d.rw <- onset_of_breeding_surv %>% filter(Watershed=="Redwood Creek")
+
+mean_onset <- onset_of_breeding_surv %>% 
+  summarize(mean_onset = mean(first_breeding))
 
 #intercept model of the mean
 fit.null <- survfit(Surv(first_breeding, status) ~ 1, data = onset_of_breeding_surv)
