@@ -144,9 +144,6 @@ between_year_gamlss <- gamlss(formula =
                            family = ZINBI,
                            control = gamlss.control(n.cyc = 1000))
 
-aic_rs <- AIC(model1.gamlss.rs)
-aic_cg <- AIC(model1.gamlss)
-
 summary(between_year_gamlss)
 
 plot(between_year_gamlss)
