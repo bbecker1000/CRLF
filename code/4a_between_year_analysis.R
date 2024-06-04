@@ -23,18 +23,18 @@ complete_btw_data <- between_year_data %>% filter(complete_case == TRUE)
 # scaling covariates
 scaled_between_year <- complete_btw_data %>% 
   mutate(
-    BRDYEAR = scale(BRDYEAR),
-    mean_percent_sub = scale(mean_percent_sub),
-    mean_percent_emerg = scale(mean_percent_emerg),
-    mean_percent_water = scale(mean_percent_water),
-    interpolated_canopy = scale(interpolated_canopy),
-    yearly_rain = scale(yearly_rain),
-    mean_max_depth = scale(mean_max_depth),
-    max_depth = scale(max_depth),
-    AirTemp = scale(AirTemp),
-    WaterTemp = scale(WaterTemp),
-    mean_salinity = scale(mean_salinity),
-    max_salinity = scale(max_salinity),
+    BRDYEAR = as.vector(scale(BRDYEAR)),
+    mean_percent_sub = as.vector(scale(mean_percent_sub)),
+    mean_percent_emerg = as.vector(scale(mean_percent_emerg)),
+    mean_percent_water = as.vector(scale(mean_percent_water)),
+    interpolated_canopy = as.vector(scale(interpolated_canopy)),
+    yearly_rain = as.vector(scale(yearly_rain)),
+    mean_max_depth = as.vector(scale(mean_max_depth)),
+    max_depth = as.vector(scale(max_depth)),
+    AirTemp = as.vector(scale(AirTemp)),
+    WaterTemp = as.vector(scale(WaterTemp)),
+    mean_salinity = as.vector(scale(mean_salinity)),
+    max_salinity = as.vector(scale(max_salinity)),
   )
 
 complete_case_model <- glmmTMB(num_egg_masses ~ BRDYEAR + 
@@ -93,7 +93,7 @@ model1.gam <- gam(num_egg_masses ~ s(BRDYEAR) +
                     s(interpolated_canopy, k = 3) +
                     s(yearly_rain) + 
                     max_depth +
-                    s(WaterTemp) + # not sure if this should be a smooth variable or not
+                    s(WaterTemp) +
                     max_salinity:as.factor(CoastalSite) +
                     s(Watershed, LocationID, bs = 're'),
                   data = scaled_between_year,
@@ -122,31 +122,36 @@ gam.hp(mod = model1.gam, type = "dev")
 permu.gamhp(model1.gam,permutations=100)
 plot(gam.hp(mod=model1.gam,type="dev"))
 
-### zero-inflated GAM model -- not working yet ####
+### zero-inflated GAM model ####
 # gamlss uses pb() instead of s()
 
-model1.gamlss <- gamlss(num_egg_masses ~ pb(BRDYEAR) + 
-                          mean_percent_emerg + 
-                          mean_percent_sub +
-                          pb(mean_percent_water) +
-                          interpolated_canopy +
-                          pb(yearly_rain) + 
-                          # mean_max_depth +
-                          max_depth +
-                          pb(WaterTemp) +
-                          max_salinity:CoastalSite +
-                          # re(random = ~1 | Watershed) +
-                          # re(random = ~1 | LocationID),
-                          re(random = ~1 | LocationInWatershed),
-                        data = complete_btw_data,
-                        family = ZINBI,
-                        control = gamlss.control(n.cyc = 200))
+between_year_gamlss <- gamlss(formula = 
+                             num_egg_masses ~ pb(BRDYEAR) + 
+                             pb(mean_percent_emerg) + 
+                             pb(mean_percent_sub) +
+                             pb(mean_percent_water) +
+                             pb(interpolated_canopy) +
+                             pb(yearly_rain) + 
+                             max_depth +
+                             pb(WaterTemp) +
+                             max_salinity:as.factor(CoastalSite) +
+                             re(random = ~1 | Watershed/LocationID),
+                           nu.formula = ~ max_depth +
+                             max_salinity:CoastalSite +
+                             pb(yearly_rain) +
+                             re(random = ~1 | Watershed/LocationID),
+                           data = scaled_between_year,
+                           family = ZINBI,
+                           control = gamlss.control(n.cyc = 1000))
 
-summary(model1.gamlss)
+aic_rs <- AIC(model1.gamlss.rs)
+aic_cg <- AIC(model1.gamlss)
 
-plot(model1.gamlss)
+summary(between_year_gamlss)
 
-term.plot(model1.gamlss, pages = 1)
+plot(between_year_gamlss)
+
+term.plot(between_year_gamlss, pages = 1)
 
 #### initial model -- ignore for now ####
 model1 <- glmmTMB(num_egg_masses ~ BRDYEAR +
