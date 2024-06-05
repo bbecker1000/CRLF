@@ -125,9 +125,13 @@ plot(gam.hp(mod=model1.gam,type="dev"))
 ### zero-inflated GAM model ####
 # gamlss uses pb() instead of s()
 
+cor(scaled_between_year[, c("BRDYEAR", "mean_percent_emerg", "mean_percent_sub", 
+                            "mean_percent_water", "interpolated_canopy", "yearly_rain", 
+                            "max_depth", "WaterTemp", "max_salinity")])
+
+
 between_year_gamlss <- gamlss(formula = 
                              num_egg_masses ~ pb(BRDYEAR) + 
-                             pb(mean_percent_emerg) + 
                              pb(mean_percent_sub) +
                              pb(mean_percent_water) +
                              pb(interpolated_canopy) +
@@ -136,13 +140,13 @@ between_year_gamlss <- gamlss(formula =
                              pb(WaterTemp) +
                              max_salinity:as.factor(CoastalSite) +
                              re(random = ~1 | Watershed/LocationID),
-                           nu.formula = ~ max_depth +
-                             max_salinity:CoastalSite +
-                             pb(yearly_rain) +
+                           nu.formula = ~ 
+                             max_depth +
+                             yearly_rain +
                              re(random = ~1 | Watershed/LocationID),
                            data = scaled_between_year,
                            family = ZINBI,
-                           control = gamlss.control(n.cyc = 1000))
+                           control = gamlss.control(n.cyc = 500))
 
 summary(between_year_gamlss)
 
