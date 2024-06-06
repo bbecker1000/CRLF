@@ -235,6 +235,18 @@ emerg_veg_model <- lm(mean_ground_emerg ~ mean_interpolated_emerg, data = comple
 summary(emerg_veg_model)
 ```
 
+##### canopy cover and aquatic vegetation
+
+```{r}
+canopy_emergent <- between_year_data %>% ggplot(aes(x=interpolated_canopy, y=mean_percent_emerg))+
+  geom_point() +
+  geom_smooth(method=lm)
+
+canopy_emergent_model <- lm(mean_percent_emerg ~ interpolated_canopy, data = between_year_data)
+
+summary(canopy_emergent_model)
+```
+
 ## eggs
 
 ```{r mean_NEW_eggs}
