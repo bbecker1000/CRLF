@@ -20,6 +20,9 @@ between_year_data <- read_csv(here::here("data", "between_year_data.csv"))  %>%
 between_year_data$complete_case <- complete.cases(between_year_data)
 complete_btw_data <- between_year_data %>% filter(complete_case == TRUE)
 
+# write to CSV
+write_csv(complete_btw_data, here::here("data", "complete_btw_data.csv"))
+
 # scaling covariates
 scaled_between_year <- complete_btw_data %>% 
   mutate(
