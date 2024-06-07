@@ -25,7 +25,12 @@ plot(fit1_k7)
 #install this package called "gam.hp", it tells the R2 for each fixed variable.
 #somehow this results shows water temperature is not significant? very low R2
 library(gam.hp)
-fit3_test <- gam(first_breeding ~ s(rain_to_date, k = 10) + s(WaterTemp, k = 10), data = onset_of_breeding_surv)
+fit3_test <- gam(first_breeding ~ 
+                   s(rain_to_date, k = 3) + 
+                   s(WaterTemp, k = 3) +
+                   s(AirTemp, k = 3)+
+                   s(MaxD, k = 3),data = onset_of_breeding_surv_clean)
+summary(fit3_test)
 gam.hp(fit3_test)
 gam.hp(mod=fit3_test,type="dev")
 permu.gamhp(fit3_test,permutations=100)
