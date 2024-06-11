@@ -167,13 +167,15 @@ univ_results <- lapply(univ_models, function(x) {
 res <- t(as.data.frame(univ_results, check.names = FALSE))
 as.data.frame(res)
 
-# choose a model!!
-# multivariate cox with random effects
-multi.cox <- coxme(Surv(first_breeding, status) ~ MaxD_proportion + AirTemp + AirTemp_squared + WaterTemp + WaterTemp_squared + BRDYEAR + rain_to_date + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv)
 # multivariate with random effects -- scaled variables
-multi.cox <- coxme(Surv(first_breeding, status) ~ scale(MaxD_proportion) + scale(AirTemp) + scale(AirTemp_squared) + scale(WaterTemp) + scale(WaterTemp_squared) + scale(BRDYEAR) + scale(rain_to_date) + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv)
-
-multi.cox <- coxme(Surv(first_breeding, status) ~ scale(MaxD_proportion) + scale(AirTemp) + scale(AirTemp_squared) + scale(WaterTemp) + scale(WaterTemp_squared) + scale(rain_to_date) + (1 | Watershed) + (1 | LocationID) + (1 | BRDYEAR), data = onset_of_breeding_surv)
+multi.cox <- coxme(Surv(first_breeding, status) ~ 
+                     scale(MaxD_proportion) + 
+                     scale(AirTemp) + 
+                     scale(WaterTemp) + 
+                     scale(BRDYEAR) + 
+                     scale(rain_to_date) + 
+                     (1 | Watershed/LocationID),
+                   data = onset_of_breeding_surv)
 
 # see summary of the model:
 summary(multi.cox)

@@ -10,7 +10,6 @@ library(gratia)
 library(gam.hp)
 library(patchwork)
 
-
 between_year_data <- read_csv(here::here("data", "between_year_data.csv"))  %>% 
   mutate(LocationID = as.factor(LocationID),
          Watershed = as.factor(Watershed), 
