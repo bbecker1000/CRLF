@@ -8,6 +8,7 @@ library(mgcv)
 library(gamlss)
 library(gratia)
 library(gam.hp)
+library(patchwork)
 
 
 between_year_data <- read_csv(here::here("data", "between_year_data.csv"))  %>% 
@@ -15,7 +16,7 @@ between_year_data <- read_csv(here::here("data", "between_year_data.csv"))  %>%
          Watershed = as.factor(Watershed), 
          LocationInWatershed = interaction(Watershed, LocationID))
 
-#### complete case model with scaled covariates ####
+#### scaling covariates ####
 # creating a "complete case" column
 between_year_data$complete_case <- complete.cases(between_year_data)
 complete_btw_data <- between_year_data %>% filter(complete_case == TRUE)
@@ -23,20 +24,109 @@ complete_btw_data <- between_year_data %>% filter(complete_case == TRUE)
 # scaling covariates
 scaled_between_year <- complete_btw_data %>% 
   mutate(
-    BRDYEAR = as.vector(scale(BRDYEAR)),
-    mean_percent_sub = as.vector(scale(mean_percent_sub)),
-    mean_percent_emerg = as.vector(scale(mean_percent_emerg)),
-    mean_percent_water = as.vector(scale(mean_percent_water)),
-    interpolated_canopy = as.vector(scale(interpolated_canopy)),
-    yearly_rain = as.vector(scale(yearly_rain)),
-    mean_max_depth = as.vector(scale(mean_max_depth)),
-    max_depth = as.vector(scale(max_depth)),
-    AirTemp = as.vector(scale(AirTemp)),
-    WaterTemp = as.vector(scale(WaterTemp)),
-    mean_salinity = as.vector(scale(mean_salinity)),
-    max_salinity = as.vector(scale(max_salinity)),
+    BRDYEAR_scaled = as.vector(scale(BRDYEAR)),
+    mean_percent_sub_scaled = as.vector(scale(mean_percent_sub)),
+    mean_percent_emerg_scaled = as.vector(scale(mean_percent_emerg)),
+    mean_percent_water_scaled = as.vector(scale(mean_percent_water)),
+    interpolated_canopy_scaled = as.vector(scale(interpolated_canopy)),
+    yearly_rain_scaled = as.vector(scale(yearly_rain)),
+    mean_max_depth_scaled = as.vector(scale(mean_max_depth)),
+    max_depth_scaled = as.vector(scale(max_depth)),
+    AirTemp_scaled = as.vector(scale(AirTemp)),
+    WaterTemp_scaled = as.vector(scale(WaterTemp)),
+    mean_salinity_scaled = as.vector(scale(mean_salinity)),
+    max_salinity_scaled = as.vector(scale(max_salinity)),
   )
 
+### zero-inflated GAM model ####
+# gamlss uses pb() instead of s()
+
+# testing correlations, removed mean_percent_emerg because it was highly correlated with percent water
+cor(scaled_between_year[, c("BRDYEAR", "mean_percent_emerg", "mean_percent_sub", 
+                            "mean_percent_water", "interpolated_canopy", "yearly_rain", 
+                            "max_depth", "WaterTemp", "max_salinity")])
+
+
+between_year_gamlss <- gamlss(formula = 
+                             num_egg_masses ~ pb(BRDYEAR_scaled) + 
+                             pb(mean_percent_sub_scaled) +
+                             pb(mean_percent_water_scaled) +
+                             pb(interpolated_canopy_scaled) +
+                             pb(yearly_rain_scaled) + 
+                             max_depth_scaled +
+                             pb(WaterTemp_scaled) +
+                             max_salinity:as.factor(CoastalSite) +
+                             re(random = ~1 | Watershed/LocationID),
+                           nu.formula = ~ 
+                             max_depth_scaled +
+                             pb(yearly_rain_scaled) +
+                             re(random = ~1 | Watershed/LocationID),
+                           data = scaled_between_year,
+                           family = ZINBI,
+                           control = gamlss.control(n.cyc = 500))
+
+# model summary and diagnostics
+summary(between_year_gamlss)
+plot(between_year_gamlss)
+
+
+# plotting model
+
+plot_df <- data.frame(scaled_between_year, fv = fitted(between_year_gamlss))
+
+# breeding year plot
+brdyear_plot <- ggplot(data = plot_df, aes(x = BRDYEAR)) + 
+  coord_cartesian(ylim = c(0, 100)) +
+  geom_point(aes(y = num_egg_masses), alpha = 0.5) + 
+  geom_point(aes(y = fv), color = "red3", alpha = 0.5) +
+  geom_smooth(aes(y = fv), se = FALSE) +
+  labs(x = "Breeding Year", y = "Number of Egg Masses") +
+  theme_classic()
+
+# yearly rain plot
+yearly_rain_plot <- ggplot(data = plot_df, aes(x = yearly_rain)) + 
+  coord_cartesian(ylim = c(0, 100)) +
+  geom_point(aes(y = num_egg_masses), alpha = 0.5) + 
+  geom_point(aes(y = fv), color = "red3", alpha = 0.5) +
+  geom_smooth(aes(y = fv), se = FALSE) +
+  labs(x = "Yearly Rainfall", y = "Number of Egg Masses") +
+  theme_classic()
+
+# percent water plot
+percent_water_plot <- ggplot(data = plot_df, aes(x = mean_percent_water)) + 
+  coord_cartesian(ylim = c(0, 100)) +
+  geom_point(aes(y = num_egg_masses), alpha = 0.5) + 
+  geom_point(aes(y = fv), color = "red3", alpha = 0.5) +
+  geom_smooth(aes(y = fv), se = FALSE) +
+  labs(x = "Percent Open Water", y = "Number of Egg Masses") +
+  theme_classic()
+
+# percent submergent vegetation plot
+percent_submergent_plot <- ggplot(data = plot_df, aes(x = mean_percent_sub)) +
+  coord_cartesian(ylim = c(0, 100)) +
+  geom_point(aes(y = num_egg_masses), alpha = 0.5) + 
+  geom_point(aes(y = fv), color = "red3", alpha = 0.5) +
+  geom_smooth(aes(y = fv), se = FALSE) +
+  labs(x = "Percent Submergent Vegetation", y = "Number of Egg Masses") +
+  theme_classic()
+
+combined_plot <- brdyear_plot + yearly_rain_plot + percent_water_plot + percent_submergent_plot +
+  plot_layout(ncol = 2)
+
+# plotting zero inflation
+plot_nu_df <- data.frame(scaled_between_year, fv = fitted(between_year_gamlss, what = "nu"))
+
+# yearly rain plot
+yearly_rain_plot <- ggplot(data = plot_nu_df, aes(x = yearly_rain)) + 
+  geom_point(aes(y = num_egg_masses), alpha = 0.5) +
+  geom_point(aes(y = fv), color = "red3", alpha = 0.5) +
+  geom_smooth(aes(y = fv), se = FALSE) +
+  labs(x = "Yearly Rainfall", y = "Number of Egg Masses") +
+  theme_classic()
+
+#### unused models (saving just in case) ####
+
+#### complete case model ####
 complete_case_model <- glmmTMB(num_egg_masses ~ BRDYEAR + 
                                  mean_percent_emerg +
                                  mean_percent_sub +
@@ -56,7 +146,6 @@ complete_case_model <- glmmTMB(num_egg_masses ~ BRDYEAR +
                                  interpolated_canopy +
                                  (1 | LocationID),
                                family = nbinom2)
-summary(complete_case_model)
 
 complete_case_model_glmer <- glmer(num_egg_masses ~ BRDYEAR + 
                                      I(BRDYEAR^2) +
@@ -77,13 +166,15 @@ complete_case_model_glmer <- glmer(num_egg_masses ~ BRDYEAR +
                                    #(1 | LocationID),
                                    data = scaled_between_year,
                                    family = negative.binomial(0.88)) 
-summary(complete_case_model_glmer)
 
-plot_model(complete_case_model_glmer)
-
-
-
-plot_model(complete_case_model)
+#### initial model ####
+model1 <- glmmTMB(num_egg_masses ~ BRDYEAR +
+                    yearly_rain +
+                    (1 | LocationID),
+                  data = between_year_data,
+                  ziformula = ~0,
+                  family = nbinom2) 
+summary(model1)
 
 #### GAM model ####
 model1.gam <- gam(num_egg_masses ~ s(BRDYEAR) + 
@@ -121,48 +212,6 @@ plot_model(model1.gam, terms = c("CoastalSite","max_salinity"), type = "int")
 gam.hp(mod = model1.gam, type = "dev")
 permu.gamhp(model1.gam,permutations=100)
 plot(gam.hp(mod=model1.gam,type="dev"))
-
-### zero-inflated GAM model ####
-# gamlss uses pb() instead of s()
-
-# testing correlations, removed mean_percent_emerg because it was highly correlated with percent water
-cor(scaled_between_year[, c("BRDYEAR", "mean_percent_emerg", "mean_percent_sub", 
-                            "mean_percent_water", "interpolated_canopy", "yearly_rain", 
-                            "max_depth", "WaterTemp", "max_salinity")])
-
-
-between_year_gamlss <- gamlss(formula = 
-                             num_egg_masses ~ pb(BRDYEAR) + 
-                             pb(mean_percent_sub) +
-                             pb(mean_percent_water) +
-                             pb(interpolated_canopy) +
-                             pb(yearly_rain) + 
-                             max_depth +
-                             pb(WaterTemp) +
-                             max_salinity:as.factor(CoastalSite) +
-                             re(random = ~1 | Watershed/LocationID),
-                           nu.formula = ~ 
-                             max_depth +
-                             pb(yearly_rain) +
-                             re(random = ~1 | Watershed/LocationID),
-                           data = scaled_between_year,
-                           family = ZINBI,
-                           control = gamlss.control(n.cyc = 200))
-
-summary(between_year_gamlss)
-
-plot(between_year_gamlss)
-
-term.plot(between_year_gamlss, pages = 1)
-
-#### initial model -- ignore for now ####
-model1 <- glmmTMB(num_egg_masses ~ BRDYEAR +
-                     yearly_rain +
-                    (1 | LocationID),
-                  data = between_year_data,
-                  ziformula = ~0,
-                  family = nbinom2) 
-summary(model1)
 
 #### lme4 model ####
 model1 <- glmer(num_egg_masses ~ I(BRDYEAR - 2009) + 
