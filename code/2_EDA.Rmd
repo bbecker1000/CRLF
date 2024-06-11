@@ -16,6 +16,7 @@ setwd(here::here("code"))
 # source("1_data_prep.R")
 data <- read_csv(here::here("data", "filtered_raw_data.csv"))
 between_year_data <- read_csv(here::here("data", "between_year_data.csv"))
+complete_btw_data <- read_csv(here::here("data", "complete_btw_data.csv"))
 ```
 
 # data manipulation
@@ -135,7 +136,7 @@ ggplot(data = cover_comparisons, aes(x = mean_ground_open_water, y = mean_interp
   facet_wrap(~LocationID)
 ```
 
-#### complete cases
+#### complete cases cover
 
 ```{r complete_case}
 cover_comparisons = between_year_data_for_cover_comparison
@@ -233,6 +234,26 @@ summary(sub_veg_model)
 
 emerg_veg_model <- lm(mean_ground_emerg ~ mean_interpolated_emerg, data = complete_cover_comparisons)
 summary(emerg_veg_model)
+```
+
+##### canopy cover and aquatic vegetation
+
+```{r}
+canopy_emergent <- complete_btw_data %>% ggplot(aes(x=interpolated_canopy, y=mean_percent_emerg))+
+  geom_point() +
+  geom_smooth()
+canopy_emergent
+
+canopy_emergent_model <- lm(mean_percent_emerg ~ interpolated_canopy, data = complete_btw_data)
+
+summary(canopy_emergent_model)
+
+# facet by site
+complete_btw_data %>% ggplot(aes(x=interpolated_canopy, y=mean_percent_emerg))+
+  geom_point() +
+  geom_smooth() +
+  facet_wrap(~Watershed)
+
 ```
 
 ## eggs
