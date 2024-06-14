@@ -6,6 +6,9 @@ library(cowplot)
 setwd(here::here("code"))
 between_year_data <- read_csv(here::here("data", "between_year_data.csv"))
 
+#### summary data table ####
+summary_table_data <- read_csv(here::here("data", "filtered_raw_data.csv"))
+
 
 #### mean_percent_emerg ####
 # emergent vegetation vs. egg masses
@@ -14,7 +17,8 @@ emergent_plot <- between_year_data %>%
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Emergent Vegetation (%)") +
-  ylab(NULL)
+  ylab(NULL) +
+  ylim(0,150)
 
 # emergent vs. time
 emergent_BRD_plot <- between_year_data %>% 
@@ -29,7 +33,8 @@ submergent_plot <- between_year_data %>%
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Submergent Vegetation (%)")  +
-  ylab(NULL)
+  ylab(NULL) +
+  ylim(0,150)
 
 ## submerg vs. time
 subemergent_BRD_plot <- between_year_data %>% 
@@ -44,7 +49,8 @@ open_water_plot <- between_year_data %>%
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Open Water (%)") +
-  ylab(NULL)
+  ylab(NULL) +
+  ylim(0,150)
 
 ## open water vs. time
 open_water_BRD_plot <- between_year_data %>% 
@@ -59,7 +65,8 @@ canopy_plot <- between_year_data %>%
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Canopy (%)") +
-  ylab(NULL)
+  ylab(NULL) +
+  ylim(0,150)
 
 ## canopy vs. time
 canopy_BRD_plot <- between_year_data %>% 
@@ -74,7 +81,8 @@ rain_plot <- between_year_data %>%
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Rainfall") +
-  ylab(NULL)
+  ylab(NULL) +
+  ylim(0,150)
 
 ## yearly rain vs. time
 rain_BRD_plot <- between_year_data %>% 
@@ -89,7 +97,8 @@ mean_max_depth_plot <- between_year_data %>%
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Mean Max Depth") +
-  ylab(NULL)
+  ylab(NULL) +
+  ylim(0,150)
 
 ## mean_max_depth vs. time
 mean_max_depth_BRD_plot <- between_year_data %>% 
@@ -104,7 +113,8 @@ max_depth_plot <- between_year_data %>%
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Max Depth") +
-  ylab(NULL)
+  ylab(NULL) +
+  ylim(0,150)
 
 ## max_depth vs. time
 max_depth_BRD_plot <- between_year_data %>% 
@@ -119,7 +129,8 @@ AirTemp_plot <- between_year_data %>%
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Air Temperature") +
-  ylab(NULL)
+  ylab(NULL) +
+  ylim(0,150)
 
 ## AirTemp vs. time
 AirTemp_BRD_plot <- between_year_data %>% 
@@ -134,7 +145,8 @@ WaterTemp_plot <- between_year_data %>%
   geom_point() +
   geom_smooth(se=FALSE) +
   xlab("Water Temperature") +
-  ylab(NULL)
+  ylab(NULL) +
+  ylim(0,150)
 
 ## WaterTemp vs. time
 WaterTemp_BRD_plot <- between_year_data %>% 
@@ -180,7 +192,7 @@ max_salinity_BRD_plot <- coastal_between_year_data %>%
 
 #### year ####
 # year vs. egg masses
-egg_BRD_plot <- coastal_between_year_data %>% 
+egg_BRD_plot <- between_year_data %>% 
   ggplot(aes(x=BRDYEAR, y=num_egg_masses, color=Watershed)) +
   geom_point() +
   geom_smooth(se=FALSE) +

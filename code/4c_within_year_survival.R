@@ -25,7 +25,12 @@ plot(fit1_k7)
 #install this package called "gam.hp", it tells the R2 for each fixed variable.
 #somehow this results shows water temperature is not significant? very low R2
 library(gam.hp)
-fit3_test <- gam(first_breeding ~ s(rain_to_date, k = 10) + s(WaterTemp, k = 10), data = onset_of_breeding_surv)
+fit3_test <- gam(first_breeding ~ 
+                   s(rain_to_date, k = 3) + 
+                   s(WaterTemp, k = 3) +
+                   s(AirTemp, k = 3)+
+                   s(MaxD, k = 3),data = onset_of_breeding_surv)
+summary(fit3_test)
 gam.hp(fit3_test)
 gam.hp(mod=fit3_test,type="dev")
 permu.gamhp(fit3_test,permutations=100)
@@ -66,7 +71,10 @@ vis.gam(fit2_test, view = c("rain_to_date", "WaterTemp"), theta = 30, phi = 30, 
 #assign "dead" to all known breeders.  no censoring.
 onset_of_breeding_surv$status <- 2 
 
-d.rw <- onset_of_breeding_surv %>% filter(Watershed=="Redwood Creek")
+# d.rw <- onset_of_breeding_surv %>% filter(Watershed=="Redwood Creek")
+
+mean_onset <- onset_of_breeding_surv %>% 
+  summarize(mean_onset = mean(first_breeding))
 
 #intercept model of the mean
 fit.null <- survfit(Surv(first_breeding, status) ~ 1, data = onset_of_breeding_surv)
@@ -159,13 +167,15 @@ univ_results <- lapply(univ_models, function(x) {
 res <- t(as.data.frame(univ_results, check.names = FALSE))
 as.data.frame(res)
 
-# choose a model!!
-# multivariate cox with random effects
-multi.cox <- coxme(Surv(first_breeding, status) ~ MaxD_proportion + AirTemp + AirTemp_squared + WaterTemp + WaterTemp_squared + BRDYEAR + rain_to_date + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv)
 # multivariate with random effects -- scaled variables
-multi.cox <- coxme(Surv(first_breeding, status) ~ scale(MaxD_proportion) + scale(AirTemp) + scale(AirTemp_squared) + scale(WaterTemp) + scale(WaterTemp_squared) + scale(BRDYEAR) + scale(rain_to_date) + (1 | Watershed) + (1 | LocationID), data = onset_of_breeding_surv)
-
-multi.cox <- coxme(Surv(first_breeding, status) ~ scale(MaxD_proportion) + scale(AirTemp) + scale(AirTemp_squared) + scale(WaterTemp) + scale(WaterTemp_squared) + scale(rain_to_date) + (1 | Watershed) + (1 | LocationID) + (1 | BRDYEAR), data = onset_of_breeding_surv)
+multi.cox <- coxme(Surv(first_breeding, status) ~ 
+                     scale(MaxD_proportion) + 
+                     scale(AirTemp) + 
+                     scale(WaterTemp) + 
+                     scale(BRDYEAR) + 
+                     scale(rain_to_date) + 
+                     (1 | Watershed/LocationID),
+                   data = onset_of_breeding_surv)
 
 # see summary of the model:
 summary(multi.cox)
