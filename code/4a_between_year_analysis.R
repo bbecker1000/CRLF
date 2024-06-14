@@ -81,7 +81,7 @@ brdyear_plot <- ggplot(data = plot_df, aes(x = BRDYEAR)) +
   coord_cartesian(ylim = c(0, 100)) +
   geom_point(aes(y = num_egg_masses), alpha = 0.5) + 
   geom_point(aes(y = fv), color = "red3", alpha = 0.5) +
-  geom_smooth(aes(y = fv), method = "gam", se = TRUE) +
+  geom_smooth(aes(y = fv), method = "glm", se = TRUE) +
   labs(x = "Breeding Year", y = "Number of Egg Masses") +
   theme_classic()
 
@@ -90,7 +90,7 @@ yearly_rain_plot <- ggplot(data = plot_df, aes(x = yearly_rain)) +
   coord_cartesian(ylim = c(0, 100)) +
   geom_point(aes(y = num_egg_masses), alpha = 0.5) + 
   geom_point(aes(y = fv), color = "red3", alpha = 0.5) +
-  geom_smooth(aes(y = fv), method = "gam", se = TRUE) +
+  geom_smooth(aes(y = fv), method = "glm", se = TRUE) +
   labs(x = "Yearly Rainfall", y = "Number of Egg Masses") +
   theme_classic()
 
