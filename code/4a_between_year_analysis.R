@@ -76,6 +76,22 @@ plot(between_year_gamlss)
 predictions <- lpred(between_year_gamlss, what = "mu", type = "response", se.fit = TRUE)
 plot_df <- data.frame(scaled_between_year, fv =  predictions$fit, se = predictions$se.fit)
 
+predictions <- predict(between_year_gamlss, what = "mu", type = "response", se.fit = TRUE)
+plot_df <- data.frame(
+  BRDYEAR = plot_df$BRDYEAR, 
+  fv = plot_df$fv, 
+  predicted_fv = predictions$fit, 
+  se = predictions$se.fit
+)
+
+brdyear_plot0 <- ggplot(data = plot_df, aes(x = BRDYEAR)) + 
+  geom_point(aes(y = fv), color = "red3", alpha = 0.5) + 
+  geom_smooth(aes(y = predicted_fv), method = "loess", se = TRUE, color = "blue", span = 0.5) +
+  labs(x = "Breeding Year", y = "Number of Egg Masses") + 
+  theme_classic()
+brdyear_plot0
+
+
 # breeding year plot
 brdyear_plot <- ggplot(data = plot_df, aes(x = BRDYEAR)) + 
   coord_cartesian(ylim = c(0, 100)) +
@@ -84,15 +100,39 @@ brdyear_plot <- ggplot(data = plot_df, aes(x = BRDYEAR)) +
   geom_smooth(aes(y = fv), method = "glm", se = TRUE) +
   labs(x = "Breeding Year", y = "Number of Egg Masses") +
   theme_classic()
+brdyear_plot
+
+# increasing k value doesn't change the line
+brdyear_plot2 <- ggplot(data = plot_df, aes(x = BRDYEAR)) + 
+  coord_cartesian(ylim = c(0, 100)) +
+  geom_point(aes(y = num_egg_masses), alpha = 0.5) + 
+  geom_point(aes(y = fv), color = "red3", alpha = 0.5) +
+  geom_smooth(aes(y = fv), method = "gam", formula = y ~ s(x, k = 10), se = TRUE) + 
+  labs(x = "Breeding Year", y = "Number of Egg Masses") +
+  theme_classic()
+brdyear_plot2
+
+# another attempt, still a linear line
+plot_df$fitted_values <- predict(gam_model, newdata = plot_df)
+brdyear_plot3 <- ggplot(data = plot_df, aes(x = BRDYEAR)) + 
+  coord_cartesian(ylim = c(0, 100)) +
+  geom_point(aes(y = num_egg_masses), alpha = 0.5) + 
+  geom_point(aes(y = fv), color = "red3", alpha = 0.5) +
+  geom_line(aes(y = fitted_values), color = "blue") +
+  labs(x = "Breeding Year", y = "Number of Egg Masses") +
+  theme_classic()
+print(brdyear_plot3)
+
 
 # yearly rain plot
 yearly_rain_plot <- ggplot(data = plot_df, aes(x = yearly_rain)) + 
   coord_cartesian(ylim = c(0, 100)) +
   geom_point(aes(y = num_egg_masses), alpha = 0.5) + 
   geom_point(aes(y = fv), color = "red3", alpha = 0.5) +
-  geom_smooth(aes(y = fv), method = "glm", se = TRUE) +
+  geom_smooth(aes(y = fv), method = "gam", formula = y ~ s(x, k = 10), se = TRUE) +
   labs(x = "Yearly Rainfall", y = "Number of Egg Masses") +
   theme_classic()
+yearly_rain_plot
 
 # percent water plot
 percent_water_plot <- ggplot(data = plot_df, aes(x = mean_percent_water)) + 
@@ -102,6 +142,7 @@ percent_water_plot <- ggplot(data = plot_df, aes(x = mean_percent_water)) +
   geom_smooth(aes(y = fv), method = "gam", se = TRUE) +
   labs(x = "Percent Open Water", y = "Number of Egg Masses") +
   theme_classic()
+percent_water_plot
 
 # percent submergent vegetation plot
 percent_submergent_plot <- ggplot(data = plot_df, aes(x = mean_percent_sub)) +
@@ -111,10 +152,11 @@ percent_submergent_plot <- ggplot(data = plot_df, aes(x = mean_percent_sub)) +
   geom_smooth(aes(y = fv), method = "gam", se = TRUE) +
   labs(x = "Percent Submergent Vegetation", y = "Number of Egg Masses") +
   theme_classic()
+percent_submergent_plot
 
 combined_plot <- brdyear_plot + yearly_rain_plot + percent_water_plot + percent_submergent_plot +
   plot_layout(ncol = 2)
-
+combined_plot
 
 # plotting by watershed
 # breeding year plot
@@ -125,6 +167,7 @@ brdyear_plot_watershed <- ggplot(data = plot_df, aes(x = BRDYEAR, color = Waters
   geom_point(aes(y = num_egg_masses), alpha = 0.5) + 
   labs(x = "Breeding Year", y = "Number of Egg Masses") +
   theme_classic()
+brdyear_plot_watershed
 
 # yearly rain plot
 yearly_rain_plot_watershed <- ggplot(data = plot_df, aes(x = yearly_rain, color = Watershed)) + 
@@ -134,10 +177,12 @@ yearly_rain_plot_watershed <- ggplot(data = plot_df, aes(x = yearly_rain, color 
   geom_point(aes(y = num_egg_masses), alpha = 0.5) + 
   labs(x = "Yearly Rainfall", y = "Number of Egg Masses") +
   theme_classic()
+yearly_rain_plot_watershed
 
 # combined plot
-combined_plot <- brdyear_plot_watershed + yearly_rain_plot_watershed +
+combined_plot2 <- brdyear_plot_watershed + yearly_rain_plot_watershed +
   plot_layout(ncol = 2)
+combined_plot2
 
 # plotting zero inflation
 # plot_nu_df <- data.frame(scaled_between_year, fv = lpred(between_year_gamlss, what = "nu"))
