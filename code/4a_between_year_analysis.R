@@ -77,14 +77,14 @@ predictions <- lpred(between_year_gamlss, what = "mu", type = "response", se.fit
 plot_df <- data.frame(scaled_between_year, fv =  predictions$fit, se = predictions$se.fit)
 
 predictions <- predict(between_year_gamlss, what = "mu", type = "response", se.fit = TRUE)
-plot_df <- data.frame(
-  BRDYEAR = plot_df$BRDYEAR, 
+plot_df2 <- data.frame(
+  BRDYEAR = plot_df2$BRDYEAR, 
   fv = plot_df$fv, 
   predicted_fv = predictions$fit, 
   se = predictions$se.fit
 )
 
-brdyear_plot0 <- ggplot(data = plot_df, aes(x = BRDYEAR)) + 
+brdyear_plot0 <- ggplot(data = plot_df2, aes(x = BRDYEAR)) + 
   geom_point(aes(y = fv), color = "red3", alpha = 0.5) + 
   geom_smooth(aes(y = predicted_fv), method = "loess", se = TRUE, color = "blue", span = 0.5) +
   labs(x = "Breeding Year", y = "Number of Egg Masses") + 
@@ -101,28 +101,6 @@ brdyear_plot <- ggplot(data = plot_df, aes(x = BRDYEAR)) +
   labs(x = "Breeding Year", y = "Number of Egg Masses") +
   theme_classic()
 brdyear_plot
-
-# increasing k value doesn't change the line
-brdyear_plot2 <- ggplot(data = plot_df, aes(x = BRDYEAR)) + 
-  coord_cartesian(ylim = c(0, 100)) +
-  geom_point(aes(y = num_egg_masses), alpha = 0.5) + 
-  geom_point(aes(y = fv), color = "red3", alpha = 0.5) +
-  geom_smooth(aes(y = fv), method = "gam", formula = y ~ s(x, k = 10), se = TRUE) + 
-  labs(x = "Breeding Year", y = "Number of Egg Masses") +
-  theme_classic()
-brdyear_plot2
-
-# another attempt, still a linear line
-plot_df$fitted_values <- predict(gam_model, newdata = plot_df)
-brdyear_plot3 <- ggplot(data = plot_df, aes(x = BRDYEAR)) + 
-  coord_cartesian(ylim = c(0, 100)) +
-  geom_point(aes(y = num_egg_masses), alpha = 0.5) + 
-  geom_point(aes(y = fv), color = "red3", alpha = 0.5) +
-  geom_line(aes(y = fitted_values), color = "blue") +
-  labs(x = "Breeding Year", y = "Number of Egg Masses") +
-  theme_classic()
-print(brdyear_plot3)
-
 
 # yearly rain plot
 yearly_rain_plot <- ggplot(data = plot_df, aes(x = yearly_rain)) + 
@@ -198,7 +176,7 @@ yearly_rain_plot <- ggplot(data = plot_nu_df, aes(x = yearly_rain, color = Water
   geom_smooth(aes(y = fv), method = "gam") +
   labs(x = "Yearly Rainfall", y = "Number of Egg Masses") +
   theme_classic()
-
+yearly_rain_plot
 #### unused models (saving just in case) ####
 
 #### complete case model ####
