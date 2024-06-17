@@ -78,7 +78,7 @@ plot_df <- data.frame(scaled_between_year, fv =  predictions$fit, se = predictio
 
 predictions <- predict(between_year_gamlss, what = "mu", type = "response", se.fit = TRUE)
 plot_df2 <- data.frame(
-  BRDYEAR = plot_df2$BRDYEAR, 
+  BRDYEAR = plot_df$BRDYEAR, 
   fv = plot_df$fv, 
   predicted_fv = predictions$fit, 
   se = predictions$se.fit
@@ -97,7 +97,7 @@ brdyear_plot <- ggplot(data = plot_df, aes(x = BRDYEAR)) +
   coord_cartesian(ylim = c(0, 100)) +
   geom_point(aes(y = num_egg_masses), alpha = 0.5) + 
   geom_point(aes(y = fv), color = "red3", alpha = 0.5) +
-  geom_smooth(aes(y = fv), method = "glm", se = TRUE) +
+  geom_smooth(aes(y = fv), method = "loess", se = TRUE) +
   labs(x = "Breeding Year", y = "Number of Egg Masses") +
   theme_classic()
 brdyear_plot
@@ -167,18 +167,30 @@ combined_plot2
 
 nu_predictions <- lpred(between_year_gamlss, what = "nu", type = "response", se.fit = TRUE)
 plot_nu_df <- data.frame(scaled_between_year, fv =  nu_predictions$fit, se = nu_predictions$se.fit) %>% 
-  mutate(egg_masses_boolean = if_else(num_egg_masses == 0, 0, 1))
+  mutate(egg_masses_boolean = if_else(num_egg_masses == 0, 0, 1),
+         model_probability = 1 - fv)
 
 # yearly rain plot
-yearly_rain_plot <- ggplot(data = plot_nu_df, aes(x = yearly_rain, color = Watershed)) + 
-  geom_jitter(width = 0.5, height = 0, aes(y = egg_masses_boolean), alpha = 0.5) +
-  geom_jitter(width = 0.05, height = 0, aes(y = fv), color = "black", alpha = 0.5) +
+yearly_rain_plot <- ggplot(data = plot_nu_df, aes(x = yearly_rain)) + 
+  geom_jitter(width = 0.5, height = 0.05, aes(y = egg_masses_boolean), alpha = 0.5) +
+  # geom_jitter(width = 0.25, height = 0, aes(y = model_probability), color = "black", alpha = 0.5) +
+  geom_smooth(aes(y = model_probability), method = "gam") +
+  labs(x = "Yearly Rainfall", y = "Number of Egg Masses") +
+  theme_classic()
+yearly_rain_plot
+
+yearly_rain_plot <- ggplot(data = plot_nu_df, aes(x = yearly_rain)) + 
+  geom_jitter(width = 0.5, height = 0.05, aes(y = egg_masses_boolean), alpha = 0.5) +
+  # geom_jitter(width = 0.25, height = 0, aes(y = fv), color = "black", alpha = 0.5) +
   geom_smooth(aes(y = fv), method = "gam") +
   labs(x = "Yearly Rainfall", y = "Number of Egg Masses") +
   theme_classic()
 yearly_rain_plot
-#### unused models (saving just in case) ####
 
+probability_comparison <- plot_nu_df %>% 
+  select(egg_masses_boolean, fv)
+
+#### unused models (saving just in case) ####
 #### complete case model ####
 complete_case_model <- glmmTMB(num_egg_masses ~ BRDYEAR + 
                                  mean_percent_emerg +
