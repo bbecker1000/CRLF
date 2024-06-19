@@ -10,6 +10,13 @@ raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA.csv"))
 rainfall_daily <- read_csv(here::here("data", "cm_daily_rain.csv"))
 rainfall_yearly <- read_csv(here::here("data", "cm_yearly_rain.csv"))
 land_cover <- read_csv(here::here("data", "cover_estimates.csv"))
+location_type <- read_csv(here::here("data", "CRLF_tblLocations.csv")) %>% 
+  select("LocationID", 'Lotic_Lentic', 'WaterRegime') %>% 
+  rename(
+    water_flow = Lotic_Lentic,
+    water_regime = WaterRegime
+  )
+
 
 # temporarily changing raw data to v3 because in v4, some dates are not present in CSV
 #raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA_no_city_data.csv"))
@@ -57,7 +64,8 @@ unfiltered_data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, 
     mean_percent_emerg = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_emerg", "interpolated_emerg"))), na.rm = TRUE), ground_emerg), interpolated_emerg),
     mean_percent_water = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_open_water", "interpolated_openwater"))), na.rm = TRUE), ground_open_water), interpolated_openwater),
     LocationID = as.factor(LocationID)
-  )
+  ) %>% 
+  left_join(., location_type, join_by(LocationID))
 
 ### ~~~ *** DATA FILTERING *** ~~~ ###
 
