@@ -18,6 +18,10 @@ mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilatio
                chains = 2, cores = 2,
                control = list(adapt_delta = 0.98)) #reduce divergences
 
+save(mod.brm, file = "Output/mod.brm.RData")
+#load("Output/mod.brm.RData")
+
+
 summary(mod.brm)
 
 mod.hurdle <- brm(
@@ -36,12 +40,18 @@ mod.hurdle <- brm(
   control = list(adapt_delta = 0.98)
 )
 
+save(mod.hurdle, file = "Output/mod.hurdle.RData")
+#load("Output/mod.hurdle.RData")
 summary(mod.hurdle)
 
 
 #pairs(mod.brm)
 conditional_effects(mod.brm, surface = FALSE, prob = 0.8)
 conditional_effects(mod.hurdle, surface = FALSE, prob = 0.8)
+#from Mark
+conditional_effects(mod.brm)|>
+  plot(points = TRUE, theme = theme_classic())
+
 
 
 #try some plots with 
