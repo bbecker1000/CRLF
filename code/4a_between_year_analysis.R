@@ -57,7 +57,7 @@ between_year_gamlss <- gamlss(formula =
                              pb(yearly_rain_scaled) + 
                              max_depth_scaled +
                              pb(WaterTemp_scaled) +
-                             max_salinity:as.factor(CoastalSite) +
+                             max_salinity_scaled:as.factor(CoastalSite) +
                              re(random = ~1 | Watershed/LocationID),
                            nu.formula = ~ 
                              max_depth_scaled +
