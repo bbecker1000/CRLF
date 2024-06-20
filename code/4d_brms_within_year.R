@@ -54,6 +54,13 @@ conditional_effects(mod.hurdle, surface = FALSE, prob = 0.8)
 conditional_effects(mod.brm)|>
   plot(points = TRUE, theme = theme_classic())
 
+#plot the hurdle effect by adding dpar
+conditional_effects(mod.hurdle, dpar = "hu") 
+
+
+
+
+
 
 
 #try some plots with 
