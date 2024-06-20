@@ -1,6 +1,6 @@
 library(brms)
 
-
+# testing to make sure i can push from new computer --Robin
 
 mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilation
                       s(BRDYEAR_scaled) + 

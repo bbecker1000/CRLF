@@ -51,6 +51,7 @@ unfiltered_data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, 
   select(-Obsv1, -Obsv2, -Obsv3, -OldMass) %>% 
   left_join(., rainfall_yearly, join_by(BRDYEAR == Water_Year)) %>% 
   left_join(., land_cover, join_by(LocationID, BRDYEAR == year_numeric)) %>% 
+  left_join(., location_type, join_by(LocationID)) %>% 
   rename(
     ground_sub = PercentSubVeg,
     ground_emerg = PercentEmergVeg,
@@ -64,8 +65,7 @@ unfiltered_data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, 
     mean_percent_emerg = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_emerg", "interpolated_emerg"))), na.rm = TRUE), ground_emerg), interpolated_emerg),
     mean_percent_water = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_open_water", "interpolated_openwater"))), na.rm = TRUE), ground_open_water), interpolated_openwater),
     LocationID = as.factor(LocationID)
-  ) %>% 
-  left_join(., location_type, join_by(LocationID))
+  )
 
 ### ~~~ *** DATA FILTERING *** ~~~ ###
 
@@ -101,7 +101,7 @@ write_csv(data, here::here("data", "filtered_raw_data.csv"))
 
 between_year_data <- data %>% 
   select(LocationID, BRDYEAR, Watershed, NumberofEggMasses, AirTemp, WaterTemp, MaxD, WaterSalinity, CoastalSite, yearly_rain, 
-         ground_sub, ground_emerg, ground_open_water, interpolated_canopy) %>% 
+         ground_sub, ground_emerg, ground_open_water, interpolated_canopy, water_regime) %>% 
   group_by(LocationID, BRDYEAR) %>% 
   summarize(
          mean_max_depth = ifelse(all(is.na(MaxD)), NA, mean(MaxD, na.rm = TRUE)),
@@ -163,8 +163,9 @@ for (i in 1:nrow(temp_daily_rain_table)) {
 }
 
 colnames(rain_to_date_col) <- c("rain_to_date")
+
 onset_of_breeding <- cbind(temp_daily_rain_table, rain_to_date_col) %>% select(-starts_with("day_")) %>% 
-  select(LocationID, BRDYEAR, Watershed, dayOfWY, rain_to_date, MaxD, NumberofEggMasses, yearly_rain, AirTemp, WaterTemp) %>% 
+  select(LocationID, BRDYEAR, Watershed, dayOfWY, rain_to_date, MaxD, NumberofEggMasses, yearly_rain, AirTemp, WaterTemp, water_flow, water_regime) %>% 
   group_by(BRDYEAR, LocationID) %>% 
   filter(NumberofEggMasses > 0) %>% 
   mutate(MaxD_yearly = if_else(all(is.na(MaxD)), NA, mean(MaxD, na.rm = TRUE)),
