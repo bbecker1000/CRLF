@@ -50,21 +50,23 @@ cor(scaled_between_year[, c("BRDYEAR", "mean_percent_emerg", "mean_percent_sub",
 
 
 between_year_gamlss <- gamlss(formula = 
-                             num_egg_masses ~ pb(BRDYEAR_scaled) + 
-                             pb(mean_percent_sub_scaled) +
-                             pb(mean_percent_water_scaled) +
-                             pb(interpolated_canopy_scaled) +
-                             pb(yearly_rain_scaled) + 
-                             max_depth_scaled +
-                             pb(WaterTemp_scaled) +
-                             max_salinity_scaled:as.factor(CoastalSite) +
-                             re(random = ~1 | Watershed/LocationID),
-                           nu.formula = ~ 
-                             max_depth_scaled +
-                             pb(yearly_rain_scaled) +
-                             re(random = ~1 | Watershed/LocationID),
-                           data = scaled_between_year,
-                           family = ZINBI,
+                                num_egg_masses ~ pb(BRDYEAR_scaled) + 
+                                pb(mean_percent_sub_scaled) +
+                                pb(mean_percent_water_scaled) +
+                                pb(interpolated_canopy_scaled) +
+                                max_depth_scaled +
+                                pb(WaterTemp_scaled) +
+                                max_salinity_scaled:as.factor(CoastalSite) +
+                                pb(yearly_rain_scaled)+
+                                water_regime + # added new covariate & interaction
+                                yearly_rain_scaled:as.factor(water_regime)+
+                                re(random = ~1 | Watershed/LocationID),
+                              nu.formula = ~ 
+                                max_depth_scaled +
+                                pb(yearly_rain_scaled) +
+                                re(random = ~1 | Watershed/LocationID),
+                              data = scaled_between_year,
+                              family = ZINBI,
                            control = gamlss.control(n.cyc = 500))
 
 # model summary and diagnostics

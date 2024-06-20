@@ -4,12 +4,13 @@ library(brms)
 
 mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilation
                       s(BRDYEAR_scaled) + 
-                      s(yearly_rain_scaled) +
+                      # s(yearly_rain_scaled) + ## commented out because water_regime added
                       s(mean_percent_water_scaled) + 
                       s(interpolated_canopy_scaled) +
                       s(WaterTemp_scaled) +  
                       max_depth_scaled +
                       (max_salinity_scaled * CoastalSite) + # not smoothed
+                      (yearly_rain_scaled * water_regime)+ # added new co-variate, smoothed?
                       (1|Watershed/LocationID),
                zi ~ s(yearly_rain_scaled) +      # inflated model for zeros
                  (1|Watershed/LocationID)),   # added random effects 
