@@ -51,6 +51,7 @@ unfiltered_data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, 
   select(-Obsv1, -Obsv2, -Obsv3, -OldMass) %>% 
   left_join(., rainfall_yearly, join_by(BRDYEAR == Water_Year)) %>% 
   left_join(., land_cover, join_by(LocationID, BRDYEAR == year_numeric)) %>% 
+  left_join(., location_type, join_by(LocationID)) %>% 
   rename(
     ground_sub = PercentSubVeg,
     ground_emerg = PercentEmergVeg,
@@ -64,8 +65,7 @@ unfiltered_data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, 
     mean_percent_emerg = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_emerg", "interpolated_emerg"))), na.rm = TRUE), ground_emerg), interpolated_emerg),
     mean_percent_water = if_else(ground_percent_cover_validation == TRUE, if_else(interpolated_percent_cover_validation, mean(c_across(all_of(c("ground_open_water", "interpolated_openwater"))), na.rm = TRUE), ground_open_water), interpolated_openwater),
     LocationID = as.factor(LocationID)
-  ) %>% 
-  left_join(., location_type, join_by(LocationID))
+  )
 
 ### ~~~ *** DATA FILTERING *** ~~~ ###
 
