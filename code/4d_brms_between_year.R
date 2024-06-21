@@ -1,7 +1,7 @@
 library(brms)
 
 # testing to make sure i can push from new computer --Robin
-
+t0 <- system.time()
 mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilation
                       s(BRDYEAR_scaled) + 
                       # s(yearly_rain_scaled) + ## commented out because water_regime added
@@ -10,14 +10,14 @@ mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilatio
                       s(WaterTemp_scaled) +  
                       max_depth_scaled +
                       (max_salinity_scaled * CoastalSite) + # not smoothed
-                      (yearly_rain_scaled * water_regime)+ # added new co-variate, smoothed?
+                      s(yearly_rain_scaled * water_regime) + # smooth or not?
                       (1|Watershed/LocationID),
                zi ~ s(yearly_rain_scaled) +      # inflated model for zeros
                  (1|Watershed/LocationID)),   # added random effects 
                data = scaled_between_year,
                family = zero_inflated_negbinomial(),
                chains = 2, cores = 2,
-               iter = 6000, # needs more iterations with added covariates
+               iter = 8000, # needs more iterations with added covariates
                control = list(adapt_delta = 0.98)) #reduce divergences
 
 save(mod.brm, file = "Output/mod.brm.RData")
@@ -25,6 +25,11 @@ save(mod.brm, file = "Output/mod.brm.RData")
 
   
 summary(mod.brm)
+t1 <- system.time()
+t1-t0 # zi-model run time
+
+## hurdle model ##
+t2 <- system.time()
 
 mod.hurdle <- brm(
   bf(num_egg_masses ~ 
@@ -33,22 +38,25 @@ mod.hurdle <- brm(
        s(mean_percent_water_scaled) + 
        s(interpolated_canopy_scaled) +
        s(WaterTemp_scaled) +  
-       (max_salinity_scaled * CoastalSite) + 
+       (max_salinity_scaled * CoastalSite) + # not smoothed
+       s(yearly_rain_scaled * water_regime) + # smooth or not?
        (1 | Watershed/LocationID),
      hu ~ yearly_rain_scaled +      # inflated model for zeros
        (1|Watershed/LocationID)),
   data = scaled_between_year,
   family = hurdle_negbinomial(),
   chains = 2, cores = 2,
-  control = list(adapt_delta = 0.98)
-)
+  iter = 8000, # needs more iterations with added covariates
+  control = list(adapt_delta = 0.98)) #reduce divergences
 
 save(mod.hurdle, file = "Output/mod.hurdle.RData")
 #load("Output/mod.hurdle.RData")
 summary(mod.hurdle)
 
+t3 <- system.time()
+t3-t2 # hurdle model run time
 
-#pairs(mod.brm)
+# pairs(mod.brm)
 conditional_effects(mod.brm, surface = FALSE, prob = 0.8)
 conditional_effects(mod.hurdle, surface = FALSE, prob = 0.8)
 #from Mark
