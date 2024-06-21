@@ -1,7 +1,7 @@
 library(brms)
 
 # testing to make sure i can push from new computer --Robin
-t0 <- system.time()
+t0 <- Sys.time()
 mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilation
                       s(BRDYEAR_scaled) + 
                       # s(yearly_rain_scaled) + ## commented out because water_regime added
@@ -25,11 +25,11 @@ save(mod.brm, file = "Output/mod.brm.RData")
 
   
 summary(mod.brm)
-t1 <- system.time()
+t1 <- Sys.time()
 t1-t0 # zi-model run time
 
 ## hurdle model ##
-t2 <- system.time(mod.hurdle)
+t2 <- Sys.time()
 
 mod.hurdle <- brm(
   bf(num_egg_masses ~ 
@@ -46,14 +46,14 @@ mod.hurdle <- brm(
   data = scaled_between_year,
   family = hurdle_negbinomial(),
   chains = 2, cores = 2,
-  iter = 8000, # needs more iterations with added covariates
+  iter = 11000, # needs more iterations with added covariates
   control = list(adapt_delta = 0.98)) #reduce divergences
 
 save(mod.hurdle, file = "Output/mod.hurdle.RData")
 #load("Output/mod.hurdle.RData")
 summary(mod.hurdle)
 
-t3 <- system.time(mod.hurdle)
+t3 <- Sys.time()
 t3-t2 # hurdle model run time
 
 # pairs(mod.brm)
