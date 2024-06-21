@@ -29,7 +29,7 @@ t1 <- system.time()
 t1-t0 # zi-model run time
 
 ## hurdle model ##
-t2 <- system.time()
+t2 <- system.time(mod.hurdle)
 
 mod.hurdle <- brm(
   bf(num_egg_masses ~ 
@@ -53,7 +53,7 @@ save(mod.hurdle, file = "Output/mod.hurdle.RData")
 #load("Output/mod.hurdle.RData")
 summary(mod.hurdle)
 
-t3 <- system.time()
+t3 <- system.time(mod.hurdle)
 t3-t2 # hurdle model run time
 
 # pairs(mod.brm)
