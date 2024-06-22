@@ -30,6 +30,7 @@ t1-t0 # zi-model run time
 
 ## hurdle model ##
 t2 <- Sys.time()
+t2
 
 mod.hurdle <- brm(
   bf(num_egg_masses ~ 
@@ -46,7 +47,7 @@ mod.hurdle <- brm(
   data = scaled_between_year,
   family = hurdle_negbinomial(),
   chains = 2, cores = 2,
-  iter = 11000, # needs more iterations with added covariates
+  iter = 14000, # needs more iterations with added covariates
   control = list(adapt_delta = 0.98)) #reduce divergences
 
 save(mod.hurdle, file = "Output/mod.hurdle.RData")
@@ -54,6 +55,7 @@ save(mod.hurdle, file = "Output/mod.hurdle.RData")
 summary(mod.hurdle)
 
 t3 <- Sys.time()
+t3
 t3-t2 # hurdle model run time
 
 # pairs(mod.brm)
