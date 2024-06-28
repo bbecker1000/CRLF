@@ -101,7 +101,7 @@ write_csv(data, here::here("data", "filtered_raw_data.csv"))
 
 between_year_data <- data %>% 
   select(LocationID, BRDYEAR, Watershed, NumberofEggMasses, AirTemp, WaterTemp, MaxD, WaterSalinity, CoastalSite, yearly_rain, 
-         ground_sub, ground_emerg, ground_open_water, interpolated_canopy, water_regime) %>% 
+         ground_sub, ground_emerg, ground_open_water, interpolated_canopy, water_flow, water_regime) %>% 
   group_by(LocationID, BRDYEAR) %>% 
   summarize(
          mean_max_depth = ifelse(all(is.na(MaxD)), NA, mean(MaxD, na.rm = TRUE)),
