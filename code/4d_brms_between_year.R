@@ -1,5 +1,37 @@
 library(brms)
 
+between_year_data <- read_csv(here::here("data", "between_year_data.csv"))  %>% 
+  mutate(LocationID = as.factor(LocationID),
+         Watershed = as.factor(Watershed), 
+         LocationInWatershed = interaction(Watershed, LocationID))
+
+#### scaling covariates ####
+# creating a "complete case" column
+between_year_data$complete_case <- complete.cases(between_year_data)
+complete_btw_data <- between_year_data %>% filter(complete_case == TRUE)
+
+# write to CSV
+write_csv(complete_btw_data, here::here("data", "complete_btw_data.csv"))
+
+# scaling covariates
+scaled_between_year <- complete_btw_data %>% 
+  mutate(
+    BRDYEAR_scaled = as.vector(scale(BRDYEAR)),
+    mean_percent_sub_scaled = as.vector(scale(mean_percent_sub)),
+    mean_percent_emerg_scaled = as.vector(scale(mean_percent_emerg)),
+    mean_percent_water_scaled = as.vector(scale(mean_percent_water)),
+    interpolated_canopy_scaled = as.vector(scale(interpolated_canopy)),
+    yearly_rain_scaled = as.vector(scale(yearly_rain)),
+    mean_max_depth_scaled = as.vector(scale(mean_max_depth)),
+    max_depth_scaled = as.vector(scale(max_depth)),
+    AirTemp_scaled = as.vector(scale(AirTemp)),
+    WaterTemp_scaled = as.vector(scale(WaterTemp)),
+    mean_salinity_scaled = as.vector(scale(mean_salinity)),
+    max_salinity_scaled = as.vector(scale(max_salinity)),
+  )
+
+
+#### zero inflated model ####
 # testing to make sure i can push from new computer --Robin
 t0 <- Sys.time()
 mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilation
@@ -10,7 +42,7 @@ mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilatio
                       s(WaterTemp_scaled) +  
                       max_depth_scaled +
                       (max_salinity_scaled * CoastalSite) + # not smoothed
-                      s(yearly_rain_scaled * water_regime) + # smooth or not?
+                      s(yearly_rain_scaled * water_regime) + # new
                       (1|Watershed/LocationID),
                zi ~ s(yearly_rain_scaled) +      # inflated model for zeros
                  (1|Watershed/LocationID)),   # added random effects 
@@ -28,7 +60,7 @@ summary(mod.brm)
 t1 <- Sys.time()
 t1-t0 # zi-model run time
 
-## hurdle model ##
+#### hurdle model ####
 t2 <- Sys.time()
 
 #set priors for problematic covariates
@@ -53,6 +85,7 @@ mod.hurdle <- brm(
        s(mean_percent_water_scaled) + 
        CoastalSite +  #new
        water_regime + #new
+       water_flow + #new
        s(interpolated_canopy_scaled) +
        s(WaterTemp_scaled) +  
        s(max_salinity_scaled, by = CoastalSite) + # not smoothed
@@ -64,7 +97,7 @@ mod.hurdle <- brm(
   prior = bprior, #set above before model
   family = hurdle_negbinomial(),
   chains = 3, cores = 3,
-  iter = 5000, # needs more iterations with interactions
+  iter = 8000, # needs more iterations with interactions
   control = list(adapt_delta = 0.98,   #reduce divergences, 
                  max_treedepth = 20))  #had treedepth exceedances at default 10
 

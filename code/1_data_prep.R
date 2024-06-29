@@ -15,7 +15,9 @@ location_type <- read_csv(here::here("data", "CRLF_tblLocations.csv")) %>%
   rename(
     water_flow = Lotic_Lentic,
     water_regime = WaterRegime
-  )
+  ) %>% 
+  mutate(water_regime = as.factor(water_regime), water_flow = as.factor(water_flow))
+  
 
 
 # temporarily changing raw data to v3 because in v4, some dates are not present in CSV
