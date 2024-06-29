@@ -7,20 +7,72 @@ library("survminer")
 library("mgcv")
 library(coxme)
 library(here)
+library(nlme) 
+library(gratia)
+
 
 setwd(here::here("code"))
 #rename file
 onset_of_breeding_surv <- read_csv(here::here("data", "onset_of_breeding.csv"))
 
+# creating a "complete case" column
+onset_of_breeding_surv$complete_case <- complete.cases(onset_of_breeding_surv)
+complete_onset <- onset_of_breeding_surv %>% filter(complete_case == TRUE)
+
+# scaling covariates
+scaled_within_year <- complete_onset %>% 
+  mutate(
+    BRDYEAR_scaled = as.vector(scale(BRDYEAR)),
+    yearly_rain_scaled = as.vector(scale(yearly_rain)),
+    rain_to_date_scaled = as.vector(scale(rain_to_date)),
+    max_depth_scaled = as.vector(scale(MaxD_proportion)),
+    AirTemp_scaled = as.vector(scale(AirTemp)),
+    WaterTemp_scaled = as.vector(scale(WaterTemp)), 
+    water_flow = as.factor(water_flow),
+    water_regime = as.factor(water_regime), 
+    Watershed = as.factor(Watershed),
+    LocationID = as.factor(LocationID)
+  ) %>% 
+  select(-rain_to_date, -MaxD, -MaxD_yearly, -MaxD_proportion, -NumberofEggMasses, complete_case)
+
 #### *** GAM MODELS *** ####
 #Generative additive model: first look at onset of breeding with fixed variables
 #respectively, and plot to see is the line looks linear or curve.
-fit1_k6 <- gam(first_breeding~s(rain_to_date, k = 6), data = onset_of_breeding_surv)
-summary(fit1_k6)
-plot(fit1_k6)
-fit1_k7 <- gam(first_breeding~s(WaterTemp, k = 6), data = onset_of_breeding_surv)
-summary(fit1_k7)
-plot(fit1_k7)
+within_year_gam <- gam(first_breeding ~ 
+                 s(max_depth_scaled) +
+                 s(AirTemp_scaled) +
+                 s(WaterTemp_scaled) +
+                 s(BRDYEAR_scaled) + 
+                 s(rain_to_date_scaled, by = water_regime) +
+                 water_flow +
+                 water_regime +
+                 s(Watershed, bs = "re") +
+                 s(LocationID, Watershed, bs = "re"),
+               data = scaled_within_year)
+summary(within_year_gam)
+plot(within_year_gam)
+
+#### plotting GAM model ####
+# check assumptions
+appraise(within_year_gam)
+
+# smooth terms
+draw(within_year_gam)
+
+# all terms
+plot(within_year_gam, pages = 1, all.terms = TRUE, rug = TRUE)
+
+newdata <- data.frame(first_breeding = seq(38, 179, length.out = 1000))
+
+predictions <- predict(within_year_gam, newdata = newdata, type = "response", se.fit = TRUE)
+plot_df <- data.frame(scaled_within_year, 
+                      fv =  predictions$fit, 
+                      se = predictions$se.fit,
+                      lower = predictions$fit - (1.96 * predictions$se.fit),
+                      upper = predictions$fit + (1.96 * predictions$se.fit))
+
+ggplot(data = plot_df, aes(x = first_breeding)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper))
 
 #install this package called "gam.hp", it tells the R2 for each fixed variable.
 #somehow this results shows water temperature is not significant? very low R2
@@ -46,7 +98,6 @@ points(onset_of_breeding_surv$rain_to_date, onset_of_breeding_surv$WaterTemp, pc
 
 #I tried this method using gamm() to include Watershed as random variable, and it gives
 #two summary, one for fixed one for random, still trying to interpret.
-library(nlme) 
 fit_interaction_gamm <- gamm(
   first_breeding ~ te(rain_to_date, WaterTemp, k = c(10, 10)),
   random = list(Watershed = ~1),  # Adding random effect for watershed
@@ -174,6 +225,8 @@ multi.cox <- coxme(Surv(first_breeding, status) ~
                      scale(WaterTemp) + 
                      scale(BRDYEAR) + 
                      scale(rain_to_date) + 
+                     water_flow +
+                     water_regime +
                      (1 | Watershed/LocationID),
                    data = onset_of_breeding_surv)
 

@@ -32,7 +32,6 @@ scaled_between_year <- complete_btw_data %>%
 
 
 #### zero inflated model ####
-# testing to make sure i can push from new computer --Robin
 t0 <- Sys.time()
 mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilation
                       s(BRDYEAR_scaled) + 
@@ -64,7 +63,7 @@ t1-t0 # zi-model run time
 t2 <- Sys.time()
 
 #set priors for problematic covariates
-#could add more prioris if helpful
+#could add more priors if helpful
 bprior <- c(prior(student_t(1, 0.5, 0.5), #slightly positive based on prior knowledge
                   coef = syearly_rain_scaled_1),
             prior(student_t(1, 0.5, 0.5),  #slightly positive based on prior knowledge
@@ -76,7 +75,6 @@ bprior <- c(prior(student_t(1, 0.5, 0.5), #slightly positive based on prior know
             prior(student_t(1, -0.25, 0.5),  #slightly negative based on prior knowledge
                   coef =  smax_salinity_scaled:CoastalSiteTRUE_1)
 )
-
 
 mod.hurdle <- brm(
   bf(num_egg_masses ~ 
