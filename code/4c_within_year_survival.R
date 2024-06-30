@@ -102,6 +102,43 @@ ggplot(plot_df, aes(x = AirTemp_scaled, y = fv)) +
   labs(x = "Air Temperature (scaled)", y = "Predicted First Breeding") +
   theme_classic()
 
+
+# Create a sequence for rain_to_date_scaled
+newdata_rain_to_date <- with(scaled_within_year, 
+                             data.frame(
+                               max_depth_scaled = mean(max_depth_scaled, na.rm = TRUE),
+                               AirTemp_scaled = mean(AirTemp_scaled, na.rm = TRUE),
+                               WaterTemp_scaled = mean(WaterTemp_scaled, na.rm = TRUE),
+                               BRDYEAR_scaled = mean(BRDYEAR_scaled, na.rm = TRUE),
+                               rain_to_date_scaled = seq(min(rain_to_date_scaled, na.rm = TRUE), max(rain_to_date_scaled, na.rm = TRUE), length.out = 1000),
+                               water_flow = factor(levels(water_flow)[1], levels = levels(water_flow)),
+                               water_regime = factor(levels(water_regime)[1], levels = levels(water_regime)),
+                               Watershed = factor(levels(Watershed)[1], levels = levels(Watershed)),
+                               LocationID = factor(levels(LocationID)[1], levels = levels(LocationID))
+                             )
+)
+
+# Generate predictions
+predictions_rain_to_date <- predict(within_year_gam, newdata = newdata_rain_to_date, type = "response", se.fit = TRUE)
+
+# Create a new dataframe for plotting
+plot_df_rain_to_date <- data.frame(
+  rain_to_date_scaled = newdata_rain_to_date$rain_to_date_scaled,
+  fv = predictions_rain_to_date$fit,
+  se = predictions_rain_to_date$se.fit,
+  lower = predictions_rain_to_date$fit - (1.96 * predictions_rain_to_date$se.fit),
+  upper = predictions_rain_to_date$fit + (1.96 * predictions_rain_to_date$se.fit)
+)
+
+# Plot
+ggplot(data = plot_df_rain_to_date, aes(x = rain_to_date_scaled, y = fv)) + 
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+  geom_line() +
+  labs(x = "Rain to Date (scaled)", y = "Predicted First Breeding") +
+  theme_classic()
+
+
+
 ggplot(data = plot_df, aes(x = first_breeding)) +
   geom_ribbon(aes(ymin = lower, ymax = upper))
 
