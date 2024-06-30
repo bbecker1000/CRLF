@@ -137,6 +137,52 @@ ggplot(data = plot_df_rain_to_date, aes(x = rain_to_date_scaled, y = fv)) +
   labs(x = "Rain to Date (scaled)", y = "Predicted First Breeding") +
   theme_classic()
 
+# Create a sequence for BRDYEAR_scaled
+newdata_brdyear <- with(scaled_within_year, 
+                        data.frame(
+                          BRDYEAR_scaled = seq(min(BRDYEAR_scaled, na.rm = TRUE), max(BRDYEAR_scaled, na.rm = TRUE), length.out = 1000),
+                          max_depth_scaled = mean(max_depth_scaled, na.rm = TRUE),
+                          AirTemp_scaled = mean(AirTemp_scaled, na.rm = TRUE),
+                          WaterTemp_scaled = mean(WaterTemp_scaled, na.rm = TRUE),
+                          rain_to_date_scaled = mean(rain_to_date_scaled, na.rm = TRUE),
+                          water_flow = factor(levels(water_flow)[1], levels = levels(water_flow)),
+                          water_regime = factor(levels(water_regime)[1], levels = levels(water_regime)),
+                          Watershed = factor(levels(Watershed)[1], levels = levels(Watershed)),
+                          LocationID = factor(levels(LocationID)[1], levels = levels(LocationID))
+                        )
+)
+
+# Generate predictions
+predictions_brdyear <- predict(within_year_gam, newdata = newdata_brdyear, type = "response", se.fit = TRUE)
+
+# Create a new dataframe for plotting
+plot_df_brdyear <- data.frame(
+  BRDYEAR_scaled = newdata_brdyear$BRDYEAR_scaled,
+  fv = predictions_brdyear$fit,
+  se = predictions_brdyear$se.fit,
+  lower = predictions_brdyear$fit - (1.96 * predictions_brdyear$se.fit),
+  upper = predictions_brdyear$fit + (1.96 * predictions_brdyear$se.fit)
+)
+
+# Plot
+ggplot(data = plot_df_brdyear, aes(x = BRDYEAR_scaled, y = fv)) + 
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+  geom_line() +
+  labs(x = "Breeding Year (scaled)", y = "Predicted First Breeding") +
+  theme_classic()
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ggplot(data = plot_df, aes(x = first_breeding)) +
