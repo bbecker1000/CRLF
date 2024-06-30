@@ -71,6 +71,37 @@ plot_df <- data.frame(scaled_within_year,
                       lower = predictions$fit - (1.96 * predictions$se.fit),
                       upper = predictions$fit + (1.96 * predictions$se.fit))
 
+# Create a data frame with all predictors
+newdata <- data.frame(
+  max_depth_scaled = mean(scaled_within_year$max_depth_scaled, na.rm = TRUE),
+  AirTemp_scaled = seq(min(scaled_within_year$AirTemp_scaled, na.rm = TRUE), max(scaled_within_year$AirTemp_scaled, na.rm = TRUE), length.out = 1000),
+  WaterTemp_scaled = mean(scaled_within_year$WaterTemp_scaled, na.rm = TRUE),
+  BRDYEAR_scaled = mean(scaled_within_year$BRDYEAR_scaled, na.rm = TRUE),
+  rain_to_date_scaled = mean(scaled_within_year$rain_to_date_scaled, na.rm = TRUE),
+  water_flow = factor(levels(scaled_within_year$water_flow)[1], levels = levels(scaled_within_year$water_flow)),
+  water_regime = factor(levels(scaled_within_year$water_regime)[1], levels = levels(scaled_within_year$water_regime)),
+  Watershed = factor(levels(scaled_within_year$Watershed)[1], levels = levels(scaled_within_year$Watershed)),
+  LocationID = factor(levels(scaled_within_year$LocationID)[1], levels = levels(scaled_within_year$LocationID))
+)
+
+# Generate predictions
+predictions <- predict(within_year_gam, newdata = newdata, type = "response", se.fit = TRUE)
+
+plot_df <- data.frame(
+  AirTemp_scaled = newdata$AirTemp_scaled,
+  fv = predictions$fit, 
+  se = predictions$se.fit,
+  lower = predictions$fit - (1.96 * predictions$se.fit),
+  upper = predictions$fit + (1.96 * predictions$se.fit)
+)
+
+library(ggplot2)
+ggplot(plot_df, aes(x = AirTemp_scaled, y = fv)) +
+  geom_line(color = "blue") +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+  labs(x = "Air Temperature (scaled)", y = "Predicted First Breeding") +
+  theme_classic()
+
 ggplot(data = plot_df, aes(x = first_breeding)) +
   geom_ribbon(aes(ymin = lower, ymax = upper))
 
