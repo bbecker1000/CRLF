@@ -9,7 +9,7 @@ library(coxme)
 library(here)
 library(nlme) 
 library(gratia)
-#Mark: testing if i can push it
+library(ggplot2)
 
 setwd(here::here("code"))
 #rename file
@@ -62,14 +62,26 @@ draw(within_year_gam)
 # all terms
 plot(within_year_gam, pages = 1, all.terms = TRUE, rug = TRUE)
 
-newdata <- data.frame(first_breeding = seq(38, 179, length.out = 1000))
-
-predictions <- predict(within_year_gam, newdata = newdata, type = "response", se.fit = TRUE)
+# trying to plot smoothly without using newdata and with correct standard errors
+predictions <- predict(within_year_gam, type = "response", se.fit = TRUE)
 plot_df <- data.frame(scaled_within_year, 
                       fv =  predictions$fit, 
                       se = predictions$se.fit,
                       lower = predictions$fit - (1.96 * predictions$se.fit),
                       upper = predictions$fit + (1.96 * predictions$se.fit))
+
+# accurate standard error but not smoothed
+ggplot(plot_df, aes(x = BRDYEAR_scaled, y = fv)) +
+  geom_line(color = "blue") +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+  labs(x = "Breeding year", y = "Predicted First Breeding") +
+  theme_classic()
+
+# smoothed but not accurate standard error
+ggplot(plot_df, aes(x = BRDYEAR_scaled, y = fv)) +
+  geom_smooth(method = "gam") +
+  labs(x = "Breeding year", y = "Predicted First Breeding") +
+  theme_classic()
 
 # Create a data frame with all predictors
 newdata <- data.frame(
@@ -95,7 +107,6 @@ plot_df <- data.frame(
   upper = predictions$fit + (1.96 * predictions$se.fit)
 )
 
-library(ggplot2)
 ggplot(plot_df, aes(x = AirTemp_scaled, y = fv)) +
   geom_line(color = "blue") +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
