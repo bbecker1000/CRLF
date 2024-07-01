@@ -76,6 +76,17 @@ bprior <- c(prior(student_t(1, 0.5, 0.5), #slightly positive based on prior know
                   coef =  smax_salinity_scaled:CoastalSiteTRUE_1)
 )
 
+# updating on prior format.
+bprior <- c(
+  prior(student_t(1, 0.5, 0.5), class = "b", coef = "syearly_rain_scaled_1"),
+  prior(student_t(1, 0.5, 0.5), class = "b", coef = "syearly_rain_scaled:water_regimeperennial_1"),
+  prior(student_t(1, 0, 0.5), class = "b", coef = "syearly_rain_scaled:water_regimeseasonal_1"),
+  prior(student_t(1, 0, 0.5), class = "b", coef = "smax_salinity_scaled:CoastalSiteFALSE_1"),
+  prior(student_t(1, -0.25, 0.5), class = "b", coef = "smax_salinity_scaled:CoastalSiteTRUE_1")
+)
+
+
+
 mod.hurdle <- brm(
   bf(num_egg_masses ~ 
        s(BRDYEAR_scaled) + 
