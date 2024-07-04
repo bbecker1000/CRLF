@@ -78,9 +78,11 @@ ggplot(plot_df, aes(x = BRDYEAR_scaled, y = fv)) +
   theme_classic()
 
 # smoothed but not accurate standard error
-ggplot(plot_df, aes(x = BRDYEAR_scaled, y = fv)) +
+ggplot(plot_df, aes(x = BRDYEAR, y = fv)) +
   geom_smooth(method = "gam") +
-  labs(x = "Breeding year", y = "Predicted First Breeding") +
+  geom_jitter(aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.3) +
+  geom_jitter(aes(y = fv), height = 0, width = 0.25, alpha = 0.3, color = "red3") +
+  labs(x = "Breeding year", y = "Predicted First Breeding (days after October 1st") +
   theme_classic()
 
 # Create a data frame with all predictors
