@@ -10,7 +10,9 @@ library(here)
 library(nlme) 
 library(gratia)
 library(ggplot2)
+library(cowplot)
 
+#### prepping data for analysis ####
 setwd(here::here("code"))
 #rename file
 onset_of_breeding_surv <- read_csv(here::here("data", "onset_of_breeding.csv"))
@@ -33,9 +35,9 @@ scaled_within_year <- complete_onset %>%
     Watershed = as.factor(Watershed),
     LocationID = as.factor(LocationID)
   ) %>% 
-  select(-rain_to_date, -MaxD, -MaxD_yearly, -MaxD_proportion, -NumberofEggMasses, complete_case)
+  select(-MaxD, -MaxD_yearly, -MaxD_proportion, -NumberofEggMasses, complete_case)
 
-#### *** GAM MODELS *** ####
+#### *** GAM MODEL *** ####
 #Generative additive model: first look at onset of breeding with fixed variables
 #respectively, and plot to see is the line looks linear or curve.
 within_year_gam <- gam(first_breeding ~ 
@@ -43,7 +45,7 @@ within_year_gam <- gam(first_breeding ~
                  s(AirTemp_scaled) +
                  s(WaterTemp_scaled) +
                  s(BRDYEAR_scaled) + 
-                 s(rain_to_date_scaled, by = water_regime) +
+                 s(rain_to_date_scaled) +
                  water_flow +
                  water_regime +
                  s(Watershed, bs = "re") +
@@ -51,10 +53,12 @@ within_year_gam <- gam(first_breeding ~
                data = scaled_within_year)
 summary(within_year_gam)
 plot(within_year_gam)
+AIC(within_year_gam)
 
-#### plotting GAM model ####
+##### plotting GAM model ####
 # check assumptions
 appraise(within_year_gam)
+gam.check(within_year_gam)
 
 # smooth terms
 draw(within_year_gam)
@@ -62,7 +66,7 @@ draw(within_year_gam)
 # all terms
 plot(within_year_gam, pages = 1, all.terms = TRUE, rug = TRUE)
 
-# trying to plot smoothly without using newdata and with correct standard errors
+# plots for each significant term
 predictions <- predict(within_year_gam, type = "response", se.fit = TRUE)
 plot_df <- data.frame(scaled_within_year, 
                       fv =  predictions$fit, 
@@ -70,21 +74,52 @@ plot_df <- data.frame(scaled_within_year,
                       lower = predictions$fit - (1.96 * predictions$se.fit),
                       upper = predictions$fit + (1.96 * predictions$se.fit))
 
-# accurate standard error but not smoothed
-ggplot(plot_df, aes(x = BRDYEAR_scaled, y = fv)) +
-  geom_line(color = "blue") +
-  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
-  labs(x = "Breeding year", y = "Predicted First Breeding") +
-  theme_classic()
+# # accurate standard error but not smoothed
+# ggplot(plot_df, aes(x = BRDYEAR_scaled, y = fv)) +
+#   geom_line(color = "blue") +
+#   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+#   labs(x = "Breeding year", y = "Predicted First Breeding") +
+#   theme_classic()
 
 # smoothed but not accurate standard error
-ggplot(plot_df, aes(x = BRDYEAR, y = fv)) +
-  geom_smooth(method = "gam") +
-  geom_jitter(aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.3) +
-  geom_jitter(aes(y = fv), height = 0, width = 0.25, alpha = 0.3, color = "red3") +
+# green dots are raw data. black dots and line are model predictions
+
+# air temp
+airTemp_within_year <- ggplot(plot_df, aes(x = AirTemp, y = fv)) +
+  geom_smooth(method = "gam", color = "black", alpha = 0.3, size = 1.25) +
+  geom_jitter(aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.5, color = "darkgreen") +
+  geom_jitter(aes(y = fv), height = 0, width = 0.25, alpha = 0.5) +
+  labs(x = "Air Temperature (C)", y = "Predicted First Breeding (days after October 1st") +
+  theme_classic()
+
+# water temp
+waterTemp_within_year <- ggplot(plot_df, aes(x = WaterTemp, y = fv)) +
+  geom_smooth(method = "gam", color = "black", alpha = 0.3, size = 1.25) +
+  geom_jitter(aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.5, color = "darkgreen") +
+  geom_jitter(aes(y = fv), height = 0, width = 0.25, alpha = 0.5) +
+  labs(x = "Water Temperature (C)", y = "Predicted First Breeding (days after October 1st") +
+  theme_classic()
+
+# breeding year
+breeding_year_within_year <- ggplot(plot_df, aes(x = BRDYEAR, y = fv)) +
+  geom_smooth(method = "gam", color = "black", alpha = 0.3, size = 1.25) +
+  geom_jitter(aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.5, color = "darkgreen") +
+  geom_jitter(aes(y = fv), height = 0, width = 0.25, alpha = 0.5) +
   labs(x = "Breeding year", y = "Predicted First Breeding (days after October 1st") +
   theme_classic()
 
+# rain to date
+rain_within_year <- ggplot(plot_df, aes(x = rain_to_date, y = fv)) +
+  geom_smooth(method = "gam", color = "black", alpha = 0.3, size = 1.25, method.args = list()) +
+  geom_jitter(aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.5, color = "darkgreen") +
+  geom_jitter(aes(y = fv), height = 0, width = 0.25, alpha = 0.5) +
+  labs(x = "Rain to date (in)", y = "Predicted First Breeding (days after October 1st") +
+  theme_classic()
+
+plot_grid(airTemp_within_year, waterTemp_within_year, 
+          breeding_year_within_year, rain_within_year, nrow = 2)
+
+#### plotting using newdata ####
 # Create a data frame with all predictors
 newdata <- data.frame(
   max_depth_scaled = mean(scaled_within_year$max_depth_scaled, na.rm = TRUE),
@@ -112,6 +147,7 @@ plot_df <- data.frame(
 ggplot(plot_df, aes(x = AirTemp_scaled, y = fv)) +
   geom_line(color = "blue") +
   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+  geom_jitter(data = scaled_within_year, aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.3) +
   labs(x = "Air Temperature (scaled)", y = "Predicted First Breeding") +
   theme_classic()
 
@@ -380,7 +416,7 @@ ggplot(plot_data, aes(x = hazard_ratio, y = covariate)) +
   labs(x = "Hazard Ratio", y = "Covariate", title = "Coefficient Estimates") +
   theme_minimal()
 
-#### testing assumptions ####
+#### testing assumptions for survival models ####
 # to use the cox model, results of test_assumptions must not be significant
 test_assumptions <- cox.zph(multi.cox)
 test_assumptions

@@ -145,9 +145,50 @@ newdata <- scaled_between_year %>%
   
 fv <- add_epred_draws(mod.hurdle, newdata = newdata)
 
-p1 <- ggplot(fv, aes(x = yearly_rain)) + 
+# yearly rain
+rain_plot <- ggplot(fv, aes(x = yearly_rain)) + 
   stat_lineribbon(aes(y = .epred), .width = c(0.66, 0.95), alpha = 0.5) +
-  geom_jitter(height = 0.1, width = 0.25, aes(y = num_egg_masses), alpha = 0.3, color = "purple") +
+  geom_jitter(aes(y = num_egg_masses), alpha = 0.3, color = "darkblue") +
+  labs(x = "Yearly Rain", y = "Predicted number of egg masses") +
+  scale_fill_brewer(palette = "Blues") +
+  theme_minimal()
+
+#year
+year_plot <- ggplot(fv, aes(x = BRDYEAR)) + 
+  stat_lineribbon(aes(y = .epred), .width = c(0.66, 0.95), alpha = 0.5) +
+  geom_jitter(aes(y = num_egg_masses), alpha = 0.3, color = "darkblue") +
+  labs(x = "Year", y = "Predicted number of egg masses") +
+  scale_fill_brewer(palette = "Blues") +
+  theme_minimal()
+
+# percent water
+percent_water_plot <- ggplot(fv, aes(x = mean_percent_water)) + 
+  stat_lineribbon(aes(y = .epred), .width = c(0.66, 0.95), alpha = 0.5) +
+  geom_jitter(aes(y = num_egg_masses), alpha = 0.3, color = "darkblue") +
+  labs(x = "Percent water cover", y = "Predicted number of egg masses") +
+  scale_fill_brewer(palette = "Blues") +
+  theme_minimal()
+
+# percent canopy
+percent_canopy_plot <- ggplot(fv, aes(x = mean_interpolated_canopy)) + 
+  stat_lineribbon(aes(y = .epred), .width = c(0.66, 0.95), alpha = 0.5) +
+  geom_jitter(aes(y = num_egg_masses), alpha = 0.3, color = "darkblue") +
+  labs(x = "Percent canopy cover", y = "Predicted number of egg masses") +
+  scale_fill_brewer(palette = "Blues") +
+  theme_minimal()
+
+# water temp
+water_temp_plot <- ggplot(fv, aes(x = WaterTemp)) + 
+  stat_lineribbon(aes(y = .epred), .width = c(0.66, 0.95), alpha = 0.5) +
+  geom_jitter(aes(y = num_egg_masses), alpha = 0.3, color = "darkblue") +
+  labs(x = "Yearly Rain", y = "Predicted number of egg masses") +
+  scale_fill_brewer(palette = "Blues") +
+  theme_minimal()
+
+# salinity for coastal sites
+salinity_plot <- ggplot(fv, aes(x = max_salinity)) + 
+  stat_lineribbon(aes(y = .epred), .width = c(0.66, 0.95), alpha = 0.5) +
+  geom_jitter(aes(y = num_egg_masses), alpha = 0.3, color = "darkblue") +
   labs(x = "Yearly Rain", y = "Predicted number of egg masses") +
   scale_fill_brewer(palette = "Blues") +
   theme_minimal()
