@@ -156,7 +156,7 @@ rain_plot <- ggplot(fv, aes(x = yearly_rain)) +
 #year
 year_plot <- ggplot(fv, aes(x = BRDYEAR)) + 
   stat_lineribbon(aes(y = .epred), .width = c(0.66, 0.95), alpha = 0.5) +
-  geom_jitter(aes(y = num_egg_masses), alpha = 0.3, color = "darkblue") +
+  geom_point(aes(y = num_egg_masses), alpha = 0.3, color = "darkblue") +
   labs(x = "Year", y = "Predicted number of egg masses") +
   scale_fill_brewer(palette = "Blues") +
   theme_minimal()
