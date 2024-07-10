@@ -31,7 +31,7 @@ t1-t0 # zi-model run time
 t2 <- Sys.time()
 
 #set priors for problematic covariates
-#could add more prioris if helpful
+#could add more priors if helpful
 bprior <- c(prior(student_t(1, 0.5, 0.5), #slightly positive based on prior knowledge
                   coef = syearly_rain_scaled_1),
             prior(student_t(1, 0.5, 0.5),  #slightly positive based on prior knowledge
@@ -51,7 +51,7 @@ mod.hurdle <- brm(
        s(yearly_rain_scaled) +
        s(mean_percent_water_scaled) + 
        CoastalSite +  #new
-       water_regime + #new
+       water_flow + #new
        s(interpolated_canopy_scaled) +
        s(WaterTemp_scaled) +  
        s(max_salinity_scaled, by = CoastalSite) + # not smoothed

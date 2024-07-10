@@ -136,13 +136,11 @@ newdata <- data.frame(
 # Generate predictions
 predictions <- predict(within_year_gam, newdata = newdata, type = "response", se.fit = TRUE)
 
-plot_df <- data.frame(
-  AirTemp_scaled = newdata$AirTemp_scaled,
-  fv = predictions$fit, 
-  se = predictions$se.fit,
-  lower = predictions$fit - (1.96 * predictions$se.fit),
-  upper = predictions$fit + (1.96 * predictions$se.fit)
-)
+plot_df <- data.frame(scaled_within_year, 
+                      fv =  predictions$fit, 
+                      se = predictions$se.fit,
+                      lower = predictions$fit - (1.96 * predictions$se.fit),
+                      upper = predictions$fit + (1.96 * predictions$se.fit))
 
 ggplot(plot_df, aes(x = AirTemp_scaled, y = fv)) +
   geom_line(color = "blue") +
