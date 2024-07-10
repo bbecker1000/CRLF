@@ -41,13 +41,13 @@ scaled_within_year <- complete_onset %>%
 #Generative additive model: first look at onset of breeding with fixed variables
 #respectively, and plot to see is the line looks linear or curve.
 within_year_gam <- gam(first_breeding ~ 
-                 s(max_depth_scaled) +
+                 s(max_depth_scaled, by = water_regime) +
                  s(AirTemp_scaled) +
                  s(WaterTemp_scaled) +
                  s(BRDYEAR_scaled) + 
                  s(rain_to_date_scaled) +
                  water_flow +
-                 water_regime +
+                 # water_regime +
                  s(Watershed, bs = "re") +
                  s(LocationID, Watershed, bs = "re"),
                data = scaled_within_year)

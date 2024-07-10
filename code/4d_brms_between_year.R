@@ -71,6 +71,8 @@ save(mod.hurdle, file = "Output/mod.hurdle.RData")
 #load("Output/mod.hurdle.RData")
 summary(mod.hurdle)
 
+plot(mod.hurdle)
+
 t3 <- Sys.time()
 t3-t2 # hurdle model run time
 
@@ -94,11 +96,10 @@ conditional_effects(mod.hurdle, dpar = "hu")
 library(tidybayes)
 #search tidybayes + brms for vignette
 
-library(brms)
-library(tidybayes)
 library(ggplot2)
 library(tidyverse)
-# Tried something suggested by Chatgpt...
+
+# Tried something suggested by Chatgpt... (From Mark)
 
 # Posterior predictive distribution plot
 mod.brm|>
@@ -133,6 +134,8 @@ conditional_effects(mod.brm)|>
   plot(points = TRUE, theme = theme_classic())
 
 
+
+
 # to get fitted values, newdata must match fitted data. 'Audubon Canyon', 'Easkoot Creek', 
 # 'Garden Club Canyon', 'Olema Creek' were dropped from the model due to lack of data, so I am 
 # dropping them here too
@@ -147,48 +150,64 @@ fv <- add_epred_draws(mod.hurdle, newdata = newdata)
 
 # yearly rain
 rain_plot <- ggplot(fv, aes(x = yearly_rain)) + 
-  stat_lineribbon(aes(y = .epred), .width = c(0.66, 0.95), alpha = 0.5) +
-  geom_jitter(aes(y = num_egg_masses), alpha = 0.3, color = "darkblue") +
-  labs(x = "Yearly Rain", y = "Predicted number of egg masses") +
-  scale_fill_brewer(palette = "Blues") +
+  stat_lineribbon(aes(y = .epred), .width = 0.89, size = 0.7, alpha = 0.5) +
+  geom_point(aes(y = num_egg_masses), alpha = 0.007, size = 0.75, color = "darkblue") +
+  labs(x = "Yearly Rain (inches)", y = "Predicted number of egg masses") +
+  scale_fill_brewer(palette = "Set3") +
   theme_minimal()
+ggsave("rain_plot.jpg", width = 7, height = 6)
+
+# this one doesn't work right now -- I'm trying to make the ribbon smoother
+# I think stat_smooth is taking a really long time to run and I'm sure there is a better alternative
+# rain_plot_modified <- ggplot(fv, aes(x = yearly_rain)) + 
+#   stat_smooth(aes(y = .epred), method = "loess", geom = "ribbon", alpha = 0.5) +
+#   geom_point(aes(y = num_egg_masses), alpha = 0.007, size = 0.75, color = "darkblue") +
+#   labs(x = "Yearly Rain (inches)", y = "Predicted number of egg masses") +
+#   scale_fill_brewer(palette = "Greens") +
+#   theme_minimal()
+# ggsave("rain_plot.jpg", width = 7, height = 6)
 
 #year
 year_plot <- ggplot(fv, aes(x = BRDYEAR)) + 
-  stat_lineribbon(aes(y = .epred), .width = c(0.66, 0.95), alpha = 0.5) +
-  geom_point(aes(y = num_egg_masses), alpha = 0.3, color = "darkblue") +
+  stat_lineribbon(aes(y = .epred), .width = 0.89, size = 0.7, alpha = 0.5) +
+  geom_point(aes(y = num_egg_masses), alpha = 0.007, size = 0.75, color = "darkblue") +
   labs(x = "Year", y = "Predicted number of egg masses") +
-  scale_fill_brewer(palette = "Blues") +
+  scale_fill_brewer(palette = "Set3") +
   theme_minimal()
+ggsave("year_plot.jpg", width = 7, height = 6)
 
 # percent water
 percent_water_plot <- ggplot(fv, aes(x = mean_percent_water)) + 
-  stat_lineribbon(aes(y = .epred), .width = c(0.66, 0.95), alpha = 0.5) +
-  geom_jitter(aes(y = num_egg_masses), alpha = 0.3, color = "darkblue") +
+  stat_lineribbon(aes(y = .epred), .width = 0.89, size = 0.7, alpha = 0.5) +
+  geom_point(aes(y = num_egg_masses), alpha = 0.007, size = 0.75, color = "darkblue") +
   labs(x = "Percent water cover", y = "Predicted number of egg masses") +
-  scale_fill_brewer(palette = "Blues") +
+  scale_fill_brewer(palette = "Set3") +
   theme_minimal()
+ggsave("percent_water_plot.jpg", width = 7, height = 6)
 
 # percent canopy
-percent_canopy_plot <- ggplot(fv, aes(x = mean_interpolated_canopy)) + 
-  stat_lineribbon(aes(y = .epred), .width = c(0.66, 0.95), alpha = 0.5) +
-  geom_jitter(aes(y = num_egg_masses), alpha = 0.3, color = "darkblue") +
+percent_canopy_plot <- ggplot(fv, aes(x = interpolated_canopy)) + 
+  stat_lineribbon(aes(y = .epred), .width = 0.89, size = 0.7, alpha = 0.5) +
+  geom_point(aes(y = num_egg_masses), alpha = 0.007, size = 0.75, color = "darkblue") +
   labs(x = "Percent canopy cover", y = "Predicted number of egg masses") +
-  scale_fill_brewer(palette = "Blues") +
+  scale_fill_brewer(palette = "Set3") +
   theme_minimal()
+ggsave("canopy_cover_plot.jpg", width = 7, height = 6)
 
-# water temp
+# water temperature
 water_temp_plot <- ggplot(fv, aes(x = WaterTemp)) + 
-  stat_lineribbon(aes(y = .epred), .width = c(0.66, 0.95), alpha = 0.5) +
-  geom_jitter(aes(y = num_egg_masses), alpha = 0.3, color = "darkblue") +
-  labs(x = "Yearly Rain", y = "Predicted number of egg masses") +
-  scale_fill_brewer(palette = "Blues") +
+  stat_lineribbon(aes(y = .epred), .width = 0.89, size = 0.7, alpha = 0.5) +
+  geom_point(aes(y = num_egg_masses), alpha = 0.007, size = 0.75, color = "darkblue") +
+  labs(x = "Water Temperature (C)", y = "Predicted number of egg masses") +
+  scale_fill_brewer(palette = "Set3") +
   theme_minimal()
+ggsave("water_temp_plot.jpg", width = 7, height = 6)
 
 # salinity for coastal sites
 salinity_plot <- ggplot(fv, aes(x = max_salinity)) + 
-  stat_lineribbon(aes(y = .epred), .width = c(0.66, 0.95), alpha = 0.5) +
-  geom_jitter(aes(y = num_egg_masses), alpha = 0.3, color = "darkblue") +
-  labs(x = "Yearly Rain", y = "Predicted number of egg masses") +
-  scale_fill_brewer(palette = "Blues") +
+  stat_lineribbon(aes(y = .epred), .width = 0.89, size = 0.7, alpha = 0.5) +
+  geom_point(aes(y = num_egg_masses), alpha = 0.007, size = 0.75, color = "darkblue") +
+  labs(x = "Salinity", y = "Predicted number of egg masses") +
+  scale_fill_brewer(palette = "Set3") +
   theme_minimal()
+ggsave("salinity_plot.jpg", width = 7, height = 6)
