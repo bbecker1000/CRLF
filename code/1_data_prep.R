@@ -15,7 +15,9 @@ location_type <- read_csv(here::here("data", "CRLF_tblLocations.csv")) %>%
   rename(
     water_flow = Lotic_Lentic,
     water_regime = WaterRegime
-  )
+  ) %>% 
+  mutate(water_regime = as.factor(water_regime), water_flow = as.factor(water_flow))
+  
 
 
 # temporarily changing raw data to v3 because in v4, some dates are not present in CSV
@@ -101,7 +103,7 @@ write_csv(data, here::here("data", "filtered_raw_data.csv"))
 
 between_year_data <- data %>% 
   select(LocationID, BRDYEAR, Watershed, NumberofEggMasses, AirTemp, WaterTemp, MaxD, WaterSalinity, CoastalSite, yearly_rain, 
-         ground_sub, ground_emerg, ground_open_water, interpolated_canopy, water_regime) %>% 
+         ground_sub, ground_emerg, ground_open_water, interpolated_canopy, water_flow, water_regime) %>% 
   group_by(LocationID, BRDYEAR) %>% 
   summarize(
          mean_max_depth = ifelse(all(is.na(MaxD)), NA, mean(MaxD, na.rm = TRUE)),

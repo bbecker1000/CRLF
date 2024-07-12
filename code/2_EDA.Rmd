@@ -374,10 +374,14 @@ ggplot(data = eggTiming_new, aes(x = Water_Year, y = breedingLength,)) + geom_po
 
 ```{r num_sites}
 #table showing number of different sites for all watersheds
-number_of_sites_within_watershed <- data|>
-  group_by(Watershed)|>
+number_of_sites_within_watershed <- data %>% 
+  group_by(Watershed) %>% 
   summarize(distinct_count = n_distinct(LocationID))
 number_of_sites_within_watershed
+view(number_of_sites_within_watershed)
+
+as.data.frame(number_of_sites_within_watershed)
+sum(number_of_sites_within_watershed$distinct_count)
 
 #plot of the above table.
 ggplot(number_of_sites_within_watershed,aes(x=Watershed,y=distinct_count))+

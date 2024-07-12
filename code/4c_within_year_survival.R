@@ -7,20 +7,233 @@ library("survminer")
 library("mgcv")
 library(coxme)
 library(here)
+library(nlme) 
+library(gratia)
+library(ggplot2)
+library(cowplot)
 
+#### prepping data for analysis ####
 setwd(here::here("code"))
 #rename file
 onset_of_breeding_surv <- read_csv(here::here("data", "onset_of_breeding.csv"))
 
-#### *** GAM MODELS *** ####
+# creating a "complete case" column
+onset_of_breeding_surv$complete_case <- complete.cases(onset_of_breeding_surv)
+complete_onset <- onset_of_breeding_surv %>% filter(complete_case == TRUE)
+
+# scaling covariates
+scaled_within_year <- complete_onset %>% 
+  mutate(
+    BRDYEAR_scaled = as.vector(scale(BRDYEAR)),
+    yearly_rain_scaled = as.vector(scale(yearly_rain)),
+    rain_to_date_scaled = as.vector(scale(rain_to_date)),
+    max_depth_scaled = as.vector(scale(MaxD_proportion)),
+    AirTemp_scaled = as.vector(scale(AirTemp)),
+    WaterTemp_scaled = as.vector(scale(WaterTemp)), 
+    water_flow = as.factor(water_flow),
+    water_regime = as.factor(water_regime), 
+    Watershed = as.factor(Watershed),
+    LocationID = as.factor(LocationID)
+  ) %>% 
+  select(-MaxD, -MaxD_yearly, -MaxD_proportion, -NumberofEggMasses, complete_case)
+
+#### *** GAM MODEL *** ####
 #Generative additive model: first look at onset of breeding with fixed variables
 #respectively, and plot to see is the line looks linear or curve.
-fit1_k6 <- gam(first_breeding~s(rain_to_date, k = 6), data = onset_of_breeding_surv)
-summary(fit1_k6)
-plot(fit1_k6)
-fit1_k7 <- gam(first_breeding~s(WaterTemp, k = 6), data = onset_of_breeding_surv)
-summary(fit1_k7)
-plot(fit1_k7)
+within_year_gam <- gam(first_breeding ~ 
+                 s(max_depth_scaled, by = water_regime) +
+                 s(AirTemp_scaled) +
+                 s(WaterTemp_scaled) +
+                 s(BRDYEAR_scaled) + 
+                 s(rain_to_date_scaled) +
+                 water_flow +
+                 # water_regime +
+                 s(Watershed, bs = "re") +
+                 s(LocationID, Watershed, bs = "re"),
+               data = scaled_within_year)
+summary(within_year_gam)
+plot(within_year_gam)
+AIC(within_year_gam)
+
+##### plotting GAM model ####
+# check assumptions
+appraise(within_year_gam)
+gam.check(within_year_gam)
+
+# smooth terms
+draw(within_year_gam)
+
+# all terms
+plot(within_year_gam, pages = 1, all.terms = TRUE, rug = TRUE)
+
+# plots for each significant term
+predictions <- predict(within_year_gam, type = "response", se.fit = TRUE)
+plot_df <- data.frame(scaled_within_year, 
+                      fv =  predictions$fit, 
+                      se = predictions$se.fit,
+                      lower = predictions$fit - (1.96 * predictions$se.fit),
+                      upper = predictions$fit + (1.96 * predictions$se.fit))
+
+# # accurate standard error but not smoothed
+# ggplot(plot_df, aes(x = BRDYEAR_scaled, y = fv)) +
+#   geom_line(color = "blue") +
+#   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+#   labs(x = "Breeding year", y = "Predicted First Breeding") +
+#   theme_classic()
+
+# smoothed but not accurate standard error
+# green dots are raw data. black dots and line are model predictions
+
+# air temp
+airTemp_within_year <- ggplot(plot_df, aes(x = AirTemp, y = fv)) +
+  geom_smooth(method = "gam", color = "black", alpha = 0.3, size = 1.25) +
+  geom_jitter(aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.5, color = "darkgreen") +
+  geom_jitter(aes(y = fv), height = 0, width = 0.25, alpha = 0.5) +
+  labs(x = "Air Temperature (C)", y = "Predicted First Breeding (days after October 1st") +
+  theme_classic()
+
+# water temp
+waterTemp_within_year <- ggplot(plot_df, aes(x = WaterTemp, y = fv)) +
+  geom_smooth(method = "gam", color = "black", alpha = 0.3, size = 1.25) +
+  geom_jitter(aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.5, color = "darkgreen") +
+  geom_jitter(aes(y = fv), height = 0, width = 0.25, alpha = 0.5) +
+  labs(x = "Water Temperature (C)", y = "Predicted First Breeding (days after October 1st") +
+  theme_classic()
+
+# breeding year
+breeding_year_within_year <- ggplot(plot_df, aes(x = BRDYEAR, y = fv)) +
+  geom_smooth(method = "gam", color = "black", alpha = 0.3, size = 1.25) +
+  geom_jitter(aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.5, color = "darkgreen") +
+  geom_jitter(aes(y = fv), height = 0, width = 0.25, alpha = 0.5) +
+  labs(x = "Breeding year", y = "Predicted First Breeding (days after October 1st") +
+  theme_classic()
+
+# rain to date
+rain_within_year <- ggplot(plot_df, aes(x = rain_to_date, y = fv)) +
+  geom_smooth(method = "gam", color = "black", alpha = 0.3, size = 1.25, method.args = list()) +
+  geom_jitter(aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.5, color = "darkgreen") +
+  geom_jitter(aes(y = fv), height = 0, width = 0.25, alpha = 0.5) +
+  labs(x = "Rain to date (in)", y = "Predicted First Breeding (days after October 1st") +
+  theme_classic()
+
+plot_grid(airTemp_within_year, waterTemp_within_year, 
+          breeding_year_within_year, rain_within_year, nrow = 2)
+
+#### plotting using newdata ####
+# Create a data frame with all predictors
+newdata <- data.frame(
+  max_depth_scaled = mean(scaled_within_year$max_depth_scaled, na.rm = TRUE),
+  AirTemp_scaled = seq(min(scaled_within_year$AirTemp_scaled, na.rm = TRUE), max(scaled_within_year$AirTemp_scaled, na.rm = TRUE), length.out = 1000),
+  WaterTemp_scaled = mean(scaled_within_year$WaterTemp_scaled, na.rm = TRUE),
+  BRDYEAR_scaled = mean(scaled_within_year$BRDYEAR_scaled, na.rm = TRUE),
+  rain_to_date_scaled = mean(scaled_within_year$rain_to_date_scaled, na.rm = TRUE),
+  water_flow = factor(levels(scaled_within_year$water_flow)[1], levels = levels(scaled_within_year$water_flow)),
+  water_regime = factor(levels(scaled_within_year$water_regime)[1], levels = levels(scaled_within_year$water_regime)),
+  Watershed = factor(levels(scaled_within_year$Watershed)[1], levels = levels(scaled_within_year$Watershed)),
+  LocationID = factor(levels(scaled_within_year$LocationID)[1], levels = levels(scaled_within_year$LocationID))
+)
+
+# Generate predictions
+predictions <- predict(within_year_gam, newdata = newdata, type = "response", se.fit = TRUE)
+
+plot_df <- data.frame(scaled_within_year, 
+                      fv =  predictions$fit, 
+                      se = predictions$se.fit,
+                      lower = predictions$fit - (1.96 * predictions$se.fit),
+                      upper = predictions$fit + (1.96 * predictions$se.fit))
+
+ggplot(plot_df, aes(x = AirTemp_scaled, y = fv)) +
+  geom_line(color = "blue") +
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+  geom_jitter(data = scaled_within_year, aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.3) +
+  labs(x = "Air Temperature (scaled)", y = "Predicted First Breeding") +
+  theme_classic()
+
+
+# Create a sequence for rain_to_date_scaled
+newdata_rain_to_date <- with(scaled_within_year, 
+                             data.frame(
+                               max_depth_scaled = mean(max_depth_scaled, na.rm = TRUE),
+                               AirTemp_scaled = mean(AirTemp_scaled, na.rm = TRUE),
+                               WaterTemp_scaled = mean(WaterTemp_scaled, na.rm = TRUE),
+                               BRDYEAR_scaled = mean(BRDYEAR_scaled, na.rm = TRUE),
+                               rain_to_date_scaled = seq(min(rain_to_date_scaled, na.rm = TRUE), max(rain_to_date_scaled, na.rm = TRUE), length.out = 1000),
+                               water_flow = factor(levels(water_flow)[1], levels = levels(water_flow)),
+                               water_regime = factor(levels(water_regime)[1], levels = levels(water_regime)),
+                               Watershed = factor(levels(Watershed)[1], levels = levels(Watershed)),
+                               LocationID = factor(levels(LocationID)[1], levels = levels(LocationID))
+                             )
+)
+
+# Generate predictions
+predictions_rain_to_date <- predict(within_year_gam, newdata = newdata_rain_to_date, type = "response", se.fit = TRUE)
+
+# Create a new dataframe for plotting
+plot_df_rain_to_date <- data.frame(
+  rain_to_date_scaled = newdata_rain_to_date$rain_to_date_scaled,
+  fv = predictions_rain_to_date$fit,
+  se = predictions_rain_to_date$se.fit,
+  lower = predictions_rain_to_date$fit - (1.96 * predictions_rain_to_date$se.fit),
+  upper = predictions_rain_to_date$fit + (1.96 * predictions_rain_to_date$se.fit)
+)
+
+# Plot
+ggplot(data = plot_df_rain_to_date, aes(x = rain_to_date_scaled, y = fv)) + 
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+  geom_line() +
+  labs(x = "Rain to Date (scaled)", y = "Predicted First Breeding") +
+  theme_classic()
+
+# Create a sequence for BRDYEAR_scaled
+newdata_brdyear <- with(scaled_within_year, 
+                        data.frame(
+                          BRDYEAR_scaled = seq(min(BRDYEAR_scaled, na.rm = TRUE), max(BRDYEAR_scaled, na.rm = TRUE), length.out = 1000),
+                          max_depth_scaled = mean(max_depth_scaled, na.rm = TRUE),
+                          AirTemp_scaled = mean(AirTemp_scaled, na.rm = TRUE),
+                          WaterTemp_scaled = mean(WaterTemp_scaled, na.rm = TRUE),
+                          rain_to_date_scaled = mean(rain_to_date_scaled, na.rm = TRUE),
+                          water_flow = factor(levels(water_flow)[1], levels = levels(water_flow)),
+                          water_regime = factor(levels(water_regime)[1], levels = levels(water_regime)),
+                          Watershed = factor(levels(Watershed)[1], levels = levels(Watershed)),
+                          LocationID = factor(levels(LocationID)[1], levels = levels(LocationID))
+                        )
+)
+
+# Generate predictions
+predictions_brdyear <- predict(within_year_gam, newdata = newdata_brdyear, type = "response", se.fit = TRUE)
+
+# Create a new dataframe for plotting
+plot_df_brdyear <- data.frame(
+  BRDYEAR_scaled = newdata_brdyear$BRDYEAR_scaled,
+  fv = predictions_brdyear$fit,
+  se = predictions_brdyear$se.fit,
+  lower = predictions_brdyear$fit - (1.96 * predictions_brdyear$se.fit),
+  upper = predictions_brdyear$fit + (1.96 * predictions_brdyear$se.fit)
+)
+
+# Plot
+ggplot(data = plot_df_brdyear, aes(x = BRDYEAR_scaled, y = fv)) + 
+  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+  geom_line() +
+  labs(x = "Breeding Year (scaled)", y = "Predicted First Breeding") +
+  theme_classic()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ggplot(data = plot_df, aes(x = first_breeding)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper))
 
 #install this package called "gam.hp", it tells the R2 for each fixed variable.
 #somehow this results shows water temperature is not significant? very low R2
@@ -46,7 +259,6 @@ points(onset_of_breeding_surv$rain_to_date, onset_of_breeding_surv$WaterTemp, pc
 
 #I tried this method using gamm() to include Watershed as random variable, and it gives
 #two summary, one for fixed one for random, still trying to interpret.
-library(nlme) 
 fit_interaction_gamm <- gamm(
   first_breeding ~ te(rain_to_date, WaterTemp, k = c(10, 10)),
   random = list(Watershed = ~1),  # Adding random effect for watershed
@@ -174,6 +386,8 @@ multi.cox <- coxme(Surv(first_breeding, status) ~
                      scale(WaterTemp) + 
                      scale(BRDYEAR) + 
                      scale(rain_to_date) + 
+                     water_flow +
+                     water_regime +
                      (1 | Watershed/LocationID),
                    data = onset_of_breeding_surv)
 
@@ -200,7 +414,7 @@ ggplot(plot_data, aes(x = hazard_ratio, y = covariate)) +
   labs(x = "Hazard Ratio", y = "Covariate", title = "Coefficient Estimates") +
   theme_minimal()
 
-#### testing assumptions ####
+#### testing assumptions for survival models ####
 # to use the cox model, results of test_assumptions must not be significant
 test_assumptions <- cox.zph(multi.cox)
 test_assumptions
