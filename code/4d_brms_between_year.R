@@ -9,15 +9,15 @@ mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilatio
                       s(interpolated_canopy_scaled) +
                       s(WaterTemp_scaled) +  
                       max_depth_scaled +
-                      (max_salinity_scaled * CoastalSite) + # not smoothed
-                      (yearly_rain_scaled * water_regime)+ # added new co-variate, smoothed?
+                      max_salinity_scaled * CoastalSite + # not smoothed
+                      s(yearly_rain_scaled * water_regime) + # added new co-variate, smoothed?
                       (1|Watershed/LocationID),
                zi ~ s(yearly_rain_scaled) +      # inflated model for zeros
                  (1|Watershed/LocationID)),   # added random effects 
                data = scaled_between_year,
                family = zero_inflated_negbinomial(),
                chains = 2, cores = 2,
-               iter = 6000, # needs more iterations with added covariates
+               iter = 10000, # needs more iterations with added covariates
                control = list(adapt_delta = 0.98)) #reduce divergences
 
 save(mod.brm, file = "Output/mod.brm.RData")
@@ -29,17 +29,19 @@ summary(mod.brm)
 mod.hurdle <- brm(
   bf(num_egg_masses ~ 
        s(BRDYEAR_scaled) + 
-       s(yearly_rain_scaled) +
+       #s(yearly_rain_scaled) +
        s(mean_percent_water_scaled) + 
        s(interpolated_canopy_scaled) +
        s(WaterTemp_scaled) +  
        (max_salinity_scaled * CoastalSite) + 
+       s(yearly_rain_scaled * water_regime)+
        (1 | Watershed/LocationID),
      hu ~ yearly_rain_scaled +      # inflated model for zeros
        (1|Watershed/LocationID)),
   data = scaled_between_year,
   family = hurdle_negbinomial(),
   chains = 2, cores = 2,
+  iter = 10000, # needs more iterations with added covariates
   control = list(adapt_delta = 0.98)
 )
 
