@@ -34,14 +34,15 @@ summary(mod.brm)
 mod.hurdle <- brm(
   bf(num_egg_masses ~ 
        s(BRDYEAR_scaled) + 
-       #s(yearly_rain_scaled) +
        s(mean_percent_water_scaled) + 
        s(interpolated_canopy_scaled) +
        s(WaterTemp_scaled) +  
        (max_salinity_scaled * CoastalSite) + 
        s(yearly_rain_scaled * water_regime)+
+       water_flow +
        (1 | Watershed/LocationID),
-     hu ~ yearly_rain_scaled +      # inflated model for zeros
+     hu ~ 
+       s(yearly_rain_scaled * water_regime) +      # inflated model for zeros
        (1|Watershed/LocationID)),
   data = scaled_between_year,
   family = hurdle_negbinomial(),
