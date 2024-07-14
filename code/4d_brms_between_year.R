@@ -1,6 +1,9 @@
 library(brms)
 
 t0 <- Sys.time()
+t0<-Sys.time()
+
+
 mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilation
                       s(BRDYEAR_scaled) + 
                       # s(yearly_rain_scaled) + ## commented out because water_regime added
@@ -10,6 +13,8 @@ mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilatio
                       max_depth_scaled +
                       (max_salinity_scaled * CoastalSite) + # not smoothed
                       s(yearly_rain_scaled * water_regime) + # smooth or not?
+                      max_salinity_scaled * CoastalSite + # not smoothed
+                      s(yearly_rain_scaled * water_regime) + # added new co-variate, smoothed?
                       (1|Watershed/LocationID),
                zi ~ s(yearly_rain_scaled) +      # inflated model for zeros
                  (1|Watershed/LocationID)),   # added random effects 
@@ -17,69 +22,39 @@ mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilatio
                family = zero_inflated_negbinomial(),
                chains = 2, cores = 2,
                iter = 8000, # needs more iterations with added covariates
+               iter = 10000, # needs more iterations with added covariates
                control = list(adapt_delta = 0.98)) #reduce divergences
 
 save(mod.brm, file = "Output/mod.brm.RData")
 #load("Output/mod.brm.RData")
+t1<-Sys.time()
+t1-t0
 
+beepr::beep(0)
   
 summary(mod.brm)
-t1 <- Sys.time()
-t1-t0 # zi-model run time
-
-## hurdle model ##
-t2 <- Sys.time()
-
-#set priors for problematic covariates
-#could add more priors if helpful
-bprior <- c(prior(student_t(1, 0.5, 0.5), #slightly positive based on prior knowledge
-                  coef = syearly_rain_scaled_1),
-            prior(student_t(1, 0.5, 0.5),  #slightly positive based on prior knowledge
-                  coef = syearly_rain_scaled:water_regimeperennial_1),
-            prior(student_t(1, 0, 0.5), 
-                  coef =  syearly_rain_scaled:water_regimeseasonal_1),
-            prior(student_t(1, 0, 0.5), 
-                  coef =  smax_salinity_scaled:CoastalSiteFALSE_1),
-            prior(student_t(1, -0.25, 0.5),  #slightly negative based on prior knowledge
-                  coef =  smax_salinity_scaled:CoastalSiteTRUE_1)
-)
-
 
 mod.hurdle <- brm(
   bf(num_egg_masses ~ 
        s(BRDYEAR_scaled) + 
-       s(yearly_rain_scaled) +
+       #s(yearly_rain_scaled) +
        s(mean_percent_water_scaled) + 
-       CoastalSite +  #new
-       water_flow + #new
        s(interpolated_canopy_scaled) +
        s(WaterTemp_scaled) +  
-       s(max_salinity_scaled, by = CoastalSite) + # not smoothed
-       s(yearly_rain_scaled, by = water_regime) + # smooth or not?
+       (max_salinity_scaled * CoastalSite) + 
+       s(yearly_rain_scaled * water_regime)+
        (1 | Watershed/LocationID),
-     hu ~ s(yearly_rain_scaled, by = water_regime) + #new water regime for hurdle 
+     hu ~ yearly_rain_scaled +      # inflated model for zeros
        (1|Watershed/LocationID)),
   data = scaled_between_year,
-  prior = bprior, #set above before model
   family = hurdle_negbinomial(),
-  chains = 3, cores = 3,
-  iter = 9000, # needs more iterations with interactions
-  control = list(adapt_delta = 0.98,   #reduce divergences, 
-                 max_treedepth = 25))  #had treedepth exceedances at default 10
 
 save(mod.hurdle, file = "Output/mod.hurdle.RData")
 #load("Output/mod.hurdle.RData")
 summary(mod.hurdle)
 
-plot(mod.hurdle)
 
-t3 <- Sys.time()
-t3-t2 # hurdle model run time
-
-#get coefficient names for priors
-prior_summary(mod.hurdle) 
-
-pairs(mod.hurdle)
+#pairs(mod.brm)
 conditional_effects(mod.brm, surface = FALSE, prob = 0.8)
 conditional_effects(mod.hurdle, surface = FALSE, prob = 0.8)
 #from Mark
@@ -96,10 +71,10 @@ conditional_effects(mod.hurdle, dpar = "hu")
 library(tidybayes)
 #search tidybayes + brms for vignette
 
+library(brms)
+library(tidybayes)
 library(ggplot2)
 library(tidyverse)
-
-# Tried something suggested by Chatgpt... (From Mark)
 
 # Posterior predictive distribution plot
 mod.brm|>
