@@ -11,8 +11,6 @@ mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilatio
                       s(interpolated_canopy_scaled) +
                       s(WaterTemp_scaled) +  
                       max_depth_scaled +
-                      (max_salinity_scaled * CoastalSite) + # not smoothed
-                      s(yearly_rain_scaled * water_regime) + # smooth or not?
                       max_salinity_scaled * CoastalSite + # not smoothed
                       s(yearly_rain_scaled * water_regime) + # added new co-variate, smoothed?
                       (1|Watershed/LocationID),
@@ -21,7 +19,6 @@ mod.brm <- brm(bf(num_egg_masses ~  #bf creates a model statement for compilatio
                data = scaled_between_year,
                family = zero_inflated_negbinomial(),
                chains = 2, cores = 2,
-               iter = 8000, # needs more iterations with added covariates
                iter = 10000, # needs more iterations with added covariates
                control = list(adapt_delta = 0.98)) #reduce divergences
 
@@ -48,6 +45,10 @@ mod.hurdle <- brm(
        (1|Watershed/LocationID)),
   data = scaled_between_year,
   family = hurdle_negbinomial(),
+  chains = 2, cores = 2,
+  iter = 10000, # needs more iterations with added covariates
+  control = list(adapt_delta = 0.98)
+)
 
 save(mod.hurdle, file = "Output/mod.hurdle.RData")
 #load("Output/mod.hurdle.RData")
@@ -64,9 +65,6 @@ conditional_effects(mod.brm)|>
 #plot the hurdle effect by adding dpar
 conditional_effects(mod.hurdle, dpar = "hu")
 
-
-
-
 #try some plots with 
 library(tidybayes)
 #search tidybayes + brms for vignette
@@ -75,6 +73,7 @@ library(brms)
 library(tidybayes)
 library(ggplot2)
 library(tidyverse)
+# Tried something suggested by Chatgpt...
 
 # Posterior predictive distribution plot
 mod.brm|>
@@ -107,8 +106,6 @@ mod.brm|>
 # Conditional effects plot
 conditional_effects(mod.brm)|>
   plot(points = TRUE, theme = theme_classic())
-
-
 
 
 # to get fitted values, newdata must match fitted data. 'Audubon Canyon', 'Easkoot Creek', 
