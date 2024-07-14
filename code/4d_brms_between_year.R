@@ -159,13 +159,12 @@ ggsave("rain_plot.jpg", width = 7, height = 6)
 
 # this one doesn't work right now -- I'm trying to make the ribbon smoother
 # I think stat_smooth is taking a really long time to run and I'm sure there is a better alternative
-# rain_plot_modified <- ggplot(fv, aes(x = yearly_rain)) + 
-#   stat_smooth(aes(y = .epred), method = "loess", geom = "ribbon", alpha = 0.5) +
-#   geom_point(aes(y = num_egg_masses), alpha = 0.007, size = 0.75, color = "darkblue") +
-#   labs(x = "Yearly Rain (inches)", y = "Predicted number of egg masses") +
-#   scale_fill_brewer(palette = "Greens") +
-#   theme_minimal()
-# ggsave("rain_plot.jpg", width = 7, height = 6)
+rain_plot_modified <- ggplot(fv, aes(x = BRDYEAR, y = .epred)) +
+  geom_smooth() +
+  labs(x = "Yearly Rain (inches)", y = "Predicted number of egg masses") +
+  scale_fill_brewer(palette = "Greens") +
+  theme_minimal()
+ggsave("rain_plot.jpg", width = 7, height = 6)
 
 #year
 year_plot <- ggplot(fv, aes(x = BRDYEAR)) + 
