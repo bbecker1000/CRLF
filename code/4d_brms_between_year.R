@@ -129,6 +129,7 @@ rain_plot <- ggplot(fv, aes(x = yearly_rain)) +
   scale_fill_brewer(palette = "Set3") +
   theme_minimal()
 ggsave("rain_plot.jpg", width = 7, height = 6)
+rain_plot
 
 # this one doesn't work right now -- I'm trying to make the ribbon smoother
 # I think stat_smooth is taking a really long time to run and I'm sure there is a better alternative
@@ -138,6 +139,23 @@ rain_plot_modified <- ggplot(fv, aes(x = BRDYEAR, y = .epred)) +
   scale_fill_brewer(palette = "Greens") +
   theme_minimal()
 ggsave("rain_plot.jpg", width = 7, height = 6)
+rain_plot_modified
+
+#Mark update: does this look better? use the geom_line() function with the stat_summary() function 
+fv_summary <- fv %>%
+  group_by(BRDYEAR) %>%
+  summarize(mean_epred = mean(.epred), 
+            lower = quantile(.epred, 0.05), 
+            upper = quantile(.epred, 0.95))
+
+rain_plot_modified2 <- ggplot(fv_summary, aes(x = BRDYEAR, y = mean_epred)) +
+  geom_line(color = "blue", linewidth = 1) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "lightblue", alpha = 0.5) +
+  labs(x = "Yearly Rain (inches)", y = "Predicted number of egg masses") +
+  scale_fill_brewer(palette = "Greens") +
+  theme_minimal()
+rain_plot_modified2
+
 
 #year
 year_plot <- ggplot(fv, aes(x = BRDYEAR)) + 
@@ -147,6 +165,7 @@ year_plot <- ggplot(fv, aes(x = BRDYEAR)) +
   scale_fill_brewer(palette = "Set3") +
   theme_minimal()
 ggsave("year_plot.jpg", width = 7, height = 6)
+year_plot
 
 # percent water
 percent_water_plot <- ggplot(fv, aes(x = mean_percent_water)) + 
