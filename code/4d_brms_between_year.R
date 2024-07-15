@@ -156,25 +156,36 @@ rain_plot_modified2 <- ggplot(fv_summary, aes(x = BRDYEAR, y = mean_epred)) +
   theme_minimal()
 rain_plot_modified2
 
-
+#Mark: revised the codes a little.
 #year
 year_plot <- ggplot(fv, aes(x = BRDYEAR)) + 
-  stat_lineribbon(aes(y = .epred), .width = 0.89, size = 0.7, alpha = 0.5) +
-  geom_point(aes(y = num_egg_masses), alpha = 0.007, size = 0.75, color = "darkblue") +
-  labs(x = "Year", y = "Predicted number of egg masses") +
+  stat_lineribbon(aes(y = .epred), .width = 0.89, size = 0.7, alpha = 0.2, color = "blue", fill = "lightblue") +
+  geom_point(aes(y = num_egg_masses), alpha = 0.1, size = 1, color = "darkblue") +
+  labs(title = "Predicted Number of Egg Masses Over Years",
+       x = "Year",
+       y = "Predicted Number of Egg Masses",
+       fill = "Confidence Level") +
   scale_fill_brewer(palette = "Set3") +
-  theme_minimal()
-ggsave("year_plot.jpg", width = 7, height = 6)
-year_plot
+  theme_minimal() +
+  theme(legend.position = "bottom")
+print(year_plot)
 
-# percent water
-percent_water_plot <- ggplot(fv, aes(x = mean_percent_water)) + 
+
+# percent water (revised the codes a little for visualization)
+percent_water_plot <- ggplot(fv, aes(x = mean_percent_water, y = .epred)) + 
   stat_lineribbon(aes(y = .epred), .width = 0.89, size = 0.7, alpha = 0.5) +
-  geom_point(aes(y = num_egg_masses), alpha = 0.007, size = 0.75, color = "darkblue") +
-  labs(x = "Percent water cover", y = "Predicted number of egg masses") +
+  geom_point(aes(y = num_egg_masses), alpha = 0.5, size = 1, color = "darkblue") +
+  labs(x = "Percent Water Cover", y = "Predicted Number of Egg Masses") +
   scale_fill_brewer(palette = "Set3") +
-  theme_minimal()
-ggsave("percent_water_plot.jpg", width = 7, height = 6)
+  theme_minimal() +
+  theme(
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 12),
+    legend.title = element_text(size = 14),
+    legend.text = element_text(size = 12)
+  )
+print(percent_water_plot)
+
 
 # percent canopy
 percent_canopy_plot <- ggplot(fv, aes(x = interpolated_canopy)) + 
@@ -184,6 +195,7 @@ percent_canopy_plot <- ggplot(fv, aes(x = interpolated_canopy)) +
   scale_fill_brewer(palette = "Set3") +
   theme_minimal()
 ggsave("canopy_cover_plot.jpg", width = 7, height = 6)
+print(percent_canopy_plot)
 
 # water temperature
 water_temp_plot <- ggplot(fv, aes(x = WaterTemp)) + 
@@ -193,6 +205,7 @@ water_temp_plot <- ggplot(fv, aes(x = WaterTemp)) +
   scale_fill_brewer(palette = "Set3") +
   theme_minimal()
 ggsave("water_temp_plot.jpg", width = 7, height = 6)
+print(water_temp_plot)
 
 # salinity for coastal sites
 salinity_plot <- ggplot(fv, aes(x = max_salinity)) + 
@@ -202,3 +215,4 @@ salinity_plot <- ggplot(fv, aes(x = max_salinity)) +
   scale_fill_brewer(palette = "Set3") +
   theme_minimal()
 ggsave("salinity_plot.jpg", width = 7, height = 6)
+print(salinity_plot)
