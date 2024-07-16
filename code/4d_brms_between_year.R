@@ -31,6 +31,19 @@ beepr::beep(0)
   
 summary(mod.brm)
 
+#could add more priors if helpful
+bprior <- c(prior(student_t(1, 0.5, 0.5), #slightly positive based on prior knowledge
+                  coef = syearly_rain_scaled_1),
+            prior(student_t(1, 0.5, 0.5),  #slightly positive based on prior knowledge
+                  coef = syearly_rain_scaled:water_regimeperennial_1),
+            prior(student_t(1, 0, 0.5), 
+                  coef =  syearly_rain_scaled:water_regimeseasonal_1),
+            prior(student_t(1, 0, 0.5), 
+                  coef =  smax_salinity_scaled:CoastalSiteFALSE_1),
+            prior(student_t(1, -0.25, 0.5),  #slightly negative based on prior knowledge
+                  coef =  smax_salinity_scaled:CoastalSiteTRUE_1)
+)
+
 mod.hurdle <- brm(
   bf(num_egg_masses ~ 
        s(BRDYEAR_scaled) + 
@@ -130,16 +143,6 @@ rain_plot <- ggplot(fv, aes(x = yearly_rain)) +
   theme_minimal()
 ggsave("rain_plot.jpg", width = 7, height = 6)
 rain_plot
-
-# this one doesn't work right now -- I'm trying to make the ribbon smoother
-# I think stat_smooth is taking a really long time to run and I'm sure there is a better alternative
-rain_plot_modified <- ggplot(fv, aes(x = BRDYEAR, y = .epred)) +
-  geom_smooth() +
-  labs(x = "Yearly Rain (inches)", y = "Predicted number of egg masses") +
-  scale_fill_brewer(palette = "Greens") +
-  theme_minimal()
-ggsave("rain_plot.jpg", width = 7, height = 6)
-rain_plot_modified
 
 #Mark update: does this look better? use the geom_line() function with the stat_summary() function 
 fv_summary <- fv %>%
