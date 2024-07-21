@@ -51,16 +51,16 @@ mod.hurdle <- brm(
        s(interpolated_canopy_scaled) +
        s(WaterTemp_scaled) +  
        (max_salinity_scaled * CoastalSite) + 
-       s(yearly_rain_scaled * water_regime)+
-       water_flow +
+       s(yearly_rain_scaled * water_regime) +
+       (water_flow) +
        (1 | Watershed/LocationID),
      hu ~ 
        s(yearly_rain_scaled * water_regime) +      # inflated model for zeros
        (1|Watershed/LocationID)),
   data = scaled_between_year,
   family = hurdle_negbinomial(),
-  chains = 2, cores = 2,
-  iter = 10000, # needs more iterations with added covariates
+  chains = 3, cores = 3,
+  iter = 20000, # needs more iterations with added covariates
   control = list(adapt_delta = 0.98)
 )
 
