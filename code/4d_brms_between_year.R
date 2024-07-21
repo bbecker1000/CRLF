@@ -98,7 +98,7 @@ mod.hurdle2 <- brm(
   prior = prior
 )
 
-
+summary(mod.hurdle2)
 
 
 
