@@ -69,6 +69,46 @@ save(mod.hurdle, file = "Output/mod.hurdle.RData")
 summary(mod.hurdle)
 
 
+
+# Setting stronger priors
+prior <- c(
+  set_prior("normal(0, 5)", class = "b"),
+  set_prior("normal(0, 10)", class = "Intercept")
+)
+
+# Revised model
+mod.hurdle2 <- brm(
+  bf(num_egg_masses ~ 
+       s(BRDYEAR_scaled) + 
+       s(mean_percent_water_scaled) + 
+       s(interpolated_canopy_scaled) +
+       s(WaterTemp_scaled) +  
+       (max_salinity_scaled * CoastalSite) + 
+       s(yearly_rain_scaled * water_regime) +
+       (water_flow) +
+       (1 | Watershed/LocationID),
+     hu ~ 
+       s(yearly_rain_scaled * water_regime) +      # inflated model for zeros
+       (1|Watershed/LocationID)),
+  data = scaled_between_year,
+  family = hurdle_negbinomial(),
+  chains = 3, cores = 3,
+  iter = 40000,
+  control = list(adapt_delta = 0.99),
+  prior = prior
+)
+
+
+
+
+
+
+
+
+
+
+
+
 #pairs(mod.brm)
 conditional_effects(mod.brm, surface = FALSE, prob = 0.8)
 conditional_effects(mod.hurdle, surface = FALSE, prob = 0.8)
