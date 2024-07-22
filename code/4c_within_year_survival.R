@@ -48,12 +48,16 @@ within_year_gam <- gam(first_breeding ~
                  s(rain_to_date_scaled) +
                  water_flow +
                  # water_regime +
-                 s(Watershed, bs = "re") +
                  s(LocationID, Watershed, bs = "re"),
                data = scaled_within_year)
 summary(within_year_gam)
 plot(within_year_gam)
 AIC(within_year_gam)
+
+library(gam.hp)
+gam.hp(mod=within_year_gam,type="dev")
+plot(gam.hp(mod=within_year_gam,type="dev"))
+
 
 ##### plotting GAM model ####
 # check assumptions
@@ -171,14 +175,14 @@ plot_df_AirTemp <- data.frame(
 )
 
 # Plot
-ggplot(data = plot_df_AirTemp, aes(x = AirTemp_scaled, y = fv)) + 
+Air_temp_plot <- ggplot(data = plot_df_AirTemp, aes(x = AirTemp_scaled, y = fv)) + 
   geom_ribbon(aes(ymin = lower, ymax = upper), fill = "gray", alpha = 0.2) +
   geom_line(color = "blue", size = 1) +
   geom_point(data = scaled_within_year, aes(x = AirTemp_scaled, y = first_breeding), color = "darkblue", alpha = 0.5) +
   labs(x = "Air Temperature (scaled)", y = "Predicted First Breeding") +
   theme_classic() +
   theme(text = element_text(size = 12))
-
+Air_temp_plot
 
 # Create a sequence for rain_to_date_scaled
 newdata_rain_to_date <- with(scaled_within_year, 
@@ -208,14 +212,14 @@ plot_df_rain_to_date <- data.frame(
 )
 
 # Plot
-ggplot(data = plot_df_rain_to_date, aes(x = rain_to_date_scaled, y = fv)) + 
+rain_plot <- ggplot(data = plot_df_rain_to_date, aes(x = rain_to_date_scaled, y = fv)) + 
   geom_ribbon(aes(ymin = lower, ymax = upper), fill = "gray", alpha = 0.2) +
   geom_line(color = "blue", size = 1) +
   geom_point(data = scaled_within_year, aes(x = rain_to_date_scaled, y = first_breeding), color = "darkblue", alpha = 0.5) +
   labs(x = "Rain to Date (scaled)", y = "Predicted First Breeding") +
   theme_classic() +
   theme(text = element_text(size = 12))
-
+rain_plot
 
 # Create a sequence for BRDYEAR_scaled
 newdata_BRDYEAR <- with(scaled_within_year, 
@@ -245,49 +249,82 @@ plot_df_BRDYEAR <- data.frame(
 )
 
 # Plot
-ggplot(data = plot_df_BRDYEAR, aes(x = BRDYEAR_scaled, y = fv)) + 
+BRD_plot <- ggplot(data = plot_df_BRDYEAR, aes(x = BRDYEAR_scaled, y = fv)) + 
   geom_ribbon(aes(ymin = lower, ymax = upper), fill = "gray", alpha = 0.2) +
   geom_line(color = "blue", size = 1) +
   geom_point(data = scaled_within_year, aes(x = BRDYEAR_scaled, y = first_breeding), color = "darkblue", alpha = 0.5) +
   labs(x = "Breeding Year (scaled)", y = "Predicted First Breeding") +
   theme_classic() +
   theme(text = element_text(size = 12))
+BRD_plot
 
 
-# Create a sequence for WaterTemp_scaled
-newdata_WaterTemp_scaled <- with(scaled_within_year, 
-                                 data.frame(
-                                   max_depth_scaled = mean(max_depth_scaled, na.rm = TRUE),
-                                   AirTemp_scaled = mean(AirTemp_scaled, na.rm = TRUE),
-                                   WaterTemp_scaled = seq(min(WaterTemp_scaled, na.rm = TRUE), max(WaterTemp_scaled, na.rm = TRUE), length.out = 1000),
-                                   BRDYEAR_scaled = mean(BRDYEAR_scaled, na.rm = TRUE),
-                                   rain_to_date_scaled = mean(rain_to_date_scaled, na.rm = TRUE),
-                                   water_flow = factor(levels(water_flow)[1], levels = levels(water_flow)),
-                                   water_regime = factor(levels(water_regime)[1], levels = levels(water_regime)),
-                                   Watershed = factor(levels(Watershed)[1], levels = levels(Watershed)),
-                                   LocationID = factor(levels(LocationID)[1], levels = levels(LocationID))
-                                 )
+# Create a sequence for max_depth_scaled, focusing on both water regimes
+newdata_max_depth_perennial <- with(scaled_within_year, 
+                                    data.frame(
+                                      max_depth_scaled = seq(min(max_depth_scaled, na.rm = TRUE), max(max_depth_scaled, na.rm = TRUE), length.out = 1000),
+                                      AirTemp_scaled = mean(AirTemp_scaled, na.rm = TRUE),
+                                      WaterTemp_scaled = mean(WaterTemp_scaled, na.rm = TRUE),
+                                      BRDYEAR_scaled = mean(BRDYEAR_scaled, na.rm = TRUE),
+                                      rain_to_date_scaled = mean(rain_to_date_scaled, na.rm = TRUE),
+                                      water_flow = factor(levels(water_flow)[1], levels = levels(water_flow)),
+                                      water_regime = "perennial", # Set the water_regime to perennial
+                                      Watershed = factor(levels(Watershed)[1], levels = levels(Watershed)),
+                                      LocationID = factor(levels(LocationID)[1], levels = levels(LocationID))
+                                    )
 )
 
-# Generate predictions
-predictions_WaterTemp_scaled <- predict(within_year_gam, newdata = newdata_WaterTemp_scaled, type = "response", se.fit = TRUE)
-
-# Create a new dataframe for plotting
-plot_df_WaterTemp_scaled <- data.frame(
-  WaterTemp_scaled = newdata_WaterTemp_scaled$WaterTemp_scaled,
-  fv = predictions_WaterTemp_scaled$fit,
-  se = predictions_WaterTemp_scaled$se.fit,
-  lower = predictions_WaterTemp_scaled$fit - (1.96 * predictions_WaterTemp_scaled$se.fit),
-  upper = predictions_WaterTemp_scaled$fit + (1.96 * predictions_WaterTemp_scaled$se.fit)
+newdata_max_depth_seasonal <- with(scaled_within_year, 
+                                   data.frame(
+                                     max_depth_scaled = seq(min(max_depth_scaled, na.rm = TRUE), max(max_depth_scaled, na.rm = TRUE), length.out = 1000),
+                                     AirTemp_scaled = mean(AirTemp_scaled, na.rm = TRUE),
+                                     WaterTemp_scaled = mean(WaterTemp_scaled, na.rm = TRUE),
+                                     BRDYEAR_scaled = mean(BRDYEAR_scaled, na.rm = TRUE),
+                                     rain_to_date_scaled = mean(rain_to_date_scaled, na.rm = TRUE),
+                                     water_flow = factor(levels(water_flow)[1], levels = levels(water_flow)),
+                                     water_regime = "seasonal", # Set the water_regime to seasonal
+                                     Watershed = factor(levels(Watershed)[1], levels = levels(Watershed)),
+                                     LocationID = factor(levels(LocationID)[1], levels = levels(LocationID))
+                                   )
 )
+
+# Generate predictions for both regimes
+predictions_max_depth_perennial <- predict(within_year_gam, newdata = newdata_max_depth_perennial, type = "response", se.fit = TRUE)
+predictions_max_depth_seasonal <- predict(within_year_gam, newdata = newdata_max_depth_seasonal, type = "response", se.fit = TRUE)
+
+# Create new dataframes for plotting
+plot_df_max_depth_perennial <- data.frame(
+  max_depth_scaled = newdata_max_depth_perennial$max_depth_scaled,
+  fv = predictions_max_depth_perennial$fit,
+  se = predictions_max_depth_perennial$se.fit,
+  lower = predictions_max_depth_perennial$fit - (1.96 * predictions_max_depth_perennial$se.fit),
+  upper = predictions_max_depth_perennial$fit + (1.96 * predictions_max_depth_perennial$se.fit),
+  water_regime = "perennial"
+)
+
+plot_df_max_depth_seasonal <- data.frame(
+  max_depth_scaled = newdata_max_depth_seasonal$max_depth_scaled,
+  fv = predictions_max_depth_seasonal$fit,
+  se = predictions_max_depth_seasonal$se.fit,
+  lower = predictions_max_depth_seasonal$fit - (1.96 * predictions_max_depth_seasonal$se.fit),
+  upper = predictions_max_depth_seasonal$fit + (1.96 * predictions_max_depth_seasonal$se.fit),
+  water_regime = "seasonal"
+)
+
+# Combine the dataframes
+plot_df_max_depth <- rbind(plot_df_max_depth_perennial, plot_df_max_depth_seasonal)
 
 # Plot
-ggplot(data = plot_df_WaterTemp_scaled, aes(x = WaterTemp_scaled, y = fv)) + 
-  geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
-  geom_line(color = "blue") +
-  labs(x = "Water Temperature (scaled)", y = "Predicted First Breeding") +
+max_depth_plot <- ggplot(data = plot_df_max_depth, aes(x = max_depth_scaled, y = fv, color = water_regime)) + 
+  geom_ribbon(aes(ymin = lower, ymax = upper, fill = water_regime), alpha = 0.2) +
+  geom_line(size = 1) +
+  geom_point(data = scaled_within_year, aes(x = max_depth_scaled, y = first_breeding, color = water_regime), alpha = 0.5) +
+  labs(x = "Max Depth (scaled)", y = "Predicted First Breeding") +
   theme_classic() +
   theme(text = element_text(size = 12))
+max_depth_plot
+
+
 
 
 # Create a sequence for Watershed
@@ -326,39 +363,22 @@ ggplot(data = plot_df_Watershed, aes(x = Watershed, y = fv)) +
   theme(text = element_text(size = 12))
 
 
+plot_grid(Air_temp_plot,rain_plot, BRD_plot,max_depth_plot,nrow =2)
+
+
+
+
+
 #Below codes just for reference.
 #install this package called "gam.hp", it tells the R2 for each fixed variable.
 #somehow this results shows water temperature is not significant? very low R2
 library(gam.hp)
-fit3_test <- gam(first_breeding ~ 
-                   s(rain_to_date, k = 3) + 
-                   s(WaterTemp, k = 3) +
-                   s(AirTemp, k = 3)+
-                   s(MaxD, k = 3),data = onset_of_breeding_surv)
-summary(fit3_test)
-gam.hp(fit3_test)
-gam.hp(mod=fit3_test,type="dev")
-permu.gamhp(fit3_test,permutations=100)
-plot(gam.hp(mod=fit3_test,type="dev"))
-
 
 #the 2D and 3D plots for GAM (cumulative rain $ water temp)
 fit_interaction <- gam(first_breeding ~ te(rain_to_date, WaterTemp, k = c(6, 6)), data = onset_of_breeding_surv)
 vis.gam(fit_interaction, view = c("rain_to_date", "WaterTemp"), theta = 30, phi = 30, color = "topo")
 vis.gam(fit_interaction, color = 'cm', plot.type = 'contour')
 points(onset_of_breeding_surv$rain_to_date, onset_of_breeding_surv$WaterTemp, pch = 16)
-
-
-#I tried this method using gamm() to include Watershed as random variable, and it gives
-#two summary, one for fixed one for random, still trying to interpret.
-fit_interaction_gamm <- gamm(
-  first_breeding ~ te(rain_to_date, WaterTemp, k = c(10, 10)),
-  random = list(Watershed = ~1),  # Adding random effect for watershed
-  data = onset_of_breeding_surv,
-  method = "REML"  # Using REML for estimating random effects
-)
-summary(fit_interaction_gamm$lme)
-summary(fit_interaction_gamm$gam)
 
 
 #gam model with 3 variables, and MaxD turns out to be insignifant, so we probably
