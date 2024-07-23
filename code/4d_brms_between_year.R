@@ -32,15 +32,29 @@ beepr::beep(0)
 summary(mod.brm)
 
 #could add more priors if helpful
-bprior <- c(prior(student_t(1, 0.5, 0.5), #slightly positive based on prior knowledge
+bprior <- c(
+            # yearly rain (positive)
+            prior(student_t(1, 0.5, 0.5),
                   coef = syearly_rain_scaled_1),
+            
+            # yearly rain interactions (positive but more so for seasonal)
             prior(student_t(1, 0.25, 0.5),  
                   coef = syearly_rain_scaled:water_regimeperennial_1),
-            prior(student_t(1, 0.5, 0.5), #slightly positive based on prior knowledge
+            prior(student_t(1, 0.5, 0.5), 
                   coef =  syearly_rain_scaled:water_regimeseasonal_1),
+            
+            # yearly rain interactions -- hurdle 
+            # I think we want these to be negative since we're measuring the probability of zero eggs 
+            prior(student_t(1, -0.25, 0.5),
+                  coef = hu_syearly_rain_scaled:water_regimeperennial_1),
+            prior(student_t(1, -0.5, 0.5),  
+                  coef = hu_syearly_rain_scaled:water_regimeseasonal_1),
+
+            # salinity / coastal site interactions 
+            # no effect for non-coastal sites since they're all 0, slightly negative for coastal sites
             prior(student_t(1, 0, 0.5), 
                   coef =  smax_salinity_scaled:CoastalSiteFALSE_1),
-            prior(student_t(1, -0.25, 0.5),  #slightly negative based on prior knowledge
+            prior(student_t(1, -0.25, 0.5),
                   coef =  smax_salinity_scaled:CoastalSiteTRUE_1)
 )
 

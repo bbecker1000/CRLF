@@ -41,11 +41,11 @@ scaled_within_year <- complete_onset %>%
 #Generative additive model: first look at onset of breeding with fixed variables
 #respectively, and plot to see is the line looks linear or curve.
 within_year_gam <- gam(first_breeding ~ 
-                 s(max_depth_scaled, by = water_regime) +
+                 s(rain_to_date_scaled, by = water_regime) +
                  s(AirTemp_scaled) +
                  s(WaterTemp_scaled) +
                  s(BRDYEAR_scaled) + 
-                 s(rain_to_date_scaled) +
+                 s(max_depth_scaled) +
                  water_flow +
                  # water_regime +
                  s(LocationID, Watershed, bs = "re"),
@@ -74,18 +74,18 @@ plot(within_year_gam, pages = 1, all.terms = TRUE, rug = TRUE)
 #Mark update: I tried to make all plots more smooth, do they look better/ correct?
 
 # Create a data frame with all predictors
-newdata_AirTemp <- scaled_within_year %>% 
-  mutate(
-  max_depth_scaled = mean(scaled_within_year$max_depth_scaled, na.rm = TRUE),
-  AirTemp_scaled = seq(min(scaled_within_year$AirTemp_scaled, na.rm = TRUE), max(scaled_within_year$AirTemp_scaled, na.rm = TRUE), length.out = 1000),
-  WaterTemp_scaled = mean(scaled_within_year$WaterTemp_scaled, na.rm = TRUE),
-  BRDYEAR_scaled = mean(scaled_within_year$BRDYEAR_scaled, na.rm = TRUE),
-  rain_to_date_scaled = mean(scaled_within_year$rain_to_date_scaled, na.rm = TRUE),
-  water_flow = factor(levels(scaled_within_year$water_flow)[1], levels = levels(scaled_within_year$water_flow)),
-  water_regime = factor(levels(scaled_within_year$water_regime)[1], levels = levels(scaled_within_year$water_regime)),
-  Watershed = factor(levels(scaled_within_year$Watershed)[1], levels = levels(scaled_within_year$Watershed)),
-  LocationID = factor(levels(scaled_within_year$LocationID)[1], levels = levels(scaled_within_year$LocationID))
-)
+# newdata_AirTemp <- scaled_within_year %>% 
+#   mutate(
+#   max_depth_scaled = mean(scaled_within_year$max_depth_scaled, na.rm = TRUE),
+#   AirTemp_scaled = seq(min(scaled_within_year$AirTemp_scaled, na.rm = TRUE), max(scaled_within_year$AirTemp_scaled, na.rm = TRUE), length.out = 1000),
+#   WaterTemp_scaled = mean(scaled_within_year$WaterTemp_scaled, na.rm = TRUE),
+#   BRDYEAR_scaled = mean(scaled_within_year$BRDYEAR_scaled, na.rm = TRUE),
+#   rain_to_date_scaled = mean(scaled_within_year$rain_to_date_scaled, na.rm = TRUE),
+#   water_flow = factor(levels(scaled_within_year$water_flow)[1], levels = levels(scaled_within_year$water_flow)),
+#   water_regime = factor(levels(scaled_within_year$water_regime)[1], levels = levels(scaled_within_year$water_regime)),
+#   Watershed = factor(levels(scaled_within_year$Watershed)[1], levels = levels(scaled_within_year$Watershed)),
+#   LocationID = factor(levels(scaled_within_year$LocationID)[1], levels = levels(scaled_within_year$LocationID))
+# )
 
 # Generate predictions
 predictions <- predict(within_year_gam, newdata = newdata, type = "response", se.fit = TRUE)
