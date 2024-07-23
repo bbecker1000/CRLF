@@ -70,63 +70,12 @@ draw(within_year_gam)
 # all terms
 plot(within_year_gam, pages = 1, all.terms = TRUE, rug = TRUE)
 
-# plots for each significant term
-predictions <- predict(within_year_gam, type = "response", se.fit = TRUE)
-plot_df <- data.frame(scaled_within_year, 
-                      fv =  predictions$fit, 
-                      se = predictions$se.fit,
-                      lower = predictions$fit - (1.96 * predictions$se.fit),
-                      upper = predictions$fit + (1.96 * predictions$se.fit))
-
-# # accurate standard error but not smoothed
-# ggplot(plot_df, aes(x = BRDYEAR_scaled, y = fv)) +
-#   geom_line(color = "blue") +
-#   geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
-#   labs(x = "Breeding year", y = "Predicted First Breeding") +
-#   theme_classic()
-
-# smoothed but not accurate standard error
-# green dots are raw data. black dots and line are model predictions
-
-# air temp
-airTemp_within_year <- ggplot(plot_df, aes(x = AirTemp, y = fv)) +
-  geom_smooth(method = "gam", color = "black", alpha = 0.3, size = 1.25) +
-  geom_jitter(aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.5, color = "darkgreen") +
-  geom_jitter(aes(y = fv), height = 0, width = 0.25, alpha = 0.5) +
-  labs(x = "Air Temperature (C)", y = "Predicted First Breeding (days after October 1st") +
-  theme_classic()
-
-# water temp
-waterTemp_within_year <- ggplot(plot_df, aes(x = WaterTemp, y = fv)) +
-  geom_smooth(method = "gam", color = "black", alpha = 0.3, size = 1.25) +
-  geom_jitter(aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.5, color = "darkgreen") +
-  geom_jitter(aes(y = fv), height = 0, width = 0.25, alpha = 0.5) +
-  labs(x = "Water Temperature (C)", y = "Predicted First Breeding (days after October 1st") +
-  theme_classic()
-
-# breeding year
-breeding_year_within_year <- ggplot(plot_df, aes(x = BRDYEAR, y = fv)) +
-  geom_smooth(method = "gam", color = "black", alpha = 0.3, size = 1.25) +
-  geom_jitter(aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.5, color = "darkgreen") +
-  geom_jitter(aes(y = fv), height = 0, width = 0.25, alpha = 0.5) +
-  labs(x = "Breeding year", y = "Predicted First Breeding (days after October 1st") +
-  theme_classic()
-
-# rain to date
-rain_within_year <- ggplot(plot_df, aes(x = rain_to_date, y = fv)) +
-  geom_smooth(method = "gam", color = "black", alpha = 0.3, size = 1.25, method.args = list()) +
-  geom_jitter(aes(y = first_breeding), height = 0, width = 0.25, alpha = 0.5, color = "darkgreen") +
-  geom_jitter(aes(y = fv), height = 0, width = 0.25, alpha = 0.5) +
-  labs(x = "Rain to date (in)", y = "Predicted First Breeding (days after October 1st") +
-  theme_classic()
-
-plot_grid(airTemp_within_year, waterTemp_within_year, 
-          breeding_year_within_year, rain_within_year, nrow = 2)
-
 #### plotting using newdata ####
 #Mark update: I tried to make all plots more smooth, do they look better/ correct?
+
 # Create a data frame with all predictors
-newdata <- data.frame(
+newdata_AirTemp <- scaled_within_year %>% 
+  mutate(
   max_depth_scaled = mean(scaled_within_year$max_depth_scaled, na.rm = TRUE),
   AirTemp_scaled = seq(min(scaled_within_year$AirTemp_scaled, na.rm = TRUE), max(scaled_within_year$AirTemp_scaled, na.rm = TRUE), length.out = 1000),
   WaterTemp_scaled = mean(scaled_within_year$WaterTemp_scaled, na.rm = TRUE),
