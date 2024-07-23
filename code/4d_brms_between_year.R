@@ -32,33 +32,52 @@ beepr::beep(0)
 summary(mod.brm)
 
 #### priors ####
-#could add more priors if helpful
+
+# # getting the names of all the priors -- useful for setting priors, but not needed to run the model
+# get_prior(num_egg_masses ~ 
+#             s(BRDYEAR_scaled) + 
+#             s(mean_percent_water_scaled) + 
+#             s(interpolated_canopy_scaled) +
+#             s(WaterTemp_scaled) +  
+#             s(max_salinity_scaled, by = CoastalSite) + 
+#             s(yearly_rain_scaled, by = water_regime) +
+#             (water_flow) +
+#             (1 | Watershed/LocationID),
+#           hu ~ 
+#             s(yearly_rain_scaled, by = water_regime) +
+#             (1|Watershed/LocationID),
+#         data = scaled_between_year,
+#         family = hurdle_negbinomial())
+
+# could add more priors if helpful
 bprior <- c(
   # yearly rain (positive)
-  prior(student_t(1, 0.5, 0.5), coef = syearly_rain_scaled_1),
-  
+  # prior(student_t(1, 0.5, 0.5), class = b, coef = syearly_rain_scaled_1),
+
   # yearly rain interactions (positive but more so for seasonal)
   prior(student_t(1, 0.25, 0.5), coef = syearly_rain_scaled:water_regimeperennial_1),
   prior(student_t(1, 0.5, 0.5), coef =  syearly_rain_scaled:water_regimeseasonal_1),
-  
-  # yearly rain interactions -- hurdle 
-  # I think we want these to be negative since we're measuring the probability of zero eggs 
-  prior(student_t(1, -0.25, 0.5), coef = hu_syearly_rain_scaled:water_regimeperennial_1),
-  prior(student_t(1, -0.5, 0.5), coef = hu_syearly_rain_scaled:water_regimeseasonal_1),
-  
-  # salinity / coastal site interactions 
+
+  # yearly rain interactions -- hurdle. not working and idk how to run get_prior() properly for them
+  # I think we want these to be negative since we're measuring the probability of zero eggs
+  # prior(student_t(1, -0.25, 0.5), coef = syearly_rain_scaled:water_regimeperennial_1, dpar = hu),
+  # prior(student_t(1, -0.5, 0.5), coef = syearly_rain_scaled:water_regimeseasonal_1, dpar = hu),
+
+  # salinity / coastal site interactions
   # no effect for non-coastal sites since they're all 0, slightly negative for coastal sites
   prior(student_t(1, 0, 0.5), coef =  smax_salinity_scaled:CoastalSiteFALSE_1),
   prior(student_t(1, -0.25, 0.5), coef =  smax_salinity_scaled:CoastalSiteTRUE_1),
-  
+
   # other covariates (feel free to change as you see fit)
-  prior(student_t(1, 0.5, 0.5), coef =  water_regimeseasonal), # slightly positive based on hypotheses
-  prior(student_t(1, 0.5, 0.5), coef =  water_flowlentic), # slightly positive based on hypotheses
+  # prior(student_t(1, 0.5, 0.5), coef =  water_regimeseasonal), # slightly positive based on hypotheses
+  prior(student_t(1, 0.25, 0.5), coef =  water_flowlentic), # slightly positive based on hypotheses
+  prior(student_t(1, -0.25, 0.5), coef =  water_flowlotic), # slightly negtive based on hypotheses
   prior(student_t(1, -0.25, 0.5), coef =  sinterpolated_canopy_scaled_1), # slightly negative based on hypotheses
   prior(student_t(1, 0, 0.5), coef =  sBRDYEAR_scaled_1 ),
   prior(student_t(1, 0, 0.5), coef =  smean_percent_water_scaled_1),
   prior(student_t(1, 0, 0.5), coef =  sWaterTemp_scaled_1)
 )
+
 
 #### hurdle model ####
 mod.hurdle <- brm(
@@ -67,8 +86,8 @@ mod.hurdle <- brm(
        s(mean_percent_water_scaled) + 
        s(interpolated_canopy_scaled) +
        s(WaterTemp_scaled) +  
-       (max_salinity_scaled * CoastalSite) + 
-       s(yearly_rain_scaled * water_regime) +
+       s(max_salinity_scaled, by = CoastalSite) + 
+       s(yearly_rain_scaled, by =water_regime) +
        (water_flow) +
        (1 | Watershed/LocationID),
      hu ~ 
