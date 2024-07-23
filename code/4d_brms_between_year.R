@@ -76,6 +76,7 @@ mod.hurdle <- brm(
        (1|Watershed/LocationID)),
   data = scaled_between_year,
   family = hurdle_negbinomial(),
+  prior = bprior,
   chains = 3, cores = 3,
   iter = 40000, # needs more iterations with added covariates
   control = list(adapt_delta = 0.99)
