@@ -99,14 +99,7 @@ mod.hurdle2 <- brm(
 )
 
 summary(mod.hurdle2)
-
-
-
-
-
-
-
-
+save(mod.hurdle2, file = "Output/mod.hurdle2.RData")
 
 
 #pairs(mod.brm)
