@@ -2,19 +2,22 @@
 
 library(dagitty)
 #### most up to date model ####
-DAG_FROG <- dagitty("dag{ 
+DAG_FROG <- dagitty(
+  "dag{
   Year -> FROG ;
   Rain -> FROG ;
   Site -> FROG ;
   Rain -> Vegetation -> FROG ;
   Rain -> Depth -> FROG ;
   Rain -> Site -> FROG;
-  Salinity -> FROG ; 
+  Salinity -> FROG ;
   Rain -> Salinity ;
-  Canopy -> Temp -> FROG
-  Temp -> FROG
-  
-  
+  Canopy -> Temp -> FROG ;
+  Temp -> FROG ;
+  Water_Regime -> Rain ;
+  Site -> Water_Flow -> FROG ;
+
+
   Year [exposure] ;
   Site [exposure] ;
   Rain [exposure] ;
@@ -22,32 +25,43 @@ DAG_FROG <- dagitty("dag{
   Salinity [exposure] ;
   Canopy [exposure] ;
   Temp [exposure] ;
+  Water_Regime [exposure] ;
+  Water_Flow [exposure] ;
   FROG [outcome] ;
-}")
+}"
+)
 
 plot(DAG_FROG)
 
 ## add coordinates
-coordinates(DAG_FROG) <- list(x=c(Year=2,
-                                   Rain=2.5,
-                                   Site=3,
-                                   Vegetation=2,
-                                   Depth=2.75,
-                                 
-                                   Salinity=3,
-                                  FROG=2.5,
-                                  Canopy=2.25,
-                                    Temp=2.25),
-                               y=c(Year=-1,
-                                   Rain=-4,
-                                   Site=-4,
-                                   Depth=-2,
-                                   Vegetation=-4,
-                                
-                                   Salinity=-2,
-                                   FROG=2,
-                                   Canopy=-3,
-                                     Temp=-2))
+coordinates(DAG_FROG) <- list(
+  x = c(
+    Year = 2,
+    Rain = 2.5,
+    Site = 3,
+    Vegetation = 2,
+    Depth = 2.6,
+    Water_Flow = 3,
+    Salinity = 2.75,
+    FROG = 2.5,
+    Canopy = 2.25,
+    Temp = 2.25,
+    Water_Regime = 2.5
+  ),
+  y = c(
+    Year = -1,
+    Rain = -4,
+    Site = -4,
+    Depth = -2,
+    Vegetation = -4,
+    Water_Flow = -2,
+    Salinity = -2,
+    FROG = 2,
+    Canopy = -3,
+    Temp = -2,
+    Water_Regime = -5
+  )
+)
 plot(DAG_FROG)
 
 ##### frog model using ggdag ####
