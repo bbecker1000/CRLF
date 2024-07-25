@@ -91,14 +91,14 @@ mod.hurdle <- brm(
        (water_flow) +
        (1 | Watershed/LocationID),
      hu ~ 
-       s(yearly_rain_scaled * water_regime) +      # inflated model for zeros
+       s(yearly_rain_scaled, by = water_regime) +      # inflated model for zeros
        (1|Watershed/LocationID)),
   data = scaled_between_year,
   family = hurdle_negbinomial(),
   prior = bprior,
   chains = 3, cores = 3,
   iter = 40000, # needs more iterations with added covariates
-  control = list(adapt_delta = 0.99)
+  control = list(adapt_delta = 0.99999)
 )
 
 save(mod.hurdle, file = "Output/mod.hurdle.RData")
