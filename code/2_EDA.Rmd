@@ -63,6 +63,36 @@ count(data, LocationID)
 
 # plots
 
+## pre-2010 data
+
+```{r}
+# Darren believes there is data 2004-2010 at Mori/Laguna Salada, Milagra, Big Lagoon, & Rodeo
+
+pre2010_data <- unfiltered_data %>% 
+  group_by(LocationID, BRDYEAR) %>% 
+  summarize(survey_count_site_yr = n_distinct(EventGUID), .groups = "drop") %>% 
+  ungroup() %>% 
+  full_join(unfiltered_data, by = c("LocationID" = "LocationID", "BRDYEAR" = "BRDYEAR")) %>% 
+  filter(survey_count_site_yr > 1) %>% 
+  filter(BRDYEAR < 2010) %>%
+  mutate(
+    Watershed = droplevels(Watershed),
+    LocationID = droplevels(LocationID)) %>%
+  mutate(
+    LocationID = case_when(
+      LocationID == "LS02" | LocationID == "LS03" ~ "LS11",
+      TRUE ~ LocationID))
+
+pre2010_eggs <- pre2010_data %>% 
+  group_by(BRDYEAR,Watershed,LocationID) %>% 
+  summarize(survey_count = n_distinct(EventGUID),
+            mean_egg_num = (sum(NumberofEggMasses, na.rm = TRUE)/survey_count),
+            total_egg_num =sum(NumberofEggMasses, na.rm = TRUE),
+            firstEgg = min(dayOfWY), 
+            lastEgg = max(dayOfWY), 
+            breedingLength = max(dayOfWY) - min(dayOfWY))
+```
+
 ## cover data
 
 #### ground vs. interpolated

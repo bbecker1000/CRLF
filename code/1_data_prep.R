@@ -19,7 +19,6 @@ location_type <- read_csv(here::here("data", "CRLF_tblLocations.csv")) %>%
   mutate(water_regime = as.factor(water_regime), water_flow = as.factor(water_flow))
   
 
-
 # temporarily changing raw data to v3 because in v4, some dates are not present in CSV
 #raw_data <- read_csv(here::here("data", "CRLF_EGG_RAWDATA_no_city_data.csv"))
 
@@ -69,7 +68,11 @@ unfiltered_data <- raw_data %>% select(-ParkCode, -ProjectCode, -BTime, -TTime, 
     LocationID = as.factor(LocationID)
   )
 
-### ~~~ *** DATA FILTERING *** ~~~ ###
+
+
+
+##### ~~~ *** DATA FILTERING *** ~~~ #####
+
 
 # filter to only include the 7 watersheds that Darren said had the most data and only sites that had at least 2 surveys in a given year
 # and only after 2009
