@@ -10,6 +10,7 @@ knitr::opts_chunk$set(warning = FALSE)
 ```
 
 ```{r}
+library(dplyr)
 library(ggplot2)
 library(tidyverse)
 setwd(here::here("code"))
@@ -67,6 +68,12 @@ count(data, LocationID)
 
 ```{r}
 # Darren believes there is data 2004-2010 at Mori/Laguna Salada, Milagra, Big Lagoon, & Rodeo
+
+false_validation <- raw_data %>% select(Validation) %>% 
+  group_by(Validation) %>% 
+  summarise(Counts=n())
+
+
 
 pre2010_data <- unfiltered_data %>% 
   group_by(LocationID, BRDYEAR) %>% 
